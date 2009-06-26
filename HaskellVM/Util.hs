@@ -7,5 +7,5 @@ import qualified Data.List as L
 partitionN :: Int -> B.ByteString -> [B.ByteString]
 partitionN n b = L.unfoldr (helper) b
     where helper x | B.null x = Nothing
-                   | otherwise = Just $ splitat n x
+                   | otherwise = Just $ B.splitAt n x
     
