@@ -8,11 +8,11 @@ loadLine :: Int -> [Word8] -> (Instr, Dat)
 loadLine i ds | odd  i =
     let ins = take 4 ds
         dat = drop 4 ds
-        in (loadInstr ins dat)
+    in (loadInstr ins dat)
 loadLine i ds | even i =
     let dat = take 8 ds
         ins = drop 8 ds
-        in (loadInstr ins dat)
+    in (loadInstr ins dat)
 
 loadInstrDat :: [Word8] -> [Word8] -> (Instr,Dat)
 loadInstrDat ins dat = 
