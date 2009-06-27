@@ -2,12 +2,12 @@ package de.hronopik.icfp2009.vm;
 
 import de.hronopik.icfp2009.io.Frame;
 import de.hronopik.icfp2009.io.Frames;
-import de.hronopik.icfp2009.util.Pair;
+import de.hronopik.icfp2009.io.VmReader;
+import de.hronopik.icfp2009.io.VmWriter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,14 +17,11 @@ import java.util.Map;
  */
 public class StreamVm extends AbstractVm implements Runnable {
 
-    private static final String STOP = ".";
-    private static final char COMMENT_CHAR = '#';
+    @NotNull
+    private final VmReader in;
 
     @NotNull
-    private final LineNumberReader in;
-
-    @NotNull
-    private final Writer out;
+    private final VmWriter out;
 
     //---------------------------------------------------------------------------------------------
     // Constructor
@@ -32,8 +29,8 @@ public class StreamVm extends AbstractVm implements Runnable {
 
     public StreamVm(@NotNull List<Frame> frames, @NotNull Reader in, @NotNull Writer out) {
         super(frames);
-        this.in = new LineNumberReader(in);
-        this.out = out;
+        this.in = new VmReader(in);
+        this.out = new VmWriter(out);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -61,75 +58,13 @@ public class StreamVm extends AbstractVm implements Runnable {
      * @throws IOException if an I/O error occurs
      */
     public boolean step() throws IOException {
-        Pair<Map<Integer, Double>, Boolean> readedInputs = readInputs();
-        if (readedInputs.getB()) {
-            return false;
-        }
+        Map<Integer, Double> inputs = in.readInputs();
 
-        Map<Integer, Double> outputs = step(readedInputs.getA());
+        Map<Integer, Double> outputs = step(inputs);
 
-        writeOutputs(outputs);
+        out.writeOutputs(outputs);
 
         return outputs.get(0) == 0;
-    }
-
-    //---------------------------------------------------------------------------------------------
-    // Helper Methods
-    //---------------------------------------------------------------------------------------------
-
-    @NotNull
-    private Pair<Map<Integer, Double>, Boolean> readInputs() throws IOException {
-        Map<Integer, Double> inputs = new HashMap<Integer, Double>();
-        boolean stopExecution = true;
-
-        String line;
-        while ((line = in.readLine()) != null) {
-
-            // Finish one input
-            if (STOP.equals(line)) {
-                stopExecution = false;
-                break;
-            }
-
-            // Skip Comments 
-            if (line.charAt(0) == COMMENT_CHAR) {
-                continue;
-            }
-
-            String[] parts = line.split(" ");
-
-            int address;
-            try {
-                address = Integer.parseInt(parts[0]);
-            } catch (NumberFormatException e) {
-                throw new IOException("Unable to parse the address \"" + parts[0] + "\" in line " + in.getLineNumber() +
-                        ".");
-            }
-
-            double value;
-            try {
-                value = Double.parseDouble(parts[1]);
-            } catch (NumberFormatException e) {
-                throw new IOException("Unable to parse the value \"" + parts[1] + "\" in line " + in.getLineNumber() +
-                        ".");
-            }
-
-            if (inputs.put(address, value) != null) {
-                throw new IOException("Double address " + address + " in line " + in.getLineNumber() + ".");
-            }
-        }
-        return new Pair<Map<Integer, Double>, Boolean>(inputs, stopExecution);
-    }
-
-    private void writeOutputs(@NotNull Map<Integer, Double> outputs) throws IOException {
-        for (Map.Entry<Integer, Double> entry : outputs.entrySet()) {
-            out.write(String.valueOf(entry.getKey()));
-            out.write(" ");
-            out.write(String.valueOf(entry.getValue()));
-            out.write("\n");
-        }
-        out.write(".\n");
-        out.flush();
     }
 
     //---------------------------------------------------------------------------------------------

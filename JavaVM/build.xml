@@ -98,9 +98,19 @@
 
     <target name="dist" depends="compile" description="Creates all jars.">
         <mkdir dir="${dir.dist}"/>
+
+        <!-- VM -->
         <jar destfile="${dir.dist}/java_vm-${version}.jar">
             <manifest>
                 <attribute name="Main-Class" value="de.hronopik.icfp2009.vm.StreamVm"/>
+                <!--<attribute name="Class-Path" value=""/>-->
+            </manifest>
+            <fileset dir="${dir.build.java}" excludes="META-INF/build.number"/>
+        </jar>
+
+        <jar destfile="${dir.dist}/speeds-${version}.jar">
+            <manifest>
+                <attribute name="Main-Class" value="de.hronopik.icfp2009.analysis.Speeds"/>
                 <!--<attribute name="Class-Path" value=""/>-->
             </manifest>
             <fileset dir="${dir.build.java}" excludes="META-INF/build.number"/>
