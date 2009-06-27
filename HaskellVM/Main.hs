@@ -16,8 +16,7 @@ import Console
 import VM
 
 
-           
-
+          
 
         
 {- shell  :: [(Addr,Dat)] -> (VM) -> (VM, [(Addr,Dat)])

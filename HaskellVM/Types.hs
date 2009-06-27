@@ -24,5 +24,5 @@ data VM = VM {  instr  :: [(Int,Instr)]
              ,  time   :: Int
              } deriving (Show)
 
-data Inp  = Inp (IntMap Dat )
-data Outp = Outp (IntMap Dat)
+data Inp  = Inp (IntMap Dat ) deriving (Show)
+data Outp = Outp (IntMap Dat) deriving (Show)

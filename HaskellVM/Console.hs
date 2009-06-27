@@ -10,6 +10,7 @@ import Types
 import Load
 
 import System
+import System.IO
 import Control.Monad
 
 import VM
@@ -37,4 +38,5 @@ console oneRun vm = helper vm
           putStrLn "#out:"  
           putStr $ unlines $ map showConsoleOutput $ I.toAscList outmap
           putStrLn "."
+          hFlush stdout
           return (vm', out)
