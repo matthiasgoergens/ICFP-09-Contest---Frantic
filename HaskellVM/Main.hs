@@ -18,7 +18,7 @@ oneRun inp vm =
     let out = Outp I.empty
     in foldl (flip step) (vm, out) $ instr vm
  where step :: (Int, Instr) -> (VM,Outp) -> (VM,Outp)
-       step (i, SType sop addr) (vm,out) = trace (show i) $ 
+       step (i, SType sop addr) (vm,out) =
            let v1 = readMem vm addr
                in case sop of
                     Noop -> (vm,out)
@@ -59,6 +59,7 @@ console vm = helper vm
           putStrLn $ concat $ L.intersperse "#" $ map showConsoleOutput $ I.toAscList inmap
           putStrLn "#out:"  
           putStr $ unlines $ map showConsoleOutput $ I.toAscList outmap
+          putStrLn "."
           return (vm', out)
         
 {- shell  :: [(Addr,Dat)] -> (VM) -> (VM, [(Addr,Dat)])
@@ -72,11 +73,11 @@ shell inputs vm =
 
 main = do
   args <- getArgs
-  when (length args < 1) $ do fail "\nUsage: vm binary\n\t first line \"16000 confignummer\"\n\tporceed with . \n"; 
+  when (length args < 1) $ do fail "\nUsage: vm binary\n\t first line \"16000 confignummer\"\n\tproceed with . \\n \n"; 
   let file = args !! 0
   dat <- B.readFile file
   let vm  = loadVM dat
-  print vm
+-- print vm
   console vm
 --  let vm' = oneRun vm
 --  print vm'
