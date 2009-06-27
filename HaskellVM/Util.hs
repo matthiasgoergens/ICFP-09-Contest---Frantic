@@ -82,3 +82,24 @@ decodeIEEE exponentBits significandBits n = encodeFloat significand exponent
          significandField = n .&. significandMask 
          significandMask = bit significandBits - 1 
     
+
+doubleToWord64 :: Double -> Word64 
+doubleToWord64 = encodeIEEE 11 52 
+ 
+-- TODO: Check if this works for denormalized numbers, NaNs and infinities. 
+encodeIEEE :: (RealFloat a, Bits b, Integral b) => Int -> Int -> a -> b 
+encodeIEEE exponentBits significandBits f = 
+      (signBit `shiftL` (exponentBits + significandBits)) .|. 
+      (exponentField `shiftL` significandBits) .|. 
+      significandField 
+   where (significand, exponent) = decodeFloat f 
+ 
+         signBit | significand < 0 = 1 
+                 | otherwise = 0 
+         exponentField | significand == 0 && exponent == 0 = 0 
+                       | otherwise = fromIntegral exponent + exponentBias + fromIntegral significandBits 
+         significandField = fromIntegral (abs significand) .&. significandMask 
+ 
+         exponentBias = bit (exponentBits - 1) - 1 
+         significandMask = bit significandBits - 1 
+ 
