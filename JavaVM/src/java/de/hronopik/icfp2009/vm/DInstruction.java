@@ -3,6 +3,7 @@ package de.hronopik.icfp2009.vm;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import static java.util.logging.Level.FINE;
 import java.util.logging.Logger;
 
 /**
@@ -53,11 +54,8 @@ final class DInstruction extends Instruction {
     //
     //---------------------------------------------------------------------------------------------
 
-    boolean execute(boolean status, double[] values, @NotNull Map<Integer, Double> inputs,
+    boolean execute(int stepIndex, boolean status, double[] values, @NotNull Map<Integer, Double> inputs,
                     @NotNull Map<Integer, Double> outputs) {
-
-        // Log into the instruction trace
-        logger.fine(address + ": " + toString());
 
         switch (op) {
             case Add:
@@ -79,6 +77,13 @@ final class DInstruction extends Instruction {
                 values[address] = status ? values[r1] : values[r2];
                 break;
         }
+
+        // Log into the instruction trace
+        if (logger.isLoggable(FINE)) {
+            logger.fine(stepIndex + "," + address + "," + toString() + "," +
+                    op.toSemanticsString(address, r1, r2, values, status));
+        }
+
         return status;
     }
 

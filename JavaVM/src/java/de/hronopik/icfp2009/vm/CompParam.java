@@ -1,5 +1,7 @@
 package de.hronopik.icfp2009.vm;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Alexander Kiel
  * @version $Id$
@@ -8,37 +10,42 @@ public enum CompParam implements Parameter {
 
     // Do not change the order of the operations!
 
-    LTZ {
+    LTZ("<") {
         boolean isCompZero(double value) {
             return value < 0;
         }
     },
 
-    LEZ {
+    LEZ("<=") {
         boolean isCompZero(double value) {
             return value <= 0;
         }
     },
 
-    EQZ {
+    EQZ("==") {
         boolean isCompZero(double value) {
             return value == 0;
         }
     },
 
-    GEZ {
+    GEZ(">=") {
         boolean isCompZero(double value) {
             return value >= 0;
         }
     },
 
-    GTZ {
+    GTZ(">") {
         boolean isCompZero(double value) {
             return value > 0;
         }
     };
 
-    abstract boolean isCompZero(double value);
+    @NotNull
+    private final String operation;
+
+    //---------------------------------------------------------------------------------------------
+    // Constructors
+    //---------------------------------------------------------------------------------------------
 
     /**
      * Returns the parameter according to the given opcode.
@@ -48,5 +55,25 @@ public enum CompParam implements Parameter {
      */
     public static CompParam fromOpcode(int opcode) {
         return values()[opcode];
+    }
+
+    CompParam(@NotNull String operation) {
+        this.operation = operation;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    //
+    //---------------------------------------------------------------------------------------------
+
+    abstract boolean isCompZero(double value);
+
+    //---------------------------------------------------------------------------------------------
+    // Overridden Object Methods
+    //---------------------------------------------------------------------------------------------
+
+
+    @Override
+    public String toString() {
+        return operation;
     }
 }

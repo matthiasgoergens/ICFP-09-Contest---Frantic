@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import static java.util.logging.Level.FINE;
 import java.util.logging.Logger;
 
 /**
@@ -58,11 +59,8 @@ final class SInstruction<P extends Parameter> extends Instruction {
     //
     //---------------------------------------------------------------------------------------------
 
-    boolean execute(boolean status, @NotNull double[] values, @NotNull Map<Integer, Double> inputs,
+    boolean execute(int stepIndex, boolean status, @NotNull double[] values, @NotNull Map<Integer, Double> inputs,
                     @NotNull Map<Integer, Double> outputs) {
-
-        // Log into the instruction trace
-        logger.fine(address + ": " + toString());
 
         switch (op) {
             case Noop:
@@ -91,6 +89,13 @@ final class SInstruction<P extends Parameter> extends Instruction {
             default:
                 throw new IllegalArgumentException("Unknown operation: " + op);
         }
+
+        // Log into the instruction trace
+        if (logger.isLoggable(FINE)) {
+            logger.fine(stepIndex + "," + address + "," + toString() + "," +
+                    op.toSemanticsString(address, param, r1, values, inputs));
+        }
+
         return status;
     }
 

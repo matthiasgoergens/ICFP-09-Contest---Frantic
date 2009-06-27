@@ -23,6 +23,8 @@ abstract class AbstractVm {
      */
     boolean status = false;
 
+    private int stepIndex = 0;
+
     //---------------------------------------------------------------------------------------------
     // Constructor
     //---------------------------------------------------------------------------------------------
@@ -47,8 +49,10 @@ abstract class AbstractVm {
         Map<Integer, Double> outputs = new HashMap<Integer, Double>();
 
         for (Instruction instruction : instructions) {
-            status = instruction.execute(status, values, inputs, outputs);
+            status = instruction.execute(stepIndex, status, values, inputs, outputs);
         }
+
+        stepIndex++;
 
         return outputs;
     }

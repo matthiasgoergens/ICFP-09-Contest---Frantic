@@ -25,12 +25,13 @@ abstract class Instruction {
     /**
      * Executes the instruction.
      *
-     * @param status  the value of the status register
-     * @param values  the RAM
-     * @param inputs  the input register
-     * @param outputs the output register
-     * @return the new value of the status register
+     * @param stepIndex the index of the current simulation step
+     * @param status    the value of the status register
+     * @param values    the RAM
+     * @param inputs    the input register
+     * @param outputs   the output register     @return the new value of the status register
+     * @return the new status value
      */
-    abstract boolean execute(boolean status, double[] values, @NotNull Map<Integer, Double> inputs,
+    abstract boolean execute(int stepIndex, boolean status, double[] values, @NotNull Map<Integer, Double> inputs,
                              @NotNull Map<Integer, Double> outputs);
 }
