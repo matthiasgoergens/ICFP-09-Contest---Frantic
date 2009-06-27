@@ -1,4 +1,4 @@
-package de.hronopik.icfp2009.vm;
+package de.hronopik.icfp2009.model;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  * @version $Id$
  * @see "task-1.0.pdf 2.3 p.3"
  */
-final class SInstruction<P extends Parameter> extends Instruction {
+public final class SInstruction<P extends Parameter> extends Instruction {
 
     private static final Logger logger = Logger.getLogger("de.hronopik.icfp2009.vm.InstructionTrace");
 
@@ -30,7 +30,7 @@ final class SInstruction<P extends Parameter> extends Instruction {
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    SInstruction(int address, @NotNull SOp op, @Nullable P param, int r1) {
+    public SInstruction(int address, @NotNull SOp op, @Nullable P param, int r1) {
         super(address);
         this.op = op;
         this.param = param;
@@ -59,8 +59,8 @@ final class SInstruction<P extends Parameter> extends Instruction {
     //
     //---------------------------------------------------------------------------------------------
 
-    boolean execute(int stepIndex, boolean status, @NotNull double[] values, @NotNull Map<Integer, Double> inputs,
-                    @NotNull Map<Integer, Double> outputs) {
+    public boolean execute(int stepIndex, boolean status, @NotNull double[] values,
+                           @NotNull Map<Integer, Double> inputs, @NotNull Map<Integer, Double> outputs) {
 
         switch (op) {
             case Noop:

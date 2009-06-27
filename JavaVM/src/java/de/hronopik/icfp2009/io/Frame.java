@@ -1,10 +1,12 @@
-package de.hronopik.icfp2009.vm;
+package de.hronopik.icfp2009.io;
+
+import de.hronopik.icfp2009.model.Instruction;
 
 /**
  * @author Alexander Kiel
  * @version $Id$
  */
-final class Frame {
+public final class Frame {
 
     private final Instruction instruction;
     private final double value;

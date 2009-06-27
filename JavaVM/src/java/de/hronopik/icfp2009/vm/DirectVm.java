@@ -1,5 +1,6 @@
 package de.hronopik.icfp2009.vm;
 
+import de.hronopik.icfp2009.io.Frames;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;

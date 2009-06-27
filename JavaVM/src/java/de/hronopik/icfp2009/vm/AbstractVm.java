@@ -1,5 +1,7 @@
 package de.hronopik.icfp2009.vm;
 
+import de.hronopik.icfp2009.io.Frame;
+import de.hronopik.icfp2009.model.Instruction;
 import org.jetbrains.annotations.NotNull;
 
 import static java.util.Arrays.copyOf;

@@ -1,4 +1,4 @@
-package de.hronopik.icfp2009.vm;
+package de.hronopik.icfp2009.model;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -10,7 +10,7 @@ import java.util.Map;
  * @author Alexander Kiel
  * @version $Id$
  */
-abstract class Instruction {
+public abstract class Instruction {
 
     final int address;
 
@@ -32,6 +32,6 @@ abstract class Instruction {
      * @param outputs   the output register     @return the new value of the status register
      * @return the new status value
      */
-    abstract boolean execute(int stepIndex, boolean status, double[] values, @NotNull Map<Integer, Double> inputs,
-                             @NotNull Map<Integer, Double> outputs);
+    public abstract boolean execute(int stepIndex, boolean status, double[] values,
+                                    @NotNull Map<Integer, Double> inputs, @NotNull Map<Integer, Double> outputs);
 }

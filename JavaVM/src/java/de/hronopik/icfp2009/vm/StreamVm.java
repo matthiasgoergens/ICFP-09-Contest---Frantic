@@ -1,5 +1,7 @@
 package de.hronopik.icfp2009.vm;
 
+import de.hronopik.icfp2009.io.Frame;
+import de.hronopik.icfp2009.io.Frames;
 import de.hronopik.icfp2009.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,6 +18,7 @@ import java.util.Map;
 public class StreamVm extends AbstractVm implements Runnable {
 
     private static final String STOP = ".";
+    private static final char COMMENT_CHAR = '#';
 
     @NotNull
     private final LineNumberReader in;
@@ -81,10 +84,18 @@ public class StreamVm extends AbstractVm implements Runnable {
 
         String line;
         while ((line = in.readLine()) != null) {
+
+            // Finish one input
             if (STOP.equals(line)) {
                 stopExecution = false;
                 break;
             }
+
+            // Skip Comments 
+            if (line.charAt(0) == COMMENT_CHAR) {
+                continue;
+            }
+
             String[] parts = line.split(" ");
 
             int address;

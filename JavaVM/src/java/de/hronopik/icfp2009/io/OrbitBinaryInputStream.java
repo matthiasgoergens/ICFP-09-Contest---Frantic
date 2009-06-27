@@ -1,5 +1,6 @@
-package de.hronopik.icfp2009.vm;
+package de.hronopik.icfp2009.io;
 
+import de.hronopik.icfp2009.model.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.EOFException;
@@ -11,7 +12,7 @@ import java.io.InputStream;
  * @author Alexander Kiel
  * @version $Id$
  */
-public class OrbitInputStream extends FilterInputStream {
+public class OrbitBinaryInputStream extends FilterInputStream {
 
     private int frameAddress;
 
@@ -19,7 +20,7 @@ public class OrbitInputStream extends FilterInputStream {
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    public OrbitInputStream(@NotNull InputStream in) {
+    public OrbitBinaryInputStream(@NotNull InputStream in) {
         super(in);
         frameAddress = 0;
     }
