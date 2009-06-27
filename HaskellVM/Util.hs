@@ -21,9 +21,37 @@ writeMem addr v vm  =
 readInput :: VM -> Addr -> Dat
 readInput VM {input = inp} addr = I.findWithDefault 0 addr inp 
 
+setInputs :: [(Addr, Dat)] -> VM -> VM
+setInputs inps vm = 
+    vm {input = foldr (\(a,d) map -> I.insert a d map) (input vm) inps }
+
 writeOutput :: Addr -> Dat -> VM ->VM 
 writeOutput addr v vm  = 
     vm { output = I.insert addr v $ output vm }
+
+readConsoleInput :: String -> (Addr, Dat)
+readConsoleInput s = let (a,d) = L.break (== ' ') s
+                     in (read a, read d)
+
+showConsoleOutput :: (Addr, Dat) -> String
+showConsoleOutput (a,d) = show a ++ " " ++ show d
+
+readConsoleLines :: IO([String])
+readConsoleLines = do
+  l <- getLine
+  case head l of 
+    '.' -> return []
+    _   -> do ls <- readConsoleLines
+              return (l:ls)
+
+
+isFinished :: VM -> Bool
+isFinished VM {output = o} 
+    = (I.findWithDefault 0 0 o) /= 0
+
+score :: VM -> Dat
+score VM {output = o} 
+    = I.findWithDefault 0 0 o
 
 ---- LOADING
 partitionN :: Int -> B.ByteString -> [B.ByteString]
