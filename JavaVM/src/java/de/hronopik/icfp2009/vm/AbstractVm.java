@@ -2,11 +2,16 @@ package de.hronopik.icfp2009.vm;
 
 import org.jetbrains.annotations.NotNull;
 
+import static java.util.Arrays.copyOf;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
+ * A VM.
+ * <p/>
+ * A VM isn't threadsafe!
+ *
  * @author Alexander Kiel
  * @version $Id$
  */
@@ -16,7 +21,10 @@ abstract class AbstractVm {
     final Instruction[] instructions;
 
     @NotNull
-    final double[] values;
+    double[] values;
+
+    @NotNull
+    final Map<String, Snapshoot> snapshoots = new HashMap<String, Snapshoot>();
 
     /**
      * The status register.
@@ -55,5 +63,57 @@ abstract class AbstractVm {
         stepIndex++;
 
         return outputs;
+    }
+
+    /**
+     * Creates a new snapshoot with the given name.
+     *
+     * @param snapshootName the name of the new snapshoot
+     */
+    public void createSnapshoot(@NotNull String snapshootName) {
+        snapshoots.put(snapshootName, new Snapshoot(values, status, stepIndex));
+    }
+
+    /**
+     * Resets the state of the VM to the state at the time of the snapshoot with the given name.
+     *
+     * @param snapshootName the name of the snapshoot to use
+     * @throws IllegalArgumentException if there is no snapshoot with the given name
+     */
+    public void reset(@NotNull String snapshootName) {
+        Snapshoot snapshoot = snapshoots.get(snapshootName);
+        if (snapshoot == null) {
+            throw new IllegalArgumentException("Unknown snapshoot with name \"" + snapshootName + "\".");
+        }
+        values = snapshoot.values;
+        status = snapshoot.status;
+        stepIndex = snapshoot.stepIndex;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    // Snapshoot
+    //---------------------------------------------------------------------------------------------
+
+    private static class Snapshoot {
+
+        @NotNull
+        private final double[] values;
+
+        /**
+         * The status register.
+         */
+        private final boolean status;
+
+        private final int stepIndex;
+
+        //---------------------------------------------------------------------------------------------
+        // Constructor
+        //---------------------------------------------------------------------------------------------
+
+        private Snapshoot(@NotNull double[] values, boolean status, int stepIndex) {
+            this.values = copyOf(values, values.length);
+            this.status = status;
+            this.stepIndex = stepIndex;
+        }
     }
 }
