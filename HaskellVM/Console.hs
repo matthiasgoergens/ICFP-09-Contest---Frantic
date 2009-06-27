@@ -25,7 +25,7 @@ console oneRun vm = helper vm
                  inp        = setInputs inputdat (Inp I.empty)
              (vm', out) <- loop inp vm
              case (isFinished out) of
-               True  -> putStrLn $"Finished with score " ++ (show $ score out) 
+               True  -> return () -- putStrLn $"#Finished with score " ++ (show $ score out) 
                False -> helper vm'
         loop :: Inp -> VM -> IO(VM,Outp)
         loop inp vm = do          
