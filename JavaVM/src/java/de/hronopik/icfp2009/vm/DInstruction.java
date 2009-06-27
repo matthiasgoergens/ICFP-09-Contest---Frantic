@@ -3,6 +3,7 @@ package de.hronopik.icfp2009.vm;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * A D-Type instruction.
@@ -12,6 +13,8 @@ import java.util.Map;
  * @see "task-1.0.pdf 2.2 p.3"
  */
 final class DInstruction extends Instruction {
+
+    private static final Logger logger = Logger.getLogger("de.hronopik.icfp2009.vm.InstructionTrace");
 
     @NotNull
     private final DOp op;
@@ -52,9 +55,29 @@ final class DInstruction extends Instruction {
 
     boolean execute(boolean status, double[] values, @NotNull Map<Integer, Double> inputs,
                     @NotNull Map<Integer, Double> outputs) {
-        switch(op) {
+
+        // Log into the instruction trace
+        logger.fine(address + ": " + toString());
+
+        switch (op) {
             case Add:
-                values[address] = values[r1] + values[r2];                
+                values[address] = values[r1] + values[r2];
+                break;
+            case Sub:
+                values[address] = values[r1] - values[r2];
+                break;
+            case Mult:
+                values[address] = values[r1] * values[r2];
+                break;
+            case Div:
+                values[address] = values[r2] == 0 ? 0 : values[r1] / values[r2];
+                break;
+            case Output:
+                outputs.put(r1, values[r2]);
+                break;
+            case Phi:
+                values[address] = status ? values[r1] : values[r2];
+                break;
         }
         return status;
     }

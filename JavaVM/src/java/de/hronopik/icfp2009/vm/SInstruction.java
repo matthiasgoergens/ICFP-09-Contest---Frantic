@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * A S-Type instruction.
@@ -13,6 +14,8 @@ import java.util.Map;
  * @see "task-1.0.pdf 2.3 p.3"
  */
 final class SInstruction<P extends Parameter> extends Instruction {
+
+    private static final Logger logger = Logger.getLogger("de.hronopik.icfp2009.vm.InstructionTrace");
 
     @NotNull
     private final SOp op;
@@ -54,10 +57,14 @@ final class SInstruction<P extends Parameter> extends Instruction {
     //---------------------------------------------------------------------------------------------
     //
     //---------------------------------------------------------------------------------------------
-    
-    boolean execute(boolean status, double[] values, @NotNull Map<Integer, Double> inputs,
+
+    boolean execute(boolean status, @NotNull double[] values, @NotNull Map<Integer, Double> inputs,
                     @NotNull Map<Integer, Double> outputs) {
-        switch(op) {
+
+        // Log into the instruction trace
+        logger.fine(address + ": " + toString());
+
+        switch (op) {
             case Noop:
                 break;
             case Cmpz:
@@ -75,7 +82,11 @@ final class SInstruction<P extends Parameter> extends Instruction {
                 values[address] = values[r1];
                 break;
             case Input:
-                values[address] = inputs.get(r1);
+                Double inputValue = inputs.get(r1);
+
+                // Not existing inputs are assumed to be zero
+                values[address] = inputValue == null ? 0 : inputValue;
+
                 break;
             default:
                 throw new IllegalArgumentException("Unknown operation: " + op);

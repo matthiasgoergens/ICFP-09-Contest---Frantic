@@ -22,16 +22,15 @@ abstract class Instruction {
         this.address = address;
     }
 
-    public Instruction() {
-    }
-
-    /*
-    * Executes the instruction.
-    *
-    * @param status the value of the status register
-    * @param values the RAM
-    * @return the new value of the status register
-    */
+    /**
+     * Executes the instruction.
+     *
+     * @param status  the value of the status register
+     * @param values  the RAM
+     * @param inputs  the input register
+     * @param outputs the output register
+     * @return the new value of the status register
+     */
     abstract boolean execute(boolean status, double[] values, @NotNull Map<Integer, Double> inputs,
                              @NotNull Map<Integer, Double> outputs);
 }

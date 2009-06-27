@@ -5,9 +5,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.logging.Logger;
 
 /**
@@ -63,8 +63,14 @@ public class OrbitVm implements Runnable {
     //---------------------------------------------------------------------------------------------
 
     public void run() {
+
+        /*int i = 0;
+        for (double value : values) {
+            System.err.println(i++ + ": " + String.valueOf(value));
+        }*/
+
         boolean running = true;
-        while(running) {
+        while (running) {
             try {
                 running = step();
             } catch (IOException e) {
@@ -74,23 +80,33 @@ public class OrbitVm implements Runnable {
         }
     }
 
+    /**
+     * Executes one step in the simulation process.
+     * <p/>
+     * <ul><li>reads the inputs<li>executes all instructions<li>writes the outputs
+     *
+     * @return {@code true} if the simulation should continue
+     * @throws IOException if an I/O error occurs
+     */
     public boolean step() throws IOException {
         Map<Integer, Double> inputs = readInputs();
-        if (inputs.isEmpty()) {
-            return false;
-        }
 
-        Map<Integer, Double> outputs = new HashMap<Integer, Double>();
-
-        for (int i = 0; i < instructions.length; i++) {
-            Instruction instruction = instructions[i];
-            logger.fine("instruction(" + i + "): " + instruction);
-            status = instruction.execute(status, values, inputs, outputs);
-        }
+        Map<Integer, Double> outputs = step(inputs);
 
         writeOutputs(outputs);
 
-        return true;
+        return outputs.get(0) == 0;
+    }
+
+    @NotNull
+    private Map<Integer, Double> step(@NotNull Map<Integer, Double> inputs) {
+        Map<Integer, Double> outputs = new HashMap<Integer, Double>();
+
+        for (Instruction instruction : instructions) {
+            status = instruction.execute(status, values, inputs, outputs);
+        }
+
+        return outputs;
     }
 
     //---------------------------------------------------------------------------------------------
@@ -136,6 +152,7 @@ public class OrbitVm implements Runnable {
             out.write(" ");
             out.write(String.valueOf(entry.getValue()));
             out.write("\n");
+            out.flush();
         }
     }
 
@@ -160,8 +177,23 @@ public class OrbitVm implements Runnable {
             System.exit(1);
         }
 
-        OrbitVm vm = new OrbitVm(frames, new InputStreamReader(System.in), new OutputStreamWriter(System.out));
-        vm.run();
+        InputStreamReader in = new InputStreamReader(System.in);
+        OutputStreamWriter out = new OutputStreamWriter(System.out);
+
+        OrbitVm vm = new OrbitVm(frames, in, out);
+
+        try {
+            vm.run();
+        } finally {
+            try {
+                in.close();
+            } catch (IOException e) {
+            }
+            try {
+                out.close();
+            } catch (IOException e) {
+            }
+        }
     }
 
     @Nullable

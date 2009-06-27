@@ -91,7 +91,7 @@ public class OrbitInputStream extends FilterInputStream {
             // We have a D-Type instruction here
             int r1 = (int) ((instructionCode >> 14) & 0x3FFF);
             int r2 = (int) (instructionCode & 0x3FFF);
-            return new DInstruction(address, DOp.fromOpcode(opcode), r1, r2);
+            return new DInstruction(frameAddress, DOp.fromOpcode(opcode), r1, r2);
 
         } else {
 
@@ -99,12 +99,12 @@ public class OrbitInputStream extends FilterInputStream {
             SOp op = SOp.fromOpcode((int) ((instructionCode >> 24) & 0xF));
             Parameter param;
             if (op == SOp.Cmpz) {
-                param = CompParam.fromOpcode((int) ((instructionCode >> 20) & 0xF));
+                param = CompParam.fromOpcode((int) ((instructionCode >> 21) & 0x7));
             } else {
                 param = null;
             }
             int r1 = (int) (instructionCode & 0x3FFF);
-            return new SInstruction<Parameter>(address, op, param, r1);
+            return new SInstruction<Parameter>(frameAddress, op, param, r1);
         }
     }
 
