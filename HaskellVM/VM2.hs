@@ -18,6 +18,8 @@ import Control.Monad.Writer
 
 import Console
 
+import Data.Function
+
 type Mem = Array Int Dat
 type Status = Bool
 type InPorts = I.IntMap Dat
@@ -44,22 +46,42 @@ oneRun (Inp inp) vm = (vm { mem = array2map newMem
     where (newStatus, newMem, outPorts) = oneRun' (size vm) (instr vm) (status vm) (map2array (mem vm)) inp
     
 
+prop_oneRun' = trace (show $ IA.elems mem) $
+               and [(newStatus == False)
+                   , I.null outports
+                   , IA.elems mem == [5,8,13]]
+    where (newStatus, mem, outports) =
+              (oneRun' 3 [(0,SType Noop 0)
+                         ,(1,SType Noop 0)
+                         ,(2,DType Add 0 1)
+                         ])
+               False
+               (IA.array (0,2) [(0,5)
+                               ,(1,8)
+                               ,(2,0)])
+               (I.fromList [(0,1)
+                           ,(1,2)
+                           ,(2,3)
+                           ]
+               )
+               
+
 oneRun' :: Int -> [(Int, Instr)] -> Status -> Mem -> InPorts -> (Status, Mem, OutPorts)
 oneRun' size code oldStatus oldMem input = (newStatus, newMem, outPorts)
     where helper :: Int -> Instr -> Status -> (Status, Dat, OutPorts -> OutPorts)
           helper c (SType sop addr) z
-              = trace (show c) $
+              = trace ("c: "++show c) $
                 let v1 = readMem c addr
-                    vc = (IA.!) oldMem c
+                    vc = readMem c c
                     input = readInput addr
                 in case sop of 
                      Noop -> (z, vc, id)
                      Cmpz f -> (f v1 0, vc, id)
                      Sqrt -> (z, sqrt v1, id)
-                     Copy -> (z, vc, id)
+                     Copy -> (z, v1, id)
                      Input -> (z, input, id)
           helper c (DType dop addr1 addr2) z
-              = trace (show c) $
+              = trace ("c: "++show c) $
                 let v1 = readMem c addr1
                     v2 = readMem c addr2
                     vc = (IA.!) oldMem c
@@ -73,24 +95,30 @@ oneRun' size code oldStatus oldMem input = (newStatus, newMem, outPorts)
 
           writeOutput = I.insert
           
+--          op :: (Status -> (Status, Dat, OutPorts -> OutPorts))
+--             -> (Status, (OutPorts -> OutPorts))
+--             -> ((Status, (OutPorts -> OutPorts)) -> EndList Dat (Status, OutPorts -> OutPorts))
+--             -> EndList Dat (Status, OutPorts -> OutPorts)
+
           op :: (Status -> (Status, Dat, OutPorts -> OutPorts))
              -> (Status, (OutPorts -> OutPorts))
-             -> ((Status, (OutPorts -> OutPorts)) -> EndList Dat (Status, OutPorts -> OutPorts))
-             -> EndList Dat (Status, OutPorts -> OutPorts)
-          op f (oldStatus, oldOut) cont
-              = Cons dat (cont (newStatus, (newOut . oldOut)))
+             -> (Dat, (Status, OutPorts -> OutPorts))
+          op f (oldStatus, oldOut)
+              = (dat, (newStatus, (newOut . oldOut)))
               where (newStatus, dat, newOut) = f oldStatus
-          endList = foldEndList Nil (oldStatus, id)
-                    . L.map op . L.map (uncurry helper) $ code
+          endList :: EndList Dat (Status, OutPorts -> OutPorts)
+          endList = foldEndList (oldStatus, id)
+                    . L.map op . L.map (uncurry helper) . L.sortBy (compare `on` fst) $ code
 
           (newStatus, outPortsTrans) = end endList
 
           outPorts = outPortsTrans I.empty
+          
           newMemPre = toList endList
           newMem = IA.array (0, size - 1) (zip [0..] newMemPre)
 
-          readMem c i | i <= c = (IA.!) oldMem i
-                      | otherwise = (IA.!) newMem i
+          readMem c i | i < c = (IA.!) newMem i
+                      | otherwise = (IA.!) oldMem i
 
           readInput :: Int -> Dat
           readInput = flip (I.findWithDefault 0) input
@@ -99,15 +127,49 @@ oneRun' size code oldStatus oldMem input = (newStatus, newMem, outPorts)
 
 data EndList a b = Cons a (EndList a b) | Nil b deriving (Ord, Eq, Show)
 
+splitEndList l = (toList l, end l)
+
 end (Nil b) = b
 end (Cons _ b) = end b
 toList (Cons a b) = a : toList b
 toList (Nil _) = []
 
-foldEndList ::  (z -> c) -> z -> [(z -> (z -> c) -> c)] -> c
-foldEndList opNil z [] = opNil z
-foldEndList opNil z (opCons : xs) = opCons z cont
-    where cont newZ = foldEndList opNil newZ xs
+---- Dauern gerade zu lange.
+
+-- prop_toList a = (toList . foldr Cons (Nil undefined) $ a) == a
+--     where types :: [Int]
+--           types = a
+
+-- prop_end a b = (end . foldr Cons (Nil b) $ map (const undefined) a) == b
+--     where types :: ([Int], Int)
+--           types = (a, b)
+
+-- foldr'' :: (a -> b -> b) -> b -> [a] -> b
+-- foldr'' op z [] = z
+-- foldr'' op z (x:xs) = op x (foldr op z xs)
+
+-- a = (z -> (z -> c) -> c)
+-- b = z
+
+-- foldl :: (a -> b -> a) -> a -> [b] -> a
+
+
+--opCons :: [(Status, (OutPorts -> OutPorts))
+--           -> EndList Dat (Status, OutPorts -> OutPorts)]
+
+foldEndList :: z -> [z -> (a, z)] -> EndList a z
+foldEndList z [] = Nil z
+foldEndList oldZ (opCons : xs) = Cons dat $ foldEndList newZ xs
+    where (dat, newZ) = opCons oldZ
+
+     
+
+-- prop_foldEndList a = (toList el == a)
+--     where opCons = map opCon a
+--           opCon i z = (i, z)
+--           el = (foldEndList 0 opCons)
+--           types :: [String]
+--           types = a
 
 
 -- oneRun :: Inp -> VM -> (VM, Outp)
