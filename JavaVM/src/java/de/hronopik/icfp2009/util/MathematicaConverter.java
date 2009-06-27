@@ -14,6 +14,7 @@ public class MathematicaConverter {
 		for(Integer key: m.keySet()){
 			result[i][0] = key;
 			result[i][1] = m.get(key);
+			++i;
 		}
 		return result;
 	}
