@@ -28,6 +28,10 @@ array2map :: Mem -> I.IntMap Dat
 array2map = I.fromList . IA.assocs
 
 
+-- manyRuns koennte so aussehen:
+-- manyRuns :: Int -> [(Int, Instr)] -> Status -> Mem -> [InPorts] -> [(Status, Mem, OutPorts)]
+-- manyRuns size code startStatus startMem inputs = ...
+
 
 oneRun :: Inp -> VM -> (VM, Outp)
 oneRun (Inp inp) vm = (vm { mem = array2map newMem
