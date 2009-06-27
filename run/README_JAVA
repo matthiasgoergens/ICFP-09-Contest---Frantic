@@ -1,6 +1,8 @@
 In diesem Verzeichnis wird die VM ausgeführt.
 
-Vorher bitte per ant compilieren.
+Vorher bitte per ant compilieren:
+
+in ../JavaVM einfach ant aufrufen
 
 Dann einfach ./run_java.sh ../task/bin1.obf
 

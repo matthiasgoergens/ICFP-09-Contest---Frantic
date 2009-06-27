@@ -63,12 +63,6 @@ public class OrbitVm implements Runnable {
     //---------------------------------------------------------------------------------------------
 
     public void run() {
-
-        /*int i = 0;
-        for (double value : values) {
-            System.err.println(i++ + ": " + String.valueOf(value));
-        }*/
-
         boolean running = true;
         while (running) {
             try {
