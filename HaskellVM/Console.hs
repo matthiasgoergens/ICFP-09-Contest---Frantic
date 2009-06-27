@@ -12,6 +12,8 @@ import Load
 import System
 import Control.Monad
 
+import VM
+
 console :: (Inp -> VM -> (VM, Outp)) -> VM -> IO()
 console oneRun vm = helper vm
       where           
