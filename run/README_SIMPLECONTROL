@@ -1,0 +1,3 @@
+cat ../controller/simple.cmd | ../controller/simple.pl 1001 | ./run_haskell.sh ../task/bin1.obf | ./output2csv.sh > test.dat  
+
+gnuplot simple.dem
