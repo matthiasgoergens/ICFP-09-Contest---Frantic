@@ -29,7 +29,7 @@ console oneRun vm = helper vm
                False -> helper vm'
         loop :: Inp -> VM -> IO(VM,Outp)
         loop inp vm = do          
-          let (vm', out) = oneRun inp vm 
+          let (vm', out) = oneRun inp vm               
               Outp outmap = out
               Inp inmap   = inp
           putStrLn $ "#time: " ++ (show $ time vm')

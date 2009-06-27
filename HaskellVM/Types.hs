@@ -19,7 +19,7 @@ instance Show (Dat -> Dat -> Bool) where
 -- length and DNA part
 data VM = VM {  instr  :: [(Int,Instr)] 
              ,  mem    :: IntMap Dat
-             ,  status :: Bool
+             ,  status :: !Bool
              ,  size   :: Int
              ,  time   :: Int
              } deriving (Show)

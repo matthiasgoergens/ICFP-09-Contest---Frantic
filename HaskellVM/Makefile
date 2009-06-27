@@ -8,8 +8,11 @@ VM:
 createsub:
 	ghc -O6 --make CreateSub.hs -o createSub
 
+output2CSV:
+	ghc -O6 --make Output2CSV.hs -o output2csv
+
 VM2:
-	ghc -O6 --make vm2
+	ghc -O6 --make VM2.hs -o vm2 
 
 clean:
 	rm vm

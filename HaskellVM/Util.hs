@@ -19,11 +19,11 @@ mapsnd f (c,a) = (c,f a)
 
 ---- RUNNING
 readMem ::   VM -> Addr -> Dat
-readMem VM {mem = m}  addr = I.findWithDefault 0 addr m
+readMem VM {mem = m}  addr = I.findWithDefault 0 addr $! m
 
 writeMem :: Addr -> Dat -> VM ->VM 
 writeMem addr v vm  = 
-    vm { mem = I.insert addr v $ mem vm }
+    vm { mem = (I.insert addr $! v) $! mem vm }
 
 readInput :: Inp -> Addr -> Dat
 readInput (Inp inp) addr = I.findWithDefault 0 addr inp 
