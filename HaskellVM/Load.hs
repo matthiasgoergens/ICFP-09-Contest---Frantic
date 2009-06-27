@@ -22,25 +22,25 @@ loadLine i ds | even i =
 
 loadInstrDat :: [Word8] -> [Word8] -> (Instr,Dat)
 loadInstrDat ins dat = 
-    let i1 = ins !! 3
-        in (case (i1 .&. 0xF0) == 0 of
-              True  -> loadSType ins
-              False -> loadDType ins
+    let i32 = word8ToWord32 $ reverse ins
+        in (case (i32 `shift` (-28)) == 0 of
+              True  -> loadSType i32
+              False -> loadDType i32
            , convertToDouble dat )
 
-loadIMM :: Word8 -> (Dat -> Dat -> Bool)
+loadIMM :: Word32 -> (Dat -> Dat -> Bool)
 loadIMM 0 = (<) 
 loadIMM 1 = (<=)
 loadIMM 2 = (==)
 loadIMM 3 = (>=)
 loadIMM 4 = (>)
 loadIMM _ = error "Wrong Imm code"
-           
-loadSType :: [Word8] -> Instr
-loadSType (i4:i3:i2:i1:_) = 
-    let op = (i1) .&. 0x0F
-        imm = (i2 .&. 0xF0) `shift` (-4)
-        r1  = fromIntegral $ i4 + (i3 .&. 0x3F) `shift` (8) 
+
+loadSType :: Word32 -> Instr
+loadSType i = 
+    let op = (i `shift` (-24)) .&. 0x0F
+        imm = (i `shift` (-21)) .&. 0x7
+        r1  = fromIntegral $ (i .&. 0x3FFF)
         in case op of
              0 -> SType Noop 0
              1 -> SType (Cmpz (loadIMM imm)) r1
@@ -48,16 +48,15 @@ loadSType (i4:i3:i2:i1:_) =
              3 -> SType Copy r1
              4 -> SType Input r1
              _ -> error $ "Wrong SType " ++ (show op)
+
      
-loadDType :: [Word8] ->  Instr
-loadDType (i4:i3:i2:i1:_) = 
-    let op = (i1 .&. 0xF0) `shift` (-4)
+loadDType :: Word32 ->  Instr
+loadDType i = 
+    let op = ( i  `shift` (-28)) .&. 0xF
         r1 = fromIntegral $ 
-             (i1 .&. 0x0F) `shift` (10)
-             + i2 `shift` 2 
-             + (i3 .&. 0x10) `shift` (-6)
-        r2  = fromIntegral $ 
-              i4 + (i3 .&. 0x3F) `shift` (8) 
+             ( i  `shift` (-14)) .&. 0x3FFF
+        r2 = fromIntegral $ 
+             ( i .&. 0x3FFF)
         in case op of
              1 -> DType Add r1 r2 
              2 -> DType Sub r1 r2
@@ -79,9 +78,6 @@ loadVM dat =
         max      = length dats
     in VM { instr  = zip [0..] insts
           , mem    = IntMap.fromAscList $ zip [0..] dats
-          , ip     = 0
           , status = False
           , size   = max
-          , input  = IntMap.empty
-          , output = IntMap.empty
           }

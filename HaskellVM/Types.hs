@@ -19,9 +19,9 @@ instance Show (Dat -> Dat -> Bool) where
 -- length and DNA part
 data VM = VM {  instr  :: [(Int,Instr)] 
              ,  mem    :: IntMap Dat
-             ,  ip     :: Int
              ,  status :: Bool
              ,  size   :: Int
-             ,   input  :: IntMap Dat 
-             ,   output :: IntMap Dat 
              } deriving (Show)
+
+data Inp  = Inp (IntMap Dat )
+data Outp = Outp (IntMap Dat)

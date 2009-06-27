@@ -18,16 +18,24 @@ writeMem :: Addr -> Dat -> VM ->VM
 writeMem addr v vm  = 
     vm { mem = I.insert addr v $ mem vm }
 
-readInput :: VM -> Addr -> Dat
-readInput VM {input = inp} addr = I.findWithDefault 0 addr inp 
+readInput :: Inp -> Addr -> Dat
+readInput (Inp inp) addr = I.findWithDefault 0 addr inp 
 
+{-
 setInputs :: [(Addr, Dat)] -> VM -> VM
 setInputs inps vm = 
-    vm {input = foldr (\(a,d) map -> I.insert a d map) (input vm) inps }
+    vm { input = foldr (\(a,d) map -> I.insert a d map) (input vm) inps }
+-}
 
-writeOutput :: Addr -> Dat -> VM ->VM 
-writeOutput addr v vm  = 
-    vm { output = I.insert addr v $ output vm }
+setInputs :: [(Addr, Dat)] -> Inp -> Inp
+setInputs inps (Inp inp)  = 
+    Inp (foldr (\(a,d) map -> I.insert a d map) inp inps )
+
+
+writeOutput :: Addr -> Dat -> Outp -> Outp
+writeOutput addr v (Outp out)  = 
+    Outp $ I.insert addr v $ out
+
 
 readConsoleInput :: String -> (Addr, Dat)
 readConsoleInput s = let (a,d) = L.break (== ' ') s
@@ -45,12 +53,12 @@ readConsoleLines = do
               return (l:ls)
 
 
-isFinished :: VM -> Bool
-isFinished VM {output = o} 
+isFinished :: Outp -> Bool
+isFinished (Outp o)
     = (I.findWithDefault 0 0 o) /= 0
 
-score :: VM -> Dat
-score VM {output = o} 
+score :: Outp -> Dat
+score (Outp o) 
     = I.findWithDefault 0 0 o
 
 ---- LOADING
@@ -58,6 +66,9 @@ partitionN :: Int -> B.ByteString -> [B.ByteString]
 partitionN n b = L.unfoldr (helper) b
     where helper x | B.null x = Nothing
                    | otherwise = Just $ B.splitAt n x
+
+word8ToWord32 :: [Word8] -> Word32
+word8ToWord32 ds = decode . BL.concat . map encode $ ds
 
 convertToDouble :: [Word8] -> Double
 convertToDouble ds = word64ToDouble . decode . BL.concat . map encode $ reverse ds
