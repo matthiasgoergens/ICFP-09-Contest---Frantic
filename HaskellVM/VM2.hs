@@ -16,6 +16,8 @@ import Data.Array.IArray as IA
 import Data.Array
 import Control.Monad.Writer
 
+import Console
+
 type Mem = Array Int Dat
 type Status = Bool
 type InPorts = I.IntMap Dat
@@ -46,7 +48,8 @@ oneRun' :: Int -> [(Int, Instr)] -> Status -> Mem -> InPorts -> (Status, Mem, Ou
 oneRun' size code oldStatus oldMem input = (newStatus, newMem, outPorts)
     where helper :: Int -> Instr -> Status -> (Status, Dat, OutPorts -> OutPorts)
           helper c (SType sop addr) z
-              = let v1 = readMem c addr
+              = trace (show c) $
+                let v1 = readMem c addr
                     vc = (IA.!) oldMem c
                     input = readInput addr
                 in case sop of 
@@ -56,7 +59,8 @@ oneRun' size code oldStatus oldMem input = (newStatus, newMem, outPorts)
                      Copy -> (z, vc, id)
                      Input -> (z, input, id)
           helper c (DType dop addr1 addr2) z
-              = let v1 = readMem c addr1
+              = trace (show c) $
+                let v1 = readMem c addr1
                     v2 = readMem c addr2
                     vc = (IA.!) oldMem c
                 in case dop of
@@ -80,6 +84,7 @@ oneRun' size code oldStatus oldMem input = (newStatus, newMem, outPorts)
                     . L.map op . L.map (uncurry helper) $ code
 
           (newStatus, outPortsTrans) = end endList
+
           outPorts = outPortsTrans I.empty
           newMemPre = toList endList
           newMem = IA.array (0, size - 1) (zip [0..] newMemPre)
@@ -130,30 +135,7 @@ foldEndList opNil z (opCons : xs) = opCons z cont
 --                     Phi -> (writeMem i (if status vm then v1  else v2) vm,out)
            
 
-console :: VM -> IO()
-console vm = helper vm
-      where           
-        helper :: VM  -> IO()
-        helper vm = do          
-             ls <- readConsoleLines
-             let inputdat   = map (readConsoleInput) ls
-                 inp        = setInputs inputdat (Inp I.empty)
-             (vm', out) <- loop inp vm
-             case (isFinished out) of
-               True  -> putStrLn $"Finished with score " ++ (show $ score out) 
-               False -> helper vm'
-        loop :: Inp -> VM -> IO(VM,Outp)
-        loop inp vm = do          
-          let (vm', out) = oneRun inp vm 
-              Outp outmap = out
-              Inp inmap   = inp
-          putStrLn $ "#time: " ++ (show $ time vm')
-          putStr "#inp:"  
-          putStrLn $ concat $ L.intersperse "#" $ map showConsoleOutput $ I.toAscList inmap
-          putStrLn "#out:"  
-          putStr $ unlines $ map showConsoleOutput $ I.toAscList outmap
-          putStrLn "."
-          return (vm', out)
+
         
 {- shell  :: [(Addr,Dat)] -> (VM) -> (VM, [(Addr,Dat)])
 shell inputs vm = 
@@ -171,7 +153,7 @@ main = do
   dat <- B.readFile file
   let vm  = loadVM dat
 -- print vm
-  console vm
+  console oneRun vm
 --  let vm' = oneRun vm
 --  print vm'
 --  let vm'' = take 100 $ iterate oneRun vm

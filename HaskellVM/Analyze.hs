@@ -53,6 +53,10 @@ showAnalysis l = "digraph dataflow {\n"
                          ++"node [shape = diamond];\n"
                          ++ (concat . map ((++" ").show) . filter isNOutp $ names) ++ ";\n"
 
+invert :: [(NameSpace, [NameSpace])] -> [(NameSpace, [NameSpace])]
+invert l = M.toList . M.fromListWith (++) . concat . map go $ l
+    where go (sink, sources) = map (flip (,) [sink]) sources
+
 isNMem (NMem _) = True
 isNMem _ = False
 
@@ -64,9 +68,43 @@ isNOutp _ = False
 
 -- LR_0 -> LR_2 [ label = "SS(B)" ];
 
-main = do
-  args <- getArgs
-  when (length args < 1) $ do fail "\nUsage: vm binary\n\t first line \"16000 confignummer\"\n\tproceed with . \\n \n"; 
-  let file = args !! 0
+analyseDepend :: VM -> NameSpace -> [(NameSpace, [NameSpace])]
+analyseDepend vm start = filter (flip S.member reached . fst) network
+    where network = invert . analyze $ vm
+          networkM = M.fromList network
+
+
+          reached = follow networkM S.empty [start]
+
+follow :: Ord a => M.Map a [a] -> S.Set a -> [a] -> S.Set a
+follow networkM exhausted [] = exhausted                    
+follow networkM exhausted (n:ns) = let news = filter (not . flip S.member exhausted)
+                                              . M.findWithDefault [] n $ networkM
+                                   in follow networkM (S.insert n exhausted) (news ++ ns)
+
+prop_followCycle a s = (L.sort $ S.toList (follow networkM S.empty a)) == L.sort (a:s)
+    where types :: (Int, [Int])
+          types = (a,s)
+          networkM = (M.fromList (zip (a ++ init s) (map (:[]) s)))
+
+fullNetworkAnalysis args = do
+  let file = args !! 1
   dat <- B.readFile file
   putStr . showAnalysis . analyze . loadVM $ dat
+
+dependencyAnalysis args = do
+  let file = args !! 1
+  when (length args < 3) $ do fail "\nWhat do you want to analyses?\n"
+  dat <- B.readFile file
+  let n = (NOutp . read $ (args !! 2))
+  print $ analyseDepend (loadVM $ dat) n
+--  putStr . showAnalysis $ analyseDepend (loadVM $ dat) n
+
+
+main = do
+  args <- getArgs
+  when (length args < 2) $ do fail "\nUsage: See source.\n"
+  case args !! 0 of 
+    "full" -> fullNetworkAnalysis args
+    "dep" -> dependencyAnalysis args
+    otherwise -> fail "\nUsage: See Source.\n"
