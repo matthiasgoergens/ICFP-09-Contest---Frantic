@@ -1,0 +1,149 @@
+(* Content-type: application/mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 7.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       145,          7]
+NotebookDataLength[      5215,        140]
+NotebookOptionsPosition[      4815,        121]
+NotebookOutlinePosition[      5155,        136]
+CellTagsIndexPosition[      5112,        133]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Bonus-Funktion fuer die Bewertung.", "Subsubtitle",
+ CellChangeTimes->{{3.455060833563888*^9, 3.4550608457551126`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"unscaled", "[", 
+    RowBox[{"t_", ",", "fuelRatio_"}], "]"}], ":=", 
+   RowBox[{"25.", "+", 
+    RowBox[{"45.", "*", "fuelRatio"}], "+", 
+    RowBox[{"(", 
+     RowBox[{"30.0", "-", 
+      RowBox[{"Log", "[", 
+       RowBox[{"2", ",", 
+        RowBox[{"t", "/", "1000"}]}], "]"}]}], ")"}]}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"Manipulate", "[", "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{"Plot", "[", 
+    RowBox[{
+     RowBox[{"unscaled", "[", 
+      RowBox[{"t", ",", "fuelLeft"}], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"t", ",", "100", ",", "tEnde"}], "}"}], ",", 
+     RowBox[{"PlotRange", "\[Rule]", 
+      RowBox[{"{", 
+       RowBox[{"Automatic", ",", 
+        RowBox[{"{", 
+         RowBox[{"40", ",", "100"}], "}"}]}], "}"}]}], ",", 
+     RowBox[{"AxesOrigin", "\[Rule]", 
+      RowBox[{"{", 
+       RowBox[{"0", ",", "66"}], "}"}]}], ",", 
+     RowBox[{"AxesLabel", "\[Rule]", 
+      RowBox[{"{", 
+       RowBox[{"\"\<t in s\>\"", ",", "\"\<Bonus\>\""}], "}"}]}], ",", 
+     RowBox[{"PlotStyle", "\[Rule]", 
+      RowBox[{"{", "Red", "}"}]}]}], "]"}], ",", "\[IndentingNewLine]", 
+   RowBox[{"{", 
+    RowBox[{"tEnde", ",", "1", ",", 
+     RowBox[{"2", "*", 
+      RowBox[{"10", "^", "6"}]}]}], "}"}], ",", "\[IndentingNewLine]", 
+   RowBox[{"{", 
+    RowBox[{"fuelLeft", ",", "0", ",", "1"}], "}"}]}], "]"}]}], "Input",
+ CellChangeTimes->{{3.455051975111104*^9, 3.4550521606249027`*^9}, {
+  3.4550522119201727`*^9, 3.4550522138759317`*^9}, {3.4550522490999613`*^9, 
+  3.455052255102826*^9}, {3.4550608548166037`*^9, 3.455061250818632*^9}, {
+  3.4550612985013437`*^9, 3.455061298837471*^9}, {3.4550613411607943`*^9, 
+  3.455061345698533*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`fuelLeft$$ = 0.264, $CellContext`tEnde$$ = 
+    482000., Typeset`show$$ = True, Typeset`bookmarkList$$ = {}, 
+    Typeset`bookmarkMode$$ = "Menu", Typeset`animator$$, Typeset`animvar$$ = 
+    1, Typeset`name$$ = "\"untitled\"", Typeset`specs$$ = {{
+      Hold[$CellContext`tEnde$$], 1, 2000000}, {
+      Hold[$CellContext`fuelLeft$$], 0, 1}}, Typeset`size$$ = {
+    360., {109., 113.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
+    Typeset`skipInitDone$$ = True, $CellContext`tEnde$5433$$ = 
+    0, $CellContext`fuelLeft$5434$$ = 0}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`fuelLeft$$ = 0, $CellContext`tEnde$$ = 1}, 
+      "ControllerVariables" :> {
+        Hold[$CellContext`tEnde$$, $CellContext`tEnde$5433$$, 0], 
+        Hold[$CellContext`fuelLeft$$, $CellContext`fuelLeft$5434$$, 0]}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, "Body" :> Plot[
+        $CellContext`unscaled[$CellContext`t, $CellContext`fuelLeft$$], \
+{$CellContext`t, 100, $CellContext`tEnde$$}, 
+        PlotRange -> {Automatic, {40, 100}}, AxesOrigin -> {0, 66}, 
+        AxesLabel -> {"t in s", "Bonus"}, PlotStyle -> {Red}], 
+      "Specifications" :> {{$CellContext`tEnde$$, 1, 
+         2000000}, {$CellContext`fuelLeft$$, 0, 1}}, "Options" :> {}, 
+      "DefaultOptions" :> {}],
+     ImageSizeCache->{405., {166., 171.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{{3.455052049886945*^9, 3.455052087822077*^9}, {
+   3.45505213617835*^9, 3.455052161276849*^9}, 3.455052216384251*^9, 
+   3.455052255649362*^9, 3.455061070889517*^9, {3.455061104267583*^9, 
+   3.4550611327658863`*^9}, 3.455061187191814*^9, {3.4550612285876904`*^9, 
+   3.455061251378471*^9}, 3.4550612991712837`*^9, 3.455061346781578*^9}]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{640, 750},
+WindowMargins->{{Automatic, -833}, {107, Automatic}},
+FrontEndVersion->"7.0 for Linux x86 (64-bit) (February 25, 2009)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[567, 22, 125, 1, 32, "Subsubtitle"],
+Cell[CellGroupData[{
+Cell[717, 27, 1723, 44, 187, "Input"],
+Cell[2443, 73, 2344, 44, 354, "Output"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
