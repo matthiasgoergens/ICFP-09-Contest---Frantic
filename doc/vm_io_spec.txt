@@ -1,0 +1,10 @@
+Alle VM's (die HaskellVM und die JavaVM) kommunizieren per STDIN und STDOUT mit den Kontrollern.
+
+ - das Format ist ASCII basiert
+ - pro Zeile eine Eingabe bzw. Ausgabe (Zeilenende '\n')
+ - Kommentare sind Zeilen beginnend mit einem '#'
+ - Zeilenformat: "address value\n"
+ - address ist ein dezimaler integer
+ - value ist ein double in scientific notation
+ - dazwischen ist ein Leerzeichen
+
