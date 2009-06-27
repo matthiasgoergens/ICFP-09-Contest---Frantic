@@ -152,8 +152,9 @@ public class OrbitVm implements Runnable {
             out.write(" ");
             out.write(String.valueOf(entry.getValue()));
             out.write("\n");
-            out.flush();
         }
+        out.write(".\n");
+        out.flush();
     }
 
     //---------------------------------------------------------------------------------------------
