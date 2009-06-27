@@ -66,6 +66,11 @@ loadDType i =
              6 -> DType Phi r1 r2
              _ -> error $"Wrong DType " ++ (show op)
      
+loadVMFromFile :: FilePath -> IO(VM)
+loadVMFromFile file = do
+  dat <- B.readFile file
+  return $ loadVM dat
+
 
 loadVM :: B.ByteString -> VM
 loadVM dat =

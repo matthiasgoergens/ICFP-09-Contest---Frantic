@@ -17,6 +17,9 @@ mapsnd :: (a -> b) ->  (c,a) -> (c,b)
 mapsnd f (c,a) = (c,f a)
                     
 
+sqr :: (Num a) => a -> a
+sqr x = x*x
+
 ---- RUNNING
 readMem ::   VM -> Addr -> Dat
 readMem VM {mem = m}  addr = I.findWithDefault 0 addr $! m

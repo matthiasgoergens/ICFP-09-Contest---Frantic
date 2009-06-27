@@ -16,24 +16,14 @@ import Console
 import VM
 
 
-          
-
+  
+import Optimizer
         
-{- shell  :: [(Addr,Dat)] -> (VM) -> (VM, [(Addr,Dat)])
-shell inputs vm = 
-    let inp = setInputs inputs (Input I.empty)
-        (vm', out) = oneRun inp vm
-        Output outmap = out
-        outs = I.toAscList $ outmap
-    in (vm', outs)
--}
-
 main = do
   args <- getArgs
   when (length args < 1) $ do fail "\nUsage: vm binary\n\t first line \"16000 confignummer\"\n\tproceed with . \\n \n"; 
   let file = args !! 0
-  dat <- B.readFile file
-  let vm  = loadVM dat
+  vm <- loadVMFromFile file
 -- print vm
   console oneRun vm
 --  let vm' = oneRun vm
