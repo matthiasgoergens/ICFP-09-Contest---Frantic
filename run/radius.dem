@@ -1,0 +1,10 @@
+set terminal wxt
+
+radius(x,y) = sqrt(x*x + y+y)
+
+# plot "test.dat" using (radius($3,$4)) w l
+#set yrange [-5000: 5000]
+set xrange [17000: 20000]
+plot "test.dat" using ($5 - radius($3,$4)) w l
+
+pause -1
