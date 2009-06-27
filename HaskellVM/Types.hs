@@ -21,6 +21,7 @@ data VM = VM {  instr  :: [(Int,Instr)]
              ,  mem    :: IntMap Dat
              ,  status :: Bool
              ,  size   :: Int
+             ,  time   :: Int
              } deriving (Show)
 
 data Inp  = Inp (IntMap Dat )

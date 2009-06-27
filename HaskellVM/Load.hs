@@ -80,4 +80,5 @@ loadVM dat =
           , mem    = IntMap.fromAscList $ zip [0..] dats
           , status = False
           , size   = max
+          , time   = 0
           }

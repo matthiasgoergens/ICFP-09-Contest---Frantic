@@ -10,6 +10,13 @@ import Control.Monad
 
 import Types
 
+mapfst :: (a -> b) ->  (a,c) -> (b,c)
+mapfst f (a,c) = (f a,c)
+
+mapsnd :: (a -> b) ->  (c,a) -> (c,b)
+mapsnd f (c,a) = (c,f a)
+                    
+
 ---- RUNNING
 readMem ::   VM -> Addr -> Dat
 readMem VM {mem = m}  addr = I.findWithDefault 0 addr m
@@ -47,8 +54,10 @@ showConsoleOutput (a,d) = show a ++ " " ++ show d
 readConsoleLines :: IO([String])
 readConsoleLines = do
   l <- getLine
-  case head l of 
-    '.' -> return []
+  case l of 
+    ('.':_) -> return []
+    ('#':_) -> readConsoleLines
+    []     -> readConsoleLines
     _   -> do ls <- readConsoleLines
               return (l:ls)
 
@@ -60,6 +69,9 @@ isFinished (Outp o)
 score :: Outp -> Dat
 score (Outp o) 
     = I.findWithDefault 0 0 o
+
+incTime :: VM -> VM
+incTime vm =  vm { time = (time vm) + 1 }
 
 ---- LOADING
 partitionN :: Int -> B.ByteString -> [B.ByteString]

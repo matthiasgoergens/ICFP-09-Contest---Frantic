@@ -16,7 +16,7 @@ import Control.Monad
 oneRun :: Inp -> VM -> (VM, Outp)
 oneRun inp vm = 
     let out = Outp I.empty
-    in foldl (flip step) (vm, out) $ instr vm
+    in mapfst incTime $ foldl (flip step) (vm, out) $ instr vm 
  where step :: (Int, Instr) -> (VM,Outp) -> (VM,Outp)
        step (i, SType sop addr) (vm,out) =
            let v1 = readMem vm addr
@@ -55,6 +55,7 @@ console vm = helper vm
           let (vm', out) = oneRun inp vm 
               Outp outmap = out
               Inp inmap   = inp
+          putStrLn $ "#time: " ++ (show $ time vm')
           putStr "#inp:"  
           putStrLn $ concat $ L.intersperse "#" $ map showConsoleOutput $ I.toAscList inmap
           putStrLn "#out:"  
