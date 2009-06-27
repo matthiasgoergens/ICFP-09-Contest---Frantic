@@ -25,15 +25,15 @@ abstract class AbstractVm {
     @NotNull
     double[] values;
 
-    @NotNull
-    final Map<String, Snapshoot> snapshoots = new HashMap<String, Snapshoot>();
-
     /**
      * The status register.
      */
     boolean status = false;
 
     private int stepIndex = 0;
+
+    @NotNull
+    final Map<String, Snapshoot> snapshoots = new HashMap<String, Snapshoot>();
 
     //---------------------------------------------------------------------------------------------
     // Constructor
@@ -64,6 +64,8 @@ abstract class AbstractVm {
 
     @NotNull
     public Map<Integer, Double> step(@NotNull Map<Integer, Double> inputs) {
+        createSnapshoot("undo");
+
         Map<Integer, Double> outputs = new HashMap<Integer, Double>();
 
         for (Instruction instruction : instructions) {
@@ -73,6 +75,13 @@ abstract class AbstractVm {
         stepIndex++;
 
         return outputs;
+    }
+
+    /**
+     * Simple one-step undo.
+     */
+    public void undo() {
+        reset("undo");
     }
 
     /**

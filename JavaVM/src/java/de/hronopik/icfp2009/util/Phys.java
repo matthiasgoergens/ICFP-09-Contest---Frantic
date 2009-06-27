@@ -19,6 +19,12 @@ public class Phys {
         return sqrt(s_t.getX() * s_t.getX() + s_t.getY() * s_t.getY());
     }
 
+    public static double distance(@NotNull Vector s_1, @NotNull Vector s_2) {
+        double x = s_1.getX() - s_2.getX();
+        double y = s_1.getY() - s_2.getY();
+        return sqrt(x * x + y * y);
+    }
+
     /**
      * Returns the speed between the two given points.
      *
