@@ -115,6 +115,14 @@
             </manifest>
             <fileset dir="${dir.build.java}" excludes="META-INF/build.number"/>
         </jar>
+
+        <jar destfile="${dir.dist}/task1_controller-${version}.jar">
+            <manifest>
+                <attribute name="Main-Class" value="de.hronopik.icfp2009.controller.Task1Controller"/>
+                <!--<attribute name="Class-Path" value=""/>-->
+            </manifest>
+            <fileset dir="${dir.build.java}" excludes="META-INF/build.number"/>
+        </jar>
     </target>
 
 </project>

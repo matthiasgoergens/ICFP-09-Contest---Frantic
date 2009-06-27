@@ -13,6 +13,12 @@ public class Phys {
     public static final double G = 6.67428E-11;
     public static final double m_e = 6e24;
 
+    public static final double mu = G * m_e;
+
+    public static double radius(@NotNull Vector s_t) {
+        return sqrt(s_t.getX() * s_t.getX() + s_t.getY() * s_t.getY());
+    }
+
     /**
      * Returns the speed between the two given points.
      *
@@ -27,5 +33,13 @@ public class Phys {
         double gt_x = g * s_t.getX();
         double gt_y = g * s_t.getY();
         return new Vector(s_tt.getX() - s_t.getX() - gt_x / 2, s_tt.getY() - s_t.getY() - gt_y / 2);
+    }
+
+    public static double hohmannSpeed1(double r1, double r2) {
+        return sqrt(mu / r1) * (sqrt(2 * r2 / (r1 + r2)) - 1);
+    }
+
+    public static double hohmannSpeed2(double r1, double r2) {
+        return sqrt(mu / r2) * (1 - sqrt(2 * r1 / (r1 + r2)));
     }
 }

@@ -54,6 +54,14 @@ abstract class AbstractVm {
     //
     //---------------------------------------------------------------------------------------------
 
+    public int getStepIndex() {
+        return stepIndex;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    //
+    //---------------------------------------------------------------------------------------------
+
     @NotNull
     public Map<Integer, Double> step(@NotNull Map<Integer, Double> inputs) {
         Map<Integer, Double> outputs = new HashMap<Integer, Double>();

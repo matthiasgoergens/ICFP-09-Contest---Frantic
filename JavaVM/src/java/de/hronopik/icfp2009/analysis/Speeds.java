@@ -32,8 +32,11 @@ public class Speeds {
             while (true) {
                 Map<Integer, Double> inputs = reader.readInputs();
 
-                Vector speed = speed(oldInputs, inputs);
+                Vector s_t = new Vector(oldInputs.get(2), oldInputs.get(3));
+                Vector s_tt = new Vector(inputs.get(2), inputs.get(3));
+                Vector speed = Phys.speed(s_t, s_tt);
 
+                System.out.println("r   = " + Phys.radius(s_t));
                 System.out.println("v_x = " + speed.getX());
                 System.out.println("v_y = " + speed.getY());
 
@@ -43,10 +46,4 @@ public class Speeds {
             // Ignore
         }
     }
-
-    static Vector speed(Map<Integer, Double> inputs_t, Map<Integer, Double> inputs_tt) {
-        return Phys.speed(new Vector(inputs_t.get(2), inputs_t.get(3)), new Vector(inputs_tt.get(2), inputs_tt.get(3)));
-    }
-
-
 }
