@@ -14,6 +14,7 @@ import Util
 import Types
 import Load
 
+import System.IO
 import System
 import Control.Monad
 
@@ -70,10 +71,8 @@ isNOutp _ = False
 
 analyseDepend :: VM -> NameSpace -> [(NameSpace, [NameSpace])]
 analyseDepend vm start = filter (flip S.member reached . fst) network
-    where network = invert . analyze $ vm
+    where network = analyze $ vm
           networkM = M.fromList network
-
-
           reached = follow networkM S.empty [start]
 
 follow :: Ord a => M.Map a [a] -> S.Set a -> [a] -> S.Set a
@@ -82,10 +81,16 @@ follow networkM exhausted (n:ns) = let news = filter (not . flip S.member exhaus
                                               . M.findWithDefault [] n $ networkM
                                    in follow networkM (S.insert n exhausted) (news ++ ns)
 
-prop_followCycle a s = (L.sort $ S.toList (follow networkM S.empty a)) == L.sort (a:s)
+prop_followCycle a s' = -- trace (show l ++ "\n") $
+    (l 
+    == (L.nub $ L.sort (a : s)))
     where types :: (Int, [Int])
           types = (a,s)
-          networkM = (M.fromList (zip (a ++ init s) (map (:[]) s)))
+          networkM = (M.fromList (zip ([a] ++ init s) (map (:[]) s)))
+          l = L.sort $ S.toList (follow networkM S.empty [a])
+          s = L.nub . L.sort $ s'
+
+prop_follow = follow (M.fromList [(1,[2]), (2,[3]), (4,[5])]) S.empty [1] == S.fromList [1,2,3]
 
 fullNetworkAnalysis args = do
   let file = args !! 1
@@ -97,9 +102,37 @@ dependencyAnalysis args = do
   when (length args < 3) $ do fail "\nWhat do you want to analyses?\n"
   dat <- B.readFile file
   let n = (NOutp . read $ (args !! 2))
-  print $ analyseDepend (loadVM $ dat) n
---  putStr . showAnalysis $ analyseDepend (loadVM $ dat) n
+  putStr $ showAnalysis $ analyseDepend (loadVM $ dat) n
 
+
+gnuplotter :: [Int] -> (Inp -> VM -> (VM, Outp)) -> VM -> IO()
+gnuplotter outports oneRun vm = helper vm
+      where           
+        helper :: VM  -> IO()
+        helper vm = do          
+             ls <- readConsoleLines
+             let inputdat   = map (readConsoleInput) ls
+                 inp        = setInputs inputdat (Inp I.empty)
+             (vm', out) <- loop inp vm
+             case (isFinished out) of
+               True  -> putStrLn $"Finished with score " ++ (show $ score out) 
+               False -> helper vm'
+        loop :: Inp -> VM -> IO (VM, Outp)
+        loop inp vm = do
+          let (vm', out) = oneRun inp vm 
+              Outp outmap = out
+              lookup :: Int -> Dat
+              lookup k = (I.findWithDefault 0.0) k outmap
+          putStrLn . ((++) (show (time vm') ++"\t")) . concat . map ((++"\t").show)
+                     . map lookup $ outports
+          hFlush stdout
+          return (vm', out)
+
+gnuplotter_wrapper args = do
+  let file = args !! 1
+  dat <- B.readFile file
+  let vm  = loadVM dat
+  gnuplotter [0,1,2,3,4] oneRun vm
 
 main = do
   args <- getArgs
@@ -107,4 +140,5 @@ main = do
   case args !! 0 of 
     "full" -> fullNetworkAnalysis args
     "dep" -> dependencyAnalysis args
+    "plot" -> gnuplotter_wrapper args
     otherwise -> fail "\nUsage: See Source.\n"
