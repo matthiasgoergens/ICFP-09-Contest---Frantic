@@ -19,6 +19,7 @@ import Control.Monad
 
 import Console
 import VM
+import qualified Data.Set as S
 
 data NameSpace = NInp Addr | NOutp Addr | NMem Addr deriving (Ord, Eq)
 
@@ -29,7 +30,7 @@ instance Show NameSpace where
 
 analyze :: VM -> [(NameSpace, [NameSpace])]
 analyze vm = map go . instr $ vm
-    where go (c, DType Output addr1 addr2) = (NMem c, [NOutp addr1, NMem addr2])
+    where go (c, DType Output addr1 addr2) = (NOutp addr1, [NMem addr2])
           go (c, DType _ addr1 addr2) = (NMem c, [NMem addr1, NMem addr2])
           go (c, SType Noop _) = (NMem c, [])
           go (c, SType Input addr) = (NMem c, [NInp addr])
@@ -39,10 +40,27 @@ analyze vm = map go . instr $ vm
 
 showAnalysis :: [(NameSpace, [NameSpace])] -> String
 showAnalysis l = "digraph dataflow {\n"
+                 ++ (shapes . S.toList . S.fromList $ (concat (map snd l) ++ map fst l))
                  ++ (concat . map (uncurry go) $ l)
                  ++ "}\n"
-    where go source = concat . map (goLine source)
-          goLine source sink = show source ++ " -> " ++ show sink ++ ";\n"
+    where go sink = concat . map (goLine sink)
+          goLine sink source = show source ++ " -> " ++ show sink ++ ";\n"
+          shapes :: [NameSpace] -> String
+          shapes names = "node [shape = circle];\n"
+                         ++ (concat . map ((++" ").show) . filter isNMem $ names) ++ ";\n"
+                         ++ "node [shape = box];\n"
+                         ++ (concat . map ((++" ").show) . filter isNInp $ names) ++ ";\n"
+                         ++"node [shape = diamond];\n"
+                         ++ (concat . map ((++" ").show) . filter isNOutp $ names) ++ ";\n"
+
+isNMem (NMem _) = True
+isNMem _ = False
+
+isNInp (NInp _) = True
+isNInp _ = False
+
+isNOutp (NOutp _) = True
+isNOutp _ = False
 
 -- LR_0 -> LR_2 [ label = "SS(B)" ];
 
