@@ -12,6 +12,7 @@ import Load
 import System
 import Control.Monad
 
+import Console
 
 oneRun :: Inp -> VM -> (VM, Outp)
 oneRun inp vm = 
@@ -38,30 +39,7 @@ oneRun inp vm =
                     Phi -> (writeMem i (if status vm then v1  else v2) vm,out)
            
 
-console :: VM -> IO()
-console vm = helper vm
-      where           
-        helper :: VM  -> IO()
-        helper vm = do          
-             ls <- readConsoleLines
-             let inputdat   = map (readConsoleInput) ls
-                 inp        = setInputs inputdat (Inp I.empty)
-             (vm', out) <- loop inp vm
-             case (isFinished out) of
-               True  -> putStrLn $"Finished with score " ++ (show $ score out) 
-               False -> helper vm'
-        loop :: Inp -> VM -> IO(VM,Outp)
-        loop inp vm = do          
-          let (vm', out) = oneRun inp vm 
-              Outp outmap = out
-              Inp inmap   = inp
-          putStrLn $ "#time: " ++ (show $ time vm')
-          putStr "#inp:"  
-          putStrLn $ concat $ L.intersperse "#" $ map showConsoleOutput $ I.toAscList inmap
-          putStrLn "#out:"  
-          putStr $ unlines $ map showConsoleOutput $ I.toAscList outmap
-          putStrLn "."
-          return (vm', out)
+
         
 {- shell  :: [(Addr,Dat)] -> (VM) -> (VM, [(Addr,Dat)])
 shell inputs vm = 
@@ -79,7 +57,7 @@ main = do
   dat <- B.readFile file
   let vm  = loadVM dat
 -- print vm
-  console vm
+  console oneRun vm
 --  let vm' = oneRun vm
 --  print vm'
 --  let vm'' = take 100 $ iterate oneRun vm
