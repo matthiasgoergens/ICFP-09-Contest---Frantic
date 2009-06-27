@@ -1,0 +1,6 @@
+
+# use tee to get a input trace
+# list this
+cat task1_1_CMDS.txt | tee "task1_1.input" | ./run_haskell.sh ../task/bin1.obf  
+
+createSub.sh submission1_1.osf < task1_1.input

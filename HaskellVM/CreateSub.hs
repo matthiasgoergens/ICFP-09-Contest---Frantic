@@ -79,8 +79,8 @@ main  = do
       cleared  = filter (\ Frame {vals = vs} -> length vs > 0) frames  
       sub = B.concat (encode header : 
                       (map encode ( cleared ++ [Frame {step = max, vals = []}])) )
-  print scenario
-  print os
+  putStrLn $ "Scenario: " ++ show scenario
+--  print os
   print cleared
   B.writeFile file sub 
   

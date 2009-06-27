@@ -108,6 +108,14 @@ decodeIEEE exponentBits significandBits n = encodeFloat significand exponent
 
 doubleToWord64 :: Double -> Word64 
 doubleToWord64 = encodeIEEE 11 52 
+
+reverseWord64 :: Word64 -> Word64 
+reverseWord64 w = decode $ BL.pack $ reverse $ BL.unpack $ encode $ w
+
+reverseWord32 :: Word32 -> Word32
+reverseWord32 w = decode $ BL.pack $ reverse $ BL.unpack $ encode $ w
+
+
  
 -- TODO: Check if this works for denormalized numbers, NaNs and infinities. 
 encodeIEEE :: (RealFloat a, Bits b, Integral b) => Int -> Int -> a -> b 
