@@ -4,19 +4,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * @author Alexander Kiel
  * @version $Id$
  */
-public class OrbitVm implements Runnable {
+public class StreamVm extends AbstractVm implements Runnable {
 
-    private static final Logger logger = Logger.getLogger(OrbitVm.class.getName());
     private static final String STOP = ".";
 
     @NotNull
@@ -25,35 +22,12 @@ public class OrbitVm implements Runnable {
     @NotNull
     private final Writer out;
 
-    @NotNull
-    private final Instruction[] instructions;
-
-    @NotNull
-    private final double[] values;
-
-    /**
-     * The instruction pointer.
-     */
-    private int pc = 0;
-
-    /**
-     * The status register.
-     */
-    private boolean status = false;
-
     //---------------------------------------------------------------------------------------------
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    public OrbitVm(@NotNull List<Frame> frames, @NotNull Reader in, @NotNull Writer out) {
-        this.instructions = new Instruction[frames.size()];
-        this.values = new double[frames.size()];
-        int i = 0;
-        for (Frame frame : frames) {
-            instructions[i] = frame.getInstruction();
-            values[i] = frame.getValue();
-            i++;
-        }
+    public StreamVm(@NotNull List<Frame> frames, @NotNull Reader in, @NotNull Writer out) {
+        super(frames);
         this.in = new LineNumberReader(in);
         this.out = out;
     }
@@ -90,17 +64,6 @@ public class OrbitVm implements Runnable {
         writeOutputs(outputs);
 
         return outputs.get(0) == 0;
-    }
-
-    @NotNull
-    private Map<Integer, Double> step(@NotNull Map<Integer, Double> inputs) {
-        Map<Integer, Double> outputs = new HashMap<Integer, Double>();
-
-        for (Instruction instruction : instructions) {
-            status = instruction.execute(status, values, inputs, outputs);
-        }
-
-        return outputs;
     }
 
     //---------------------------------------------------------------------------------------------
@@ -175,7 +138,7 @@ public class OrbitVm implements Runnable {
         InputStreamReader in = new InputStreamReader(System.in);
         OutputStreamWriter out = new OutputStreamWriter(System.out);
 
-        OrbitVm vm = new OrbitVm(frames, in, out);
+        StreamVm vm = new StreamVm(frames, in, out);
 
         try {
             vm.run();
@@ -192,25 +155,11 @@ public class OrbitVm implements Runnable {
     }
 
     @Nullable
-    private static List<Frame> readFrames(File file) {
-        FileInputStream fileIn;
+    private static List<Frame> readFrames(@NotNull File file) {
         try {
-            fileIn = new FileInputStream(file);
-        } catch (FileNotFoundException e) {
-            System.err.println("File " + file + " not found.");
-            return null;
-        }
-
-        OrbitInputStream in = new OrbitInputStream(fileIn);
-        List<Frame> frames = new ArrayList<Frame>();
-        try {
-            while (true) {
-                frames.add(in.readFrame());
-            }
-        } catch (EOFException e) {
-            return frames;
+            return Frames.readFromFile(file);
         } catch (IOException e) {
-            System.err.println("File " + file + " not found.");
+            System.err.println("Problem while reading from file " + file + ". " + e.getMessage());
             return null;
         }
     }

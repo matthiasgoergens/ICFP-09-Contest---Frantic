@@ -100,7 +100,7 @@
         <mkdir dir="${dir.dist}"/>
         <jar destfile="${dir.dist}/java_vm-${version}.jar">
             <manifest>
-                <attribute name="Main-Class" value="de.hronopik.icfp2009.vm.OrbitVm"/>
+                <attribute name="Main-Class" value="de.hronopik.icfp2009.vm.StreamVmm"/>
                 <!--<attribute name="Class-Path" value=""/>-->
             </manifest>
             <fileset dir="${dir.build.java}" excludes="META-INF/build.number"/>
