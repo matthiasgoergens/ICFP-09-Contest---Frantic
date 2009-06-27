@@ -1,0 +1,240 @@
+(* Content-type: application/mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 7.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       145,          7]
+NotebookDataLength[      7040,        231]
+NotebookOptionsPosition[      6223,        198]
+NotebookOutlinePosition[      6562,        213]
+CellTagsIndexPosition[      6519,        210]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Settings", "Subsubtitle",
+ CellChangeTimes->{{3.455100797402782*^9, 3.455100801038904*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"orbitJar", "=", "\"\</home/patrick/icfp/JavaVM/JavaVM.jar\>\""}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"problemFile", "=", "\"\</home/patrick/icfp/task/bin1.obf\>\""}], 
+  ";"}], "\[IndentingNewLine]"}], "Input"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Definitionen", "Subsubtitle",
+ CellChangeTimes->{{3.455100818571824*^9, 3.45510082023881*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"Needs", "[", "\"\<JLink`\>\"", "]"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"ResetJava", "[", "]"}], ":=", 
+   RowBox[{"Block", "[", 
+    RowBox[{
+     RowBox[{"{", "}"}], ",", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"ReinstallJava", "[", "]"}], ";", "\[IndentingNewLine]", 
+      RowBox[{"AddToClassPath", "[", "orbitJar", "]"}], ";"}]}], 
+    "\[IndentingNewLine]", "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"ResetJava", "[", "]"}], ";", " ", 
+  RowBox[{"(*", 
+   RowBox[{"um", " ", "das", " ", "jar", " ", "zu", " ", "laden"}], "*)"}], 
+  "\[IndentingNewLine]", 
+  RowBox[{"vmClass", "=", 
+   RowBox[{
+   "LoadJavaClass", "[", "\"\<de.hronopik.icfp2009.vm.DirectVm\>\"", "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"converter", "=", 
+   RowBox[{
+   "LoadJavaClass", "[", 
+    "\"\<de.hronopik.icfp2009.util.MathematicaConverter\>\"", "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"VMInit", "[", "vm_", "]"}], ":=", 
+   RowBox[{"Block", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"in", ",", "out"}], "}"}], ",", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"in", "=", 
+       RowBox[{"MathematicaConverter`toMap", "[", 
+        RowBox[{
+         RowBox[{"{", "16000", "}"}], ",", 
+         RowBox[{"{", "1001.0", "}"}]}], "]"}]}], ";", "\[IndentingNewLine]", 
+      
+      RowBox[{"out", "=", 
+       RowBox[{"vm", "@", 
+        RowBox[{"step", "[", "in", "]"}]}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"MathematicaConverter`fromMap", "[", "out", "]"}]}]}], 
+    "\[IndentingNewLine]", "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"VMStep", "[", 
+    RowBox[{"vm_", ",", "input_"}], "]"}], ":=", 
+   RowBox[{"Block", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"in", ",", "out"}], "}"}], ",", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"in", "=", 
+       RowBox[{"MathematicaConverter`toMap", "[", 
+        RowBox[{"Sequence", "@@", "input"}], "]"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"out", "=", 
+       RowBox[{"vm", "@", 
+        RowBox[{"step", "[", "in", "]"}]}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"MathematicaConverter`fromMap", "[", "out", "]"}]}]}], 
+    "\[IndentingNewLine]", "]"}]}], ";"}]}], "Input",
+ CellChangeTimes->{{3.455100850387002*^9, 3.455100894853544*^9}, {
+  3.455101105257687*^9, 3.4551011391129637`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Los gehts", "Subsubtitle",
+ CellChangeTimes->{{3.455100902706801*^9, 3.4551009040373917`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"vm", "=", 
+   RowBox[{"JavaNew", "[", 
+    RowBox[{"vmClass", ",", "problemFile"}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"initStep", "=", 
+  RowBox[{"VMInit", "[", "vm", "]"}]}]}], "Input",
+ CellChangeTimes->{{3.455100915460216*^9, 3.455100939751863*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"0.`", ",", "0.`"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"1.`", ",", "10000.`"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"2.`", ",", 
+     RowBox[{"-", "6.556995342902722`*^6"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"3.`", ",", "7814.932738513376`"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"4.`", ",", "4.2164`*^7"}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.455101154911447*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"data", "=", 
+   RowBox[{"Table", "[", "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"Last", "@", 
+      RowBox[{"Transpose", "@", 
+       RowBox[{
+        RowBox[{"VMStep", "[", 
+         RowBox[{"vm", ",", 
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{"{", "}"}], ",", 
+            RowBox[{"{", "}"}]}], "}"}]}], "]"}], "[", 
+        RowBox[{"[", 
+         RowBox[{"{", 
+          RowBox[{"3", ",", "4"}], "}"}], "]"}], "]"}]}]}], ",", 
+     RowBox[{"{", "6000", "}"}]}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.455100990534382*^9, 3.4551010096003513`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"Graphics", "[", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"PointSize", "[", "0.001", "]"}], ",", 
+    RowBox[{"Point", "[", "data", "]"}]}], "}"}], "]"}]], "Input",
+ CellChangeTimes->{{3.4551012380990477`*^9, 3.455101272047741*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Schwankung im Radius. Wir bewegen uns auf einer Ellipse.", "Subsubtitle",
+ CellChangeTimes->{{3.455101335045411*^9, 3.455101351781886*^9}, 
+   3.455101401069347*^9}],
+
+Cell[BoxData[
+ RowBox[{"ListPlot", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"#", "-", 
+      RowBox[{"Min", "[", "#", "]"}]}], "&"}], "[", 
+    RowBox[{"Norm", "/@", "data"}], "]"}], ",", 
+   RowBox[{"PlotStyle", "\[Rule]", 
+    RowBox[{"{", "Red", "}"}]}], ",", 
+   RowBox[{"Joined", "\[Rule]", "True"}], ",", 
+   RowBox[{"AxesLabel", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+     "\"\<t\>\"", ",", 
+      "\"\<Abweichung von \!\(\*SubscriptBox[\(R\), \(min\)]\)\>\""}], 
+     "}"}]}]}], "]"}]], "Input",
+ CellChangeTimes->{
+  3.455101319432654*^9, {3.455101360383297*^9, 3.4551014354877777`*^9}}]
+}, Open  ]]
+},
+WindowSize->{640, 750},
+WindowMargins->{{Automatic, -837}, {Automatic, 58}},
+FrontEndVersion->"7.0 for Linux x86 (64-bit) (February 25, 2009)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[567, 22, 97, 1, 32, "Subsubtitle"],
+Cell[667, 25, 265, 6, 77, "Input"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[969, 36, 100, 1, 32, "Subsubtitle"],
+Cell[1072, 39, 2466, 66, 451, "Input"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[3575, 110, 100, 1, 32, "Subsubtitle"],
+Cell[CellGroupData[{
+Cell[3700, 115, 306, 8, 55, "Input"],
+Cell[4009, 125, 475, 14, 56, "Output"]
+}, Open  ]],
+Cell[4499, 142, 624, 18, 55, "Input"],
+Cell[5126, 162, 255, 6, 32, "Input"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5418, 173, 171, 2, 32, "Subsubtitle"],
+Cell[5592, 177, 615, 18, 55, "Input"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
