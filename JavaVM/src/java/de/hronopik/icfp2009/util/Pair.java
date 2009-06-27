@@ -1,4 +1,4 @@
-package de.hronopik.icfp2009.vm;
+package de.hronopik.icfp2009.util;
 
 /**
  * @author Alexander Kiel

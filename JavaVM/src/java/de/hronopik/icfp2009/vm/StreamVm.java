@@ -1,5 +1,6 @@
 package de.hronopik.icfp2009.vm;
 
+import de.hronopik.icfp2009.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,9 +58,12 @@ public class StreamVm extends AbstractVm implements Runnable {
      * @throws IOException if an I/O error occurs
      */
     public boolean step() throws IOException {
-        Map<Integer, Double> inputs = readInputs();
+        Pair<Map<Integer, Double>, Boolean> readedInputs = readInputs();
+        if (readedInputs.getB()) {
+            return false;
+        }
 
-        Map<Integer, Double> outputs = step(inputs);
+        Map<Integer, Double> outputs = step(readedInputs.getA());
 
         writeOutputs(outputs);
 
@@ -71,11 +75,14 @@ public class StreamVm extends AbstractVm implements Runnable {
     //---------------------------------------------------------------------------------------------
 
     @NotNull
-    private Map<Integer, Double> readInputs() throws IOException {
+    private Pair<Map<Integer, Double>, Boolean> readInputs() throws IOException {
         Map<Integer, Double> inputs = new HashMap<Integer, Double>();
+        boolean stopExecution = true;
+
         String line;
         while ((line = in.readLine()) != null) {
             if (STOP.equals(line)) {
+                stopExecution = false;
                 break;
             }
             String[] parts = line.split(" ");
@@ -100,7 +107,7 @@ public class StreamVm extends AbstractVm implements Runnable {
                 throw new IOException("Double address " + address + " in line " + in.getLineNumber() + ".");
             }
         }
-        return inputs;
+        return new Pair<Map<Integer, Double>, Boolean>(inputs, stopExecution);
     }
 
     private void writeOutputs(@NotNull Map<Integer, Double> outputs) throws IOException {
