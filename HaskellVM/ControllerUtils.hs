@@ -20,3 +20,13 @@ hohmannSpeed2 r1 r2 =
 
 hohmannTime :: Dat -> Dat -> Dat
 hohmannTime r1 r2 = pi * sqrt ((r1 + r2)^3 / (8 * mu)) 
+
+{-
+[00:36:37] Alexander Kiel: public static double hohmannTime1R2(double r1, int th) {
+        return pow(8 * mu, 1d / 3) * pow(th / PI, 2d / 3) - r1;
+    }
+[00:43:36] public static double circulationTime(double r) {
+        return sqrt(4 * PI * PI / mu) * pow(r, 3d / 2);
+    }
+
+-}
