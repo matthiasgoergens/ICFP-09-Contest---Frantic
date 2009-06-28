@@ -5,10 +5,7 @@ import de.hronopik.icfp2009.model.Instruction;
 import org.jetbrains.annotations.NotNull;
 
 import static java.util.Arrays.copyOf;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A VM.
@@ -19,6 +16,8 @@ import java.util.Map;
  * @version $Id$
  */
 abstract class AbstractVm {
+
+    private final static Map<Integer, Double> EMPTY_INPUT = Collections.emptyMap();
 
     @NotNull
     final Instruction[] instructions;
@@ -62,6 +61,16 @@ abstract class AbstractVm {
     //---------------------------------------------------------------------------------------------
     //
     //---------------------------------------------------------------------------------------------
+
+    /**
+     * Performes a step with empty input.
+     *
+     * @return the output
+     */
+    @NotNull
+    public Map<Integer, Double> step() {
+        return step(EMPTY_INPUT);
+    }
 
     @NotNull
     public Map<Integer, Double> step(@NotNull Map<Integer, Double> inputs) {

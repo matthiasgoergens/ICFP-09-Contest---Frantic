@@ -2,7 +2,7 @@ package de.hronopik.icfp2009.util;
 
 import org.jetbrains.annotations.NotNull;
 
-import static java.lang.Math.sqrt;
+import static java.lang.Math.*;
 
 /**
  * @author Alexander Kiel
@@ -47,5 +47,17 @@ public class Phys {
 
     public static double hohmannSpeed2(double r1, double r2) {
         return sqrt(mu / r2) * (1 - sqrt(2 * r1 / (r1 + r2)));
+    }
+
+    public static double hohmannTime1(double r1, double r2) {
+        return PI * sqrt(pow(r1 + r2, 3) / (8 * mu));
+    }
+
+    public static double hohmannTime1R2(double r1, int th) {
+        return pow(8 * mu, 1d / 3) * pow(th / PI, 2d / 3) - r1;
+    }
+
+    public static double circulationTime(double r) {
+        return sqrt(4 * PI * PI / mu) * pow(r, 3d / 2);
     }
 }

@@ -23,6 +23,10 @@ public class InputBuilder {
     public InputBuilder() {
     }
 
+    public InputBuilder(int inputPort, double value) {
+        add(inputPort, value);
+    }
+
     //---------------------------------------------------------------------------------------------
     //
     //---------------------------------------------------------------------------------------------
