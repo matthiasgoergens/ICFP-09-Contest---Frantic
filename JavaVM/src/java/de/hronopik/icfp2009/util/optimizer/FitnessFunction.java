@@ -1,4 +1,4 @@
-package de.hronopik.icfp2009.util.NewtonOptimizer;
+package de.hronopik.icfp2009.util.optimizer;
 
 /**
  * Created by IntelliJ IDEA. User: patrick Purpose:
