@@ -9,16 +9,15 @@ import Data.Binary
 import System
 import Control.Monad
 
-type Pairs  = [(Addr, Dat)]
-data MPair = MPair (Addr, Dat) deriving (Show)
-
-fromMPair :: MPair -> (Addr, Dat)
-fromMPair (MPair a) = a
+import ParseInOut
 
 data Header = Header Int Int
 data Frame = Frame { step :: Int
                    , vals :: [MPair]
                    } deriving (Show)
+
+teamID :: Int
+teamID = 151
 
 instance Binary Header where
     put (Header team scenario) = do
@@ -41,46 +40,26 @@ instance Binary MPair where
     get = return $ MPair (0,0)        
 
 
-teamID :: Int
-teamID = 151
-
-partitionAt :: ( a-> Bool) -> [a] -> [[a]]
-partitionAt f []   = []
-partitionAt f list = 
-    (takeWhile (not . f) list) : (partitionAt f $ drop 1 $ dropWhile (not . f) list)
-
-isComment :: String -> Bool
-isComment ('#':_) = True
-isComment []      = True
-isComment _       = False
-
-
-parse :: String -> [Pairs]
-parse cont = 
-    let ls     = lines cont
-        blocks = partitionAt (== ".") ls    
-        cleaned= map (\b -> 
-                          map readConsoleInput $ filter (not . isComment) b) blocks
-    in cleaned
-
 
 
 main :: IO ()
 main  = do
   args <- getArgs
-  when (length args < 1) $ do fail "\nUsage: createSub submission_dest < input\n"; 
-  let file = args !! 0
-  f <- getContents
-  let os = parse f
-  let scenario = fromJust $ lookup 16000 (head os)
+  when (length args < 3) $ do fail "\nUsage: createSub inputtrace outputtrace submission_dest\n"; 
+  let (inpfile:outfile:file:_) = args
+  inpf <- readFile inpfile
+  outf <- readFile outfile
+  let is = parseInput inpf
+  let os = parseOutput outf
+  let scenario = fromJust $ lookup 16000 (head is)
       header   = Header teamID (floor $ scenario)
-      frames   = map (\(i,o) -> Frame {step = i, vals = map MPair o} ) $ zip [0..] os 
-      max      = length frames
+      max      = length os
+      frames   = take max $ map (\(i,o) -> Frame {step = i, vals = map MPair o} ) $ zip [0..] is       
       cleared  = filter (\ Frame {vals = vs} -> length vs > 0) frames  
       sub = B.concat (encode header : 
                       (map encode ( cleared ++ [Frame {step = max, vals = []}])) )
   putStrLn $ "Scenario: " ++ show scenario
---  print os
+--  print is
   print cleared
   B.writeFile file sub 
   

@@ -9,37 +9,13 @@ import Data.List
 import System
 import Control.Monad
 
-type Pairs  = [(Addr, Dat)]
-data MPair = MPair (Addr, Dat) deriving (Show)
-
-fromMPair :: MPair -> (Addr, Dat)
-fromMPair (MPair a) = a
-
-partitionAt :: ( a-> Bool) -> [a] -> [[a]]
-partitionAt f []   = []
-partitionAt f list = 
-    (takeWhile (not . f) list) : (partitionAt f $ drop 1 $ dropWhile (not . f) list)
-
-isComment :: String -> Bool
-isComment ('#':_) = True
-isComment []      = True
-isComment _       = False
-
-
-parse :: String -> [Pairs]
-parse cont = 
-    let ls     = lines cont
-        blocks = partitionAt (== ".") ls    
-        cleaned= map (\b -> 
-                          map readConsoleInput $ filter (not . isComment) b) blocks
-    in cleaned
-
+import ParseInOut
 
 
 main :: IO ()
 main  = do
   f <- getContents
-  let os = parse f
+  let os = parseOutput f
   let maxAddr = foldr (\ ps ma -> max (maximum (map fst ps)) ma) 0 os      
   putStrLn $ "#C t " ++ (concat $ intersperse " " $ take (maxAddr) $ ["fuel", "sx", "sy"] ++ map (show) [4..])
   let ls = map (showLine maxAddr) $ zip [0..] os       

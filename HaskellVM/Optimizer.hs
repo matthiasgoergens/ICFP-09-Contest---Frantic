@@ -231,7 +231,7 @@ test1_1 = do
     print $ totaltime
     print $ getOptTimeMin r
     let vm2 = getN vm init1_1 opttime
-    let (vm',r) = test vm2 init1_1b opt1_1 crit1_1b
+    let (vm',r) = test vm2 init1_1b opt1_1a crit1_1b
     print $ getOptTimeMax r
 
 

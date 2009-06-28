@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleInstances #-}
+
 module Util where
    
 import qualified Data.ByteString.Lazy as BL
@@ -10,15 +12,30 @@ import Control.Monad
 
 import Types
 
+--- normal UTILS
 mapfst :: (a -> b) ->  (a,c) -> (b,c)
 mapfst f (a,c) = (f a,c)
 
 mapsnd :: (a -> b) ->  (c,a) -> (c,b)
 mapsnd f (c,a) = (c,f a)
                     
+trd4 :: (a,b,c,d) -> c
+trd4 (_,_,c,_) = c
 
 sqr :: (Num a) => a -> a
 sqr x = x*x
+
+instance Num a => Num (a,a) where
+    (+) (a,c) (b,d) = (a+b,c+d)
+    (-) (a,c) (b,d) = (a-b,c-d)
+    (*) (a,c) (b,d) = (a*b,c*d)
+    negate (a,b)    = (-a,-b)
+    abs (a,b)       = (abs(a),abs(b))
+    signum (a,b)    = (signum a, signum b) 
+    fromInteger i   = (fromInteger i, fromInteger i) 
+                      
+
+
 
 ---- RUNNING
 readMem ::   VM -> Addr -> Dat
