@@ -11,6 +11,8 @@ import VM
 import Types
 import Util
 
+import ControllerUtils
+
 type Time = Int
 type Opt = Double
 type TOpt = (Time,Double)
@@ -74,13 +76,19 @@ defParams =  OptParams { eps =0.1
 
 ---  Gradient Descent for 1 Param
 
+takeWhile1 :: (a -> Bool) -> [a] -> [a]
+takeWhile1 f (x:xs) = x : takeWhile f xs
+
+
 -- optimizes parameter at Addr to minimize FitFun
 optimizer1 :: OptParams -> VM -> [(Addr,Dat)] -> Addr -> OptFun -> CritFun -> FitFun -> ([(Addr,Dat)],Dat,Opt,Time)
 optimizer1 params vm cmds port optfun abortcrit fitfun =
     let (_,r) = test vm cmds optfun abortcrit
         (t,opt) = fitfun r
-        steps   = iterate loop (cmds, delta params, opt, t)
-        optsteps = takeWhile ( (> (thresh params)) . trd4 ) $ take (maxiter params) $ steps        
+        steps   = iterate loop (cmds, delta params, opt, t)                  
+        optsteps = takeWhile1 ( (> (thresh params)) . trd4 ) 
+                   $ take (maxiter params) 
+                   $ steps        
     in minimumBy (compare `on` trd4) $ trace (unlines $ map (show . trd4) optsteps) $ optsteps
  where loop :: ([(Addr,Dat)], Dat, Opt, Time) -> ([(Addr,Dat)], Dat, Opt, Time)
        loop (cmds,h,opt, t) = 
@@ -94,19 +102,35 @@ optimizer1 params vm cmds port optfun abortcrit fitfun =
                grad     = (opt'-oldopt) / h
            in  (-(eps params)* oldopt/grad, opt',t')
           
----- UNDER CONSTR
-optimizer :: VM -> [(Addr,Dat)] -> Int -> OptFun -> CritFun -> FitFun -> (Opt,[(Addr,Dat)])
-optimizer vm cmds numparams optfun abortcrit fitfun=
+
+changeParams :: (Addr, Dat) -> [(Addr,Dat)] -> [(Addr,Dat)]
+changeParams (port,h) cmds  = 
+    let cmdchange1 = mapsnd (\x -> h) $ head $ filter ( (== port) . fst ) cmds
+        in I.toList $ I.fromListWith (+) (cmdchange1 : cmds ) 
+
+-- optimizes parameters at Addr1 and Addr2 to minimize FitFun
+optimizer2 :: OptParams -> VM -> [(Addr,Dat)] -> (Addr,Addr) -> OptFun -> CritFun -> FitFun -> ([(Addr,Dat)],(Dat,Dat),Opt,Time)
+optimizer2 params vm cmds (port1,port2) optfun abortcrit fitfun =
     let (_,r) = test vm cmds optfun abortcrit
         (t,opt) = fitfun r
-        cmdchange = map (mapsnd (\x -> 0.01)) $ (take 1 $ reverse cmds)
-        cmds'   = I.toList $ I.fromListWith (+) (cmds ++ cmdchange)
-        (_,r') = test vm cmds' optfun abortcrit
-        (t',opt') = fitfun r'
-        grad     = trace ((show opt)  ++ " " ++ (show opt')) $(opt'-opt) / 0.01
-    in (grad,[])
-
-
+        steps   = iterate loop (cmds, (delta params, delta params), opt, t)
+        optsteps = (cmds,(0,0),opt,t) : (takeWhile ( (> (thresh params)) . trd4 ) 
+                   $ take (maxiter params) 
+                   $ steps )
+    in minimumBy (compare `on` trd4) $ trace (unlines $ map (show . trd4) optsteps) $ optsteps
+ where loop :: ([(Addr,Dat)], (Dat,Dat), Opt, Time) -> ([(Addr,Dat)], (Dat,Dat), Opt, Time)
+       loop (cmds,(h1,h2),opt, t) = 
+           let cmds1      = changeParams (port1,h1) cmds 
+               (delta1,opt1,t1) = helper cmds1 h1 opt
+               cmds2      = changeParams (port2,h2) cmds 
+               (delta2,opt2,t2) = helper cmds2 h2 opt
+               cmds3      = changeParams (port1,h1) $ changeParams (port2,h2) cmds
+               in (cmds3,(delta1,delta2),min opt1 opt2, min t1 t2)
+       helper cmds h oldopt = 
+           let (_,r') = test vm cmds optfun abortcrit
+               (t',opt') = fitfun r'
+               grad     = (opt'-oldopt) / h
+           in  (-(eps params)* oldopt/grad, opt',t')
 
     
 getRunTime :: [TOpt] -> Time
@@ -121,41 +145,6 @@ getOptTimeMax opts =  maximumBy (\ (_,o1) (_,o2) ->  compare o1 o2 ) $ opts
 
 ---
    
-get :: Int -> Outp -> Dat
-get k (Outp outp) = I.findWithDefault 0 k outp
-
-getVel :: Int -> (Outp,Outp) -> Dat
-getVel k (o1, o2) = get k o2 - get k o1
-
-normalize :: (Dat,Dat) -> (Dat,Dat)
-normalize v@(x,y) = let len = (1/vecLen v) in (x*len,y*len)
-
-scalar :: (Dat,Dat) -> (Dat,Dat) -> Dat
-scalar (a,b) (c,d) = a*c+b*d
-
-getRad :: Outp -> Dat
-getRad o = sqrt $ (sqr $ get 2 o)  + (sqr $ get 3 o)
-
-
-isEmpty :: Outp -> Bool
-isEmpty (Outp outp) = I.null outp 
-
-vecLen :: (Dat,Dat) -> Dat
-vecLen (d1,d2) = sqrt(d1*d1 + d2*d2)
-
-
-mu = let g = 6.67428E-11
-         m_e = 6e24
-     in g * m_e;
-
-hohmannSpeed1 :: Dat -> Dat -> Dat
-hohmannSpeed1 r1 r2 = 
-    sqrt(mu / r1) * (sqrt (2 * r2 / (r1 + r2)) - 1)
-
-
-hohmannSpeed2 :: Dat -> Dat -> Dat
-hohmannSpeed2 r1 r2 = 
-    sqrt(mu / r2) * (1 - sqrt(2 * r1 / (r1 + r2)))
 
 printStat :: ([(Addr,Dat)],Dat,Opt,Time) -> IO()
 printStat (newcmds, _ , opt, time) = 
@@ -163,6 +152,11 @@ printStat (newcmds, _ , opt, time) =
                  ++ "\nNewCommands: " ++ (show newcmds) 
                  ++ "\nOpt: " ++ (show opt)
 
+showStat2 :: ([(Addr,Dat)],(Dat,Dat),Opt,Time) -> String
+showStat2 (newcmds, _ , opt, time) = 
+    "Opts and Time: " ++ (show time) 
+                          ++ "\nNewCommands: " ++ (show newcmds) 
+                          ++ "\nOpt: " ++ (show opt)
 
 ---------
 -- PROBLEM 1
@@ -176,7 +170,7 @@ let stat@(newcmds, _ , opt, time) = optimizer1 params vm init1_1a 3 opt1_1a crit
 printStat stat
 
 let vm2 = getN vm newcmds time
-let stat2 = optimizer1 params vm2 init1_1b 3 opt1_1b crit1_1b getOptTimeMax
+let stat2 = optimizer1 params vm2 init1_1b 3 optOrbit crit1_1b getOptTimeMax
 printStat stat2
 -- [(3,-2466.484135158279),(16000,1001.0)]
 -- 18868 : [(3,1473.167973436527)]
@@ -184,31 +178,119 @@ printStat stat2
 -- 1002
 let initcmd = (16000,1002) :: (Addr,Dat)
 vm <- loadVMFromFile "../task/bin1.obf"    
-let (_,out1) = oneRun (mkInp [initcmd]) vm 
-print out1
-rad1 = getRad out1
-rad2 = get 4 out1
-force1 = hohmannSpeed1 rad1 rad2
-force2 = hohmannSpeed1 rad1 rad2
-(vx,vy) = normalize(- get 3 out1, get 2 out1) -- perpendicular to earth
-init1  = initcmd : [(2,force1 * vx), (3,force1 * vy)] 
-let params = defParams { thresh = 150, eps=0.5 }
-let (stat@(newcmds, _ , opt, time)) = optimizer1 params vm init1 3 opt1_1b crit1_2a getOptTimeMin
-printStat stat
+let (vm1,out1) = oneRun (mkInp [initcmd]) vm 
 
 
 
 
 
 
+let initcmd = (16000,1002) :: (Addr,Dat)
 vm <- loadVMFromFile "../task/bin1.obf"    
-let (vm',r) = testN vm init1_1 opt1_1 10    
-let (vm',r) = test vm init1_1 opt1_1 crit1_1
-getOptTimeMin r
-optimizer2 vm init1_1 1 0.001 opt1_1 crit1_1 getOptTimeMin
+let (_,out1) = oneRun (mkInp [initcmd]) vm 
+out1
+
+let rad1 = getRad out1
+let rad2 = get 4 out1
+let transtime = fromIntegral $ ceiling $ hohmannTime rad1 rad2 :: Time
+let force1 = hohmannSpeed1 rad1 rad2
+let force2 = hohmannSpeed1 rad1 rad2
+let (vx,vy) = normalize(- get 3 out1, get 2 out1) -- perpendicular to earth
+let init1  = initcmd : [(2,force1 * vx), (3,force1 * vy)] 
+transtime
+init1
+let params = defParams { thresh = 100, eps=0.5 }
+let (stat@(newcmds, _ , opt, time)) = optimizer2 params vm init1 (2,3) optOrbit (critTime (transtime+20))  getOptTimeMin
+printStat2 stat
+
+let vm2 = getN vm newcmds time
+let (_,out2) = oneRun (mkInp [initcmd]) vm2 
+let (vx2,vy2) = normalize(- get 3 out2, get 2 out2) -- perpendicular to earth
+let init2  = [(2,force2 * vx2), (3,force2 * vy2)] :: [(Addr,Dat)]
+let (stat2@(newcmds2, _ , opt2, time2)) = optimizer2 params vm2 init2 (2,3) optOrbit (critTime 5000)  getOptTimeMax
+printStat2 stat2
+
+----  Test
+let initcmd = (16000,1002) :: (Addr,Dat)
+vm <- loadVMFromFile "../task/bin1.obf"    
+let (vm1,out1) = oneRun (mkInp [initcmd]) vm 
+out1
+let rad1 = getRad out1
+let rad2 = get 4 out1
+let transtime = fromIntegral $ ceiling $ hohmannTime rad1 rad2 :: Time
+let force1 = hohmannSpeed1 rad1 rad2
+let force2 = hohmannSpeed1 rad1 rad2
+let pos    = (get 2 out1, get 3 out1)
+let (vx,vy) = normalize $ perpendicular $ pos -- perpendicular to earth
+let goalPoint = (normalize $ -pos) * (rad2,rad2)
+let init1  = initcmd : [(2,force1 * vx), (3,force1 * vy)] 
+transtime
+init1
+
+let params = defParams { thresh = 10, eps=0.1 }
+let (stat@(newcmds, _ , opt, time)) = optimizer2 params vm init1 (2,3) (optPoint goalPoint) (critTime (transtime+20))  getOptTimeMin
+putStr $ showStat2 stat
+
+
+
+let vm2 = getN vm1 init1 (transtime-1)
+let (vm3,out2) = oneRun (mkInp []) vm2 
+let (vx2,vy2) = normalize(- get 3 out2, get 2 out2) -- perpendicular to earth
+let rad2 = getRad out2
+
+
+let init2  = [(2,force2 * vx2), (3,force2 * vy2)] :: [(Addr,Dat)]
+init2
+let params = defParams { thresh = 100, maxiter = 50,  eps=0.01}
+let (stat2@(newcmds2, _ , opt2, time2)) = optimizer2 params vm3 init2 (2,3) (optMyOrbit rad2) (critTime 500) getOptTimeMax
+printStat2 stat2
+
 
 
 -}
+
+type InpSeq = [(Time,Inp)]
+
+doHohmann :: VM -> Outp -> Dat -> Time -> ((VM, Outp), InpSeq)
+doHohmann vm out1 sollrad time = 
+    let rad1 = getRad out1
+        transtime = fromIntegral $ ceiling $ hohmannTime rad1 sollrad :: Time
+        force1 = hohmannSpeed1 rad1 sollrad
+        pos    = (get 2 out1, get 3 out1)
+        (vx,vy) = normalize $ perpendicular $ pos -- perpendicular to earth
+        goalPoint = (normalize $ -pos) * (sollrad,sollrad)
+        cmds   = [(2,force1 * vx), (3,force1 * vy)] 
+        params = defParams { thresh = 10, eps=0.1 }
+        stat = optimizer2 params vm cmds (2,3) (optPoint goalPoint) (critTime (transtime+20)) getOptTimeMin
+        (newcmds, _ , _, opttime) = stat
+
+        vm2 = getN vm newcmds (opttime-1) -- we go one step before to check for position
+        (vm3,out2) = oneRun (mkInp []) vm2 -- this is the step where we apply the second force
+        (vx2,vy2) = normalize(- get 3 out2, get 2 out2) -- new force 
+        rad2  = getRad out2
+        force2 = hohmannSpeed2 rad1 rad2 -- use true radius
+        -- optimize second force
+        cmds2   = [(2,force2 * vx2), (3,force2 * vy2)] :: [(Addr,Dat)]
+        params2 = defParams { thresh = 10, eps=0.1 }
+        stat2 = optimizer2 params2 vm3 cmds2 (2,3) (optMyOrbit rad2) (critTime 1000) getOptTimeMax
+       
+    in trace ((showStat2 stat) ++ "\n" ++ (showStat2 stat2)) $ 
+           ((vm3,out2), [(time, mkInp newcmds) , (time + opttime, mkInp cmds2) ])
+       
+
+
+critTime :: Time -> (Outp,Outp) -> Time -> Bool
+critTime maxtime _ t = t >= maxtime 
+
+-- optimal orbit
+optPoint point p@(old,o) _ =
+    let x = get 2 o
+        y = get 3 o
+        in vecLen ((x,y) - point)
+
+-- optimal orbit
+optMyOrbit sollrad p@(old,o) _ =     let rad  = getRad o in abs (rad - sollrad)
+
 
 init1_1a,init1_1b :: [(Addr,Dat)]
 -- init1_1 = [(16000,1001),(3, -2466.4860122222)]
@@ -225,7 +307,7 @@ opt1_1a p@(old,o) _ =
         in vecLen ((x,y) - (sollr,0))
 
 -- optimal orbit
-opt1_1b p@(old,o) _ = 
+optOrbit p@(old,o) _ = 
     let rad  = getRad o
         soll = get 4 o
         in abs (rad - soll)
@@ -263,4 +345,5 @@ crit1_2a p@(old,o) _
         let v = (getVel 2 p, getVel 3 p)
             toEarth = normalize( get 2 o, get 3 o) -- to earth
             vToEath = scalar v toEarth
-        in vToEath > 0
+        in trace (show toEarth) $ vToEath < 0
+
