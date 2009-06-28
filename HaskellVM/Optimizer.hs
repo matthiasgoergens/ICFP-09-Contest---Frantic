@@ -179,8 +179,7 @@ printStat stat2
 let initcmd = (16000,1002) :: (Addr,Dat)
 vm <- loadVMFromFile "../task/bin1.obf"    
 let (vm1,out1) = oneRun (mkInp [initcmd]) vm 
-
-
+doHohmann vm1 out1 (get 4 out1) 1
 
 
 
@@ -251,8 +250,8 @@ printStat2 stat2
 
 type InpSeq = [(Time,Inp)]
 
-doHohmann :: VM -> Outp -> Dat -> Time -> ((VM, Outp), InpSeq)
-doHohmann vm out1 sollrad time = 
+doHohmann :: (VM, Outp) -> Dat -> Time -> ((VM, Outp), InpSeq)
+doHohmann (vm, out1) sollrad time = 
     let rad1 = getRad out1
         transtime = fromIntegral $ ceiling $ hohmannTime rad1 sollrad :: Time
         force1 = hohmannSpeed1 rad1 sollrad
@@ -347,3 +346,42 @@ crit1_2a p@(old,o) _
             vToEath = scalar v toEarth
         in trace (show toEarth) $ vToEath < 0
 
+
+
+mkInputFile :: Int -> Dat -> InpSeq -> String
+mkInputFile numEmpties conf inps = 
+    let all = (0,mkInp [(16000, conf)]) : inps
+        noCons = map ( mapsnd (\ (Inp m) -> m)) all
+        imap = I.fromListWith (I.union) noCons
+        max  = numEmpties + (maximum $ I.keys imap)
+        allsteps = map (\t -> I.findWithDefault I.empty t imap) $ take max [0..]
+    in unlines $ map showStep allsteps
+       where showStep :: (I.IntMap Dat) -> String
+             showStep inp = concat $ filter (not . null) $  (map (\(a,d) -> show a ++ " " ++ show d ++ "\n") $ I.toList inp) ++ ["."]
+
+solveTask1 :: String -> Dat -> IO()
+solveTask1 file conf = do
+  let initcmd = (16000,conf) :: (Addr,Dat)
+  vm <- loadVMFromFile "../task/bin1.obf"    
+  let (vm1,out1) = oneRun (mkInp [initcmd]) vm 
+      ((vm',out'),inpseq) = doHohmann (vm1,out1) (get 4 out1) 1
+  print inpseq
+  writeFile file $ mkInputFile 2000 conf inpseq
+
+
+
+----
+{- 
+ Task 2
+
+let inpseq = [(1,Inp (I.fromList [(2,-869.4326035230357),(3,-868.1635465846844)])),(9152,Inp (I.fromList [(2,699.1992759101576),(3,698.4081077018907)]))] :: InpSeq
+putStr $ mkInputFile 2000 1002 inpseq
+
+Task 3
+[(1,Inp (fromList [(2,-1.3715393687227442),(3,-1672.6902870476797)])),(12221,Inp (fromList [(2,0.8948715955925662),(3,1219.114292914203)]))]
+
+Task 4
+[(1,Inp (fromList [(2,5446.082488748258),(3,-1693416.539137936)])),(27,Inp (fromList [(2,-1496.3360879621182),(3,2.947883974288544)]))]
+
+
+-}
