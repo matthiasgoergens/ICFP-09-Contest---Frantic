@@ -1,4 +1,4 @@
 
-cat task1_1_CMDS.txt | ./run_haskell.sh ../task/bin1.obf | output2csv.sh > test.dat
+cat ../controller/simple.cmd | ../controller/simple.pl 1002 | ./run_haskell.sh ../task/bin1.obf | output2csv.sh > test.dat
 
-gnuplot simple.dem
+gnuplot task1.dem

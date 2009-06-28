@@ -163,17 +163,23 @@ printStat (newcmds, _ , opt, time) =
 
 {-
 
-1001
+-- 1001
 vm <- loadVMFromFile "../task/bin1.obf"    
 let params = defParams { thresh = 150 }
-let stat@(newcmds, _ , opt, time) = optimizer1 defParams vm init1_1 3 opt1_1a crit1_1 getOptTimeMin
+let stat@(newcmds, _ , opt, time) = optimizer1 params vm init1_1a 3 opt1_1a crit1_1a getOptTimeMin
 printStat stat
 
 let vm2 = getN vm newcmds time
-let stat2 = optimizer1 defParams vm2 init1_1b 3 opt1_1b crit1_1b getOptTimeMax
+let stat2 = optimizer1 params vm2 init1_1b 3 opt1_1b crit1_1b getOptTimeMax
 printStat stat2
- -- 18868 : [(3,-2466.484135158279),(16000,1001.0)]
- -- 
+-- [(3,-2466.484135158279),(16000,1001.0)]
+-- 18868 : [(3,1473.167973436527)]
+
+-- 1002
+vm <- loadVMFromFile "../task/bin1.obf"    
+let params = defParams { thresh = 150, eps=0.5 }
+let (stat@(newcmds, _ , opt, time)) = optimizer1 params vm init1_2a 3 opt1_1a crit1_1a getOptTimeMin
+printStat stat
 
 
 
@@ -189,13 +195,11 @@ optimizer2 vm init1_1 1 0.001 opt1_1 crit1_1 getOptTimeMin
 
 -}
 
-init1_1 :: [(Addr,Dat)]
+init1_1a,init1_1b :: [(Addr,Dat)]
 -- init1_1 = [(16000,1001),(3, -2466.4860122222)]
-init1_1 = [(16000,1001),(3, -2466.4860122222 - 1.3176340142438757e-5)]
+init1_1a= [(16000,1001),(3, -2466.4860122222 - 1.3176340142438757e-5)]
 
-init1_1b :: [(Addr,Dat)]
 init1_1b = [(3, 1482.9355671460403)]
-
 
 -- optimal point
 opt1_1a :: (Outp,Outp) -> Time -> Opt
@@ -206,37 +210,33 @@ opt1_1a p@(old,o) _ =
         in vecLen ((x,y) - (sollr,0))
 
 -- optimal orbit
-opt1_1b :: (Outp,Outp) -> Time -> Opt
 opt1_1b p@(old,o) _ = 
     let rad  = getRad o
         soll = get 4 o
         in abs (rad - soll)
 
-
-
-crit1_1 :: (Outp,Outp) -> Time -> Bool
-crit1_1 p@(old,o) _ 
+crit1_1a :: (Outp,Outp) -> Time -> Bool
+crit1_1a p@(old,o) _ 
     | isEmpty old = False
     | otherwise   = 
         let vx = getVel 2 p
         in vx < 0
-
-crit1_1b :: (Outp,Outp) -> Time -> Bool
 crit1_1b _ t = t > 900
 
 
 test1_1 = do    
     vm <- loadVMFromFile "../task/bin1.obf"        
-    let (vm',r) = test vm init1_1 opt1_1a crit1_1
+    let (vm',r) = test vm init1_1a opt1_1a crit1_1a
     let (opttime, optval) = getOptTimeMin r
     let totaltime         = getRunTime r
     print $ totaltime
     print $ getOptTimeMin r
-    let vm2 = getN vm init1_1 opttime
+    let vm2 = getN vm init1_1a opttime
     let (vm',r) = test vm2 init1_1b opt1_1a crit1_1b
     print $ getOptTimeMax r
 
 
-
-    
+--- 1_2
+init1_2a :: [(Addr,Dat)]
+init1_2a = [(3,-1694.957934797862),(16000,1002.0)]
 
