@@ -127,6 +127,12 @@ get k (Outp outp) = I.findWithDefault 0 k outp
 getVel :: Int -> (Outp,Outp) -> Dat
 getVel k (o1, o2) = get k o2 - get k o1
 
+normalize :: (Dat,Dat) -> (Dat,Dat)
+normalize v@(x,y) = let len = (1/vecLen v) in (x*len,y*len)
+
+scalar :: (Dat,Dat) -> (Dat,Dat) -> Dat
+scalar (a,b) (c,d) = a*c+b*d
+
 getRad :: Outp -> Dat
 getRad o = sqrt $ (sqr $ get 2 o)  + (sqr $ get 3 o)
 
@@ -176,9 +182,18 @@ printStat stat2
 -- 18868 : [(3,1473.167973436527)]
 
 -- 1002
+let initcmd = (16000,1002) :: (Addr,Dat)
 vm <- loadVMFromFile "../task/bin1.obf"    
+let (_,out1) = oneRun (mkInp [initcmd]) vm 
+print out1
+rad1 = getRad out1
+rad2 = get 4 out1
+force1 = hohmannSpeed1 rad1 rad2
+force2 = hohmannSpeed1 rad1 rad2
+(vx,vy) = normalize(- get 3 out1, get 2 out1) -- perpendicular to earth
+init1  = initcmd : [(2,force1 * vx), (3,force1 * vy)] 
 let params = defParams { thresh = 150, eps=0.5 }
-let (stat@(newcmds, _ , opt, time)) = optimizer1 params vm init1_2a 3 opt1_1a crit1_1a getOptTimeMin
+let (stat@(newcmds, _ , opt, time)) = optimizer1 params vm init1 3 opt1_1b crit1_2a getOptTimeMin
 printStat stat
 
 
@@ -221,6 +236,7 @@ crit1_1a p@(old,o) _
     | otherwise   = 
         let vx = getVel 2 p
         in vx < 0
+
 crit1_1b _ t = t > 900
 
 
@@ -238,5 +254,13 @@ test1_1 = do
 
 --- 1_2
 init1_2a :: [(Addr,Dat)]
-init1_2a = [(3,-1694.957934797862),(16000,1002.0)]
+init1_2a = [(3,-2499.8427383354174),(16000,1002.0)]
 
+crit1_2a :: (Outp,Outp) -> Time -> Bool
+crit1_2a p@(old,o) _ 
+    | isEmpty old = False
+    | otherwise   = 
+        let v = (getVel 2 p, getVel 3 p)
+            toEarth = normalize( get 2 o, get 3 o) -- to earth
+            vToEath = scalar v toEarth
+        in vToEath > 0
