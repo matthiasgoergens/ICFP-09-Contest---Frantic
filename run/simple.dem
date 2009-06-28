@@ -1,5 +1,5 @@
 set terminal wxt
 
-plot "test.dat" using 3:4 w l
+plot "test.dat" using (-$3):(-$4) w l
 
 pause -1
