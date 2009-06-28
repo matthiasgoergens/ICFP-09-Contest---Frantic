@@ -17,6 +17,10 @@ public class DirectVm extends AbstractVm {
     //---------------------------------------------------------------------------------------------
 
     public DirectVm(@NotNull String filename) throws IOException {
-        super(Frames.readFromFile(new File(filename)));
+        this(new File(filename));
+    }
+
+    public DirectVm(@NotNull File binary) throws IOException {
+        super(Frames.readFromFile(binary));
     }
 }
