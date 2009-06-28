@@ -6,6 +6,7 @@ import ControllerUtils
 import Util
 import Control.Monad.State.Strict
 import Control.Monad.Writer
+import Debug.Trace
 
 
 -- type NDS a = WriterT [String] (StateT Int []) a
@@ -48,14 +49,11 @@ noop :: (Tick z) => Controller z Outp
 noop = tick (mkInp [])
 
 
--- simpleController :: forall t a. t -> IO [a]
-simpleController :: (Tick z) => Dat -> Controller z ()
-simpleController conf = 
-    do out <- tick $ mkInp [(16000, conf)]
-       v_  <- gets getVLin       
+hohmann :: (Tick z) => Outp -> Dat -> Controller z (Outp)
+hohmann out sollrad = 
+    do v_  <- gets getVLin       
        let (v@(vx,vy)) = normalize v_
-       let rad1 = getRad out
-           sollrad = getOut 4 out
+       let rad1 = getRad out           
            pos     = getPos out
            transtime = fromIntegral $ floor $ hohmannTime rad1 sollrad :: Time
            force1 = - (hohmannSpeed1 rad1 sollrad)
@@ -67,11 +65,28 @@ simpleController conf =
        sequence_ $ replicate (transtime-1) noop
        out <- noop -- scheitelpunkt
        tick cmds2
+
+----------
+
+task1Controller :: (Tick z) => Dat -> Controller z ()
+task1Controller conf = 
+    do out <- tick $ mkInp [(16000, conf)]
+       let sollrad = getOut 4 out
+       hohmann out sollrad 
        sequence_ $ replicate (1000) noop       
        return ()
-  
 
-         
+
+-- simpleController :: forall t a. t -> IO [a]
+task2Controller :: (Tick z) => Dat -> Controller z ()
+task2Controller conf = 
+    do out <- tick $ mkInp [(16000, conf)]
+       z <- get
+       let outp = tryInputs (replicate 100 (mkInp [])) z
+       trace (unlines $ map show $ outp) noop 
+       return ()
+
+
 {-
         goalPoint = (normalize $ -pos) * (sollrad,sollrad)
         cmds   = [(2,force1 * vx), (3,force1 * vy)] 

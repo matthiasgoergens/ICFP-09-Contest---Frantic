@@ -19,9 +19,13 @@ main = do
   args <- getArgs
   when (length args < 2) $ do fail "\nUsage: vm binary conf\n"; 
   let file = args !! 0
-  let conf = args !! 1
+  let conf = read (args !! 1) :: Dat
   vm <- loadVMFromFile file
-  let trace = runController (simpleController) vm (read conf)
+  let cont = case floor $ conf/1000.0 of
+               1 -> task1Controller
+               2 -> task2Controller
+               _ -> error "not implemented"
+  let trace = runController (cont conf) vm 
   sequence_ ( map showFrame trace)
     where showFrame (timeStep, inp, out) = do
             let inmap = fromInp inp
