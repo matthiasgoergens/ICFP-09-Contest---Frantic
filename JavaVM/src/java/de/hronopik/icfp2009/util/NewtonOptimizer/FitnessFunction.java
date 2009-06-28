@@ -13,7 +13,7 @@ public interface FitnessFunction {
 	 */
 	public double f(double parms[] );
 
-
+	            
 	/**
 	 * To ensure that a minimum is found it is useful to have an initial guess
 	 * for the minimizer.
