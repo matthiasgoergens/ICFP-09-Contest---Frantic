@@ -4,6 +4,7 @@ module Optimizer where
 
 import qualified Data.IntMap as I
 import Data.List
+import Data.Function
 import Debug.Trace
 
 import Load
@@ -20,16 +21,19 @@ type TOpt = (Time,Double)
 vm <- loadVMFromFile "../task/bin1.obf"    
 let (vm',r) = testN vm init1_1 opt1_1 10    
 let (vm',r) = test vm init1_1 opt1_1 crit1_1
-getOptTime r
+getOptTimeMin r
 optimizer2 vm init1_1 1 0.001 opt1_1 crit1_1 getOptTimeMin
+
+vm <- loadVMFromFile "../task/bin1.obf"    
+optimizer1 defParams vm init1_1 3 opt1_1a crit1_1 getOptTimeMin
+
+
 -}
 
 type CritFun = ((Outp,Outp) -> Time -> Bool)
 type OptFun = ((Outp,Outp) -> Time -> Opt)
 type FitFun = [TOpt] -> (Time, Opt)
     
-
-eps = 1
 
 test :: VM -> [(Addr,Dat)] -> OptFun -> CritFun -> (VM, [TOpt])
 test vm cmds optfun abortcrit =
@@ -70,26 +74,37 @@ optimizer vm cmds numparams optfun abortcrit fitfun=
     in (grad,[])
 
 
+data OptParams =  OptParams { eps :: Dat
+                            , delta :: Dat
+                            , thresh :: Opt 
+                            , maxiter :: Int
+                            } deriving (Show)
 
-optimizer2 :: VM -> [(Addr,Dat)] -> Int -> Dat -> OptFun -> CritFun -> FitFun -> (Opt,[(Addr,Dat)])
-optimizer2 vm cmds numparams delta optfun abortcrit fitfun=
+defParams =  OptParams { eps =0.3
+                       , delta = 0.0001
+                       , thresh = 10 
+                       , maxiter = 10
+                       } 
+
+optimizer1 :: OptParams -> VM -> [(Addr,Dat)] -> Addr -> OptFun -> CritFun -> FitFun -> ([(Addr,Dat)],Dat,Opt)
+optimizer1 params vm cmds port optfun abortcrit fitfun =
     let (_,r) = test vm cmds optfun abortcrit
         (t,opt) = fitfun r
-        cmdchange = map (mapsnd (\x -> delta)) $ (take 1 $ reverse cmds)
-        cmds'   = I.toList $ I.fromListWith (+) (cmds ++ cmdchange)
-        deltap  = helper cmds' opt
-    in (deltap,[])
-    where helper cmds oldopt = 
-              let (_,r') = test vm cmds optfun abortcrit
-                  (_,opt') = fitfun r'
-                  grad     = (opt'-oldopt) / delta
-                  in  -eps* oldopt/grad
-
-
-        
-        
-        
-
+        steps   = iterate loop (cmds, delta params, opt)
+        optsteps = takeWhile ( (> (thresh params)) . trd ) $ take (maxiter params) $ trace (show $ take 10 steps) steps        
+    in minimumBy (compare `on` trd) optsteps
+ where loop :: ([(Addr,Dat)], Dat, Opt) -> ([(Addr,Dat)], Dat, Opt)
+       loop (cmds,h,opt) = 
+           let cmdchange = mapsnd (\x -> h) $ head $ filter ( (== port) . fst ) cmds
+               cmds'     = I.toList $ I.fromListWith (+) (cmdchange : cmds )        
+               (delta',opt') = helper cmds' h opt
+               in (cmds',delta',opt')
+       helper cmds h oldopt = 
+           let (_,r') = test vm cmds optfun abortcrit
+               (_,opt') = fitfun r'
+               grad     = (opt'-oldopt) / h
+           in  (-(eps params)* oldopt/grad, opt')
+          
 
 
 getN :: VM -> [(Addr,Dat)] -> Time -> VM
@@ -118,6 +133,9 @@ instance Num a => Num (a,a) where
     signum (a,b)    = (signum a, signum b) 
     fromInteger i   = (fromInteger i, fromInteger i) 
                       
+
+trd :: (a,b,c) -> c
+trd (_,_,c) = c
    
 get :: Int -> Outp -> Dat
 get k (Outp outp) = I.findWithDefault 0 k outp
