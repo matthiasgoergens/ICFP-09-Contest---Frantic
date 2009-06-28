@@ -116,9 +116,9 @@ prop_oneRun' = trace (show $ IA.elems mem) $
                )
                
 
-oneRun' :: Int -> [(Int, Instr)] -> Status -> Mem -> InPorts -> (Status, Mem, OutPorts)
+oneRun' :: Int -> [(Int, Instr)] -> Status -> Mem -> InPorts -> (Status, Mem, OutPort)
 oneRun' size code oldStatus oldMem input = (newStatus, newMem, outPorts)
-    where -- helper :: Int -> Instr -> Status -> (Status, Dat, OutPorts -> OutPorts)
+    where helper :: Int -> Instr -> Status -> (Status, Dat, OutPorts -> OutPorts)
           helper c (SType sop addr) z
               = -- trace ("c: "++show c) $
                 let v1 = readMem c addr
