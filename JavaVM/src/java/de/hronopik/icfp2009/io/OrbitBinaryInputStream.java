@@ -30,8 +30,8 @@ public class OrbitBinaryInputStream extends FilterInputStream {
     //---------------------------------------------------------------------------------------------
 
     @NotNull
-    public final Frame readFrame() throws IOException {
-        Frame result;
+    public final OrbitBinaryFrame readFrame() throws IOException {
+        OrbitBinaryFrame result;
         if (frameAddress % 2 == 0) {
             result = readEvenFrame();
         } else {
@@ -51,10 +51,10 @@ public class OrbitBinaryInputStream extends FilterInputStream {
      * @see "task-1.0.pdf 2.4 p.4"
      */
     @NotNull
-    public final Frame readEvenFrame() throws IOException {
+    public final OrbitBinaryFrame readEvenFrame() throws IOException {
         double value = readValue();
         Instruction instruction = readInstruction();
-        return new Frame(instruction, value);
+        return new OrbitBinaryFrame(instruction, value);
     }
 
     /**
@@ -67,10 +67,10 @@ public class OrbitBinaryInputStream extends FilterInputStream {
      * @see "task-1.0.pdf 2.4 p.4"
      */
     @NotNull
-    public final Frame readOddFrame() throws IOException {
+    public final OrbitBinaryFrame readOddFrame() throws IOException {
         Instruction instruction = readInstruction();
         double value = readValue();
-        return new Frame(instruction, value);
+        return new OrbitBinaryFrame(instruction, value);
     }
 
     @NotNull

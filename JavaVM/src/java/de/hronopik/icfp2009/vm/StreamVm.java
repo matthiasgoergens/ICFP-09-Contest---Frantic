@@ -1,7 +1,7 @@
 package de.hronopik.icfp2009.vm;
 
-import de.hronopik.icfp2009.io.Frame;
 import de.hronopik.icfp2009.io.Frames;
+import de.hronopik.icfp2009.io.OrbitBinaryFrame;
 import de.hronopik.icfp2009.io.VmReader;
 import de.hronopik.icfp2009.io.VmWriter;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +27,7 @@ public class StreamVm extends AbstractVm implements Runnable {
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    public StreamVm(@NotNull List<Frame> frames, @NotNull Reader in, @NotNull Writer out) {
+    public StreamVm(@NotNull List<OrbitBinaryFrame> frames, @NotNull Reader in, @NotNull Writer out) {
         super(frames);
         this.in = new VmReader(in);
         this.out = new VmWriter(out);
@@ -83,7 +83,7 @@ public class StreamVm extends AbstractVm implements Runnable {
             return;
         }
 
-        List<Frame> frames = readFrames(new File(args[0]));
+        List<OrbitBinaryFrame> frames = readFrames(new File(args[0]));
         if (frames == null) {
             System.exit(1);
         }
@@ -108,7 +108,7 @@ public class StreamVm extends AbstractVm implements Runnable {
     }
 
     @Nullable
-    private static List<Frame> readFrames(@NotNull File file) {
+    private static List<OrbitBinaryFrame> readFrames(@NotNull File file) {
         try {
             return Frames.readFromFile(file);
         } catch (IOException e) {

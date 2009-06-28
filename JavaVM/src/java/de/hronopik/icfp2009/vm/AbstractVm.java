@@ -1,6 +1,6 @@
 package de.hronopik.icfp2009.vm;
 
-import de.hronopik.icfp2009.io.Frame;
+import de.hronopik.icfp2009.io.OrbitBinaryFrame;
 import de.hronopik.icfp2009.model.Instruction;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,11 +39,11 @@ abstract class AbstractVm {
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    AbstractVm(@NotNull List<Frame> frames) {
+    AbstractVm(@NotNull List<OrbitBinaryFrame> frames) {
         this.instructions = new Instruction[frames.size()];
         this.values = new double[frames.size()];
         int i = 0;
-        for (Frame frame : frames) {
+        for (OrbitBinaryFrame frame : frames) {
             instructions[i] = frame.getInstruction();
             values[i] = frame.getValue();
             i++;
