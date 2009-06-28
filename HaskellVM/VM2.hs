@@ -16,9 +16,12 @@ import Data.Array.IArray as IA
 import Data.Array
 import Control.Monad.Writer
 
+import Control.Monad.State.Strict
+
 import Console
 
 import Data.Function
+import System.IO
 
 type Mem = Array Int Dat
 type Status = Bool
@@ -33,17 +36,64 @@ array2map = I.fromList . IA.assocs
 
 
 -- manyRuns koennte so aussehen:
--- manyRuns :: Int -> [(Int, Instr)] -> Status -> Mem -> [InPorts] -> [(Status, Mem, OutPorts)]
--- manyRuns size code startStatus startMem inputs = ...
+
+manyRuns :: Int -> [(Int, Instr)] -> Status -> Mem -> [InPorts] -> [OutPorts]
+manyRuns size code status mem inputs = evalState  (sequence $ map oneStep inputs) (status, mem)
+    where oneStep input = do
+            (statusO, memO) <- get
+            let (statusN, memN, outPorts)
+                    = oneRun' size code statusO memO input
+            put (statusN, memN)
+            return outPorts
 
 
-oneRun :: Inp -> VM -> (VM, Outp)
-oneRun (Inp inp) vm = (vm { mem = array2map newMem
-                          ,  status = newStatus
-                          ,  time = time vm + 1
-                          }
-                , Outp outPorts)
-    where (newStatus, newMem, outPorts) = oneRun' (size vm) (instr vm) (status vm) (map2array (mem vm)) inp
+
+
+parseFullConsoleInput :: String -> [[(Addr, Dat)]]
+parseFullConsoleInput = map (map readConsoleInput) . frames . cleanLines
+
+
+cleanLines :: String -> [String]
+cleanLines = filter (not . all (==' '))
+             . filter (not . null)
+             . filter (not . L.isPrefixOf "#")
+             . lines
+
+frames :: [String] -> [[String]]
+frames [] =  []
+frames s =  let (l, s') = break (L.isPrefixOf ".") s
+            in  l : case s' of
+                      []      -> []
+                      (_:s'') -> frames s''
+                        
+
+console' :: VM -> IO ()
+console' vm = do contents <- getContents
+                 let inports :: [I.IntMap Dat]
+                     inports = map I.fromList . parseFullConsoleInput $ contents
+                     outports = manyRuns (size vm) (instr vm) (status vm) (map2array (mem vm))
+                                $ inports
+                 sequence_ . map showFrame $ zip3 inports outports [1..]
+    where showFrame (inmap, outmap, timeStep) = do
+            putStrLn $ "#time: " ++ (show timeStep)
+            putStr "#inp:"
+            putStrLn $ concat $ L.intersperse "#" $ map showConsoleOutput $ I.toAscList inmap
+            putStrLn "#out:"
+            putStr $ unlines $ map showConsoleOutput $ I.toAscList outmap
+            putStrLn "."
+            hFlush stdout
+
+-- oneRun' :: Int -> [(Int, Instr)] -> Status -> Mem -> InPorts -> (Status, Mem, OutPorts)  
+
+--    foldr (oneRun sive code)
+
+
+-- oneRun (Inp inp) vm = (vm { mem = array2map newMem
+--                           ,  status = newStatus
+--                           ,  time = time vm + 1
+--                           }
+--                       , Outp outPorts)
+--     where (newStatus, newMem, outPorts) = oneRun' (size vm) (instr vm) (status vm) (map2array (mem vm)) inp
     
 
 prop_oneRun' = trace (show $ IA.elems mem) $
@@ -68,9 +118,9 @@ prop_oneRun' = trace (show $ IA.elems mem) $
 
 oneRun' :: Int -> [(Int, Instr)] -> Status -> Mem -> InPorts -> (Status, Mem, OutPorts)
 oneRun' size code oldStatus oldMem input = (newStatus, newMem, outPorts)
-    where helper :: Int -> Instr -> Status -> (Status, Dat, OutPorts -> OutPorts)
+    where -- helper :: Int -> Instr -> Status -> (Status, Dat, OutPorts -> OutPorts)
           helper c (SType sop addr) z
-              = trace ("c: "++show c) $
+              = -- trace ("c: "++show c) $
                 let v1 = readMem c addr
                     vc = readMem c c
                     input = readInput addr
@@ -81,7 +131,7 @@ oneRun' size code oldStatus oldMem input = (newStatus, newMem, outPorts)
                      Copy -> (z, v1, id)
                      Input -> (z, input, id)
           helper c (DType dop addr1 addr2) z
-              = trace ("c: "++show c) $
+              = -- trace ("c: "++show c) $
                 let v1 = readMem c addr1
                     v2 = readMem c addr2
                     vc = (IA.!) oldMem c
@@ -212,10 +262,7 @@ main = do
   args <- getArgs
   when (length args < 1) $ do fail "\nUsage: vm binary\n\t first line \"16000 confignummer\"\n\tproceed with . \\n \n"; 
   let file = args !! 0
-  dat <- B.readFile file
-  let vm  = loadVM dat
--- print vm
-  console oneRun vm
+  B.readFile file >>= console' . loadVM 
 --  let vm' = oneRun vm
 --  print vm'
 --  let vm'' = take 100 $ iterate oneRun vm
