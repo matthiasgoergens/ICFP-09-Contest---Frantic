@@ -114,6 +114,14 @@ public class MathematicaVMRunner {
 		return (pos.toArray(new Double[pos.size()]));
 	}
 
+	/**
+	 *
+	 * @param dvy1 first boost
+	 * @param dvy2 second boost
+	 * @param stepMarker1 when to give the second boost
+	 * @param MAX_ITER  max steps. if -1 then we stop if goal is reached.
+	 * @return positions and at the end the score.
+	 */
 	public Double[] makeRun(double dvy1, double dvy2, int stepMarker1,  int MAX_ITER){
 		try {
 			vm = new DirectVm(path);
@@ -149,10 +157,13 @@ public class MathematicaVMRunner {
 		inputs.put(3, dvy2);
 		outputs = vm.step(inputs);
 
-		
-
+		boolean breakme = false;
+	 	if(MAX_ITER==-1){
+			 MAX_ITER = 1000000;
+			 breakme = true;
+		 }
 		for(long iter = stepMarker1+1; iter<MAX_ITER; ++iter ){
-//			if(outputs.get(0)>0) break; //If goal reached, break up
+			if(breakme && outputs.get(0)>0) break; //If goal reached, break up
 			x1 = outputs.get(2);
 			y1 = outputs.get(3);
 			result.add(x1);
