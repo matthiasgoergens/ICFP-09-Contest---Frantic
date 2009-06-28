@@ -22,7 +22,7 @@ while (<STDIN>){
     print "2 " . $vx . "\n"; 
     print "3 " . $vy . "\n";
     print ".\n";
-    $currentTime++;
+    $currentTime = $time + 1;
 }
 
 for(my $i = 0; $i < $remaningInputs; $i++) {
