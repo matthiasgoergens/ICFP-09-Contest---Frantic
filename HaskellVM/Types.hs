@@ -4,8 +4,12 @@ module Types where
 import Data.Array
 import Data.IntMap
 
+type Time = Int
 type Addr = Int
 type Dat = Double
+
+type Pos = (Dat,Dat)
+type Vec = (Dat,Dat)
 
 data Instr = DType DOP !Addr !Addr 
            |  SType SOP !Addr 
@@ -28,4 +32,13 @@ data Inp  = Inp (IntMap Dat ) deriving (Show)
 data Outp = Outp (IntMap Dat) deriving (Show)
 
 mkInp :: [(Addr,Dat)] -> Inp
-mkInp p = Inp $ fromList p
+mkInp = Inp . fromList
+
+fromInp :: Inp -> IntMap Dat
+fromInp (Inp p) = p
+
+mkOutp :: [(Addr,Dat)] -> Outp
+mkOutp = Outp . fromList
+
+fromOutp :: Outp -> IntMap Dat
+fromOutp (Outp p) = p

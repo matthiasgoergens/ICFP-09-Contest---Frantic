@@ -12,8 +12,6 @@ import Types
 import Util
 
 import ControllerUtils
-
-type Time = Int
 type Opt = Double
 type TOpt = (Time,Double)
 
@@ -253,25 +251,30 @@ type InpSeq = [(Time,Inp)]
 doHohmann :: (VM, Outp) -> Dat -> Time -> ((VM, Outp), InpSeq)
 doHohmann (vm, out1) sollrad time = 
     let rad1 = getRad out1
+        (vm',out2) = oneRun (mkInp []) vm -- to get Vel                                         
+        (_, out3) = oneRun (mkInp []) vm' -- to get Vel                                         
         transtime = fromIntegral $ ceiling $ hohmannTime rad1 sollrad :: Time
         force1 = hohmannSpeed1 rad1 sollrad
-        pos    = (get 2 out1, get 3 out1)
-        (vx,vy) = normalize $ perpendicular $ pos -- perpendicular to earth
+        pos1    = (get 2 out1, get 3 out1)
+        pos2    = (get 2 out2, get 3 out2)
+        pos3    = (get 2 out3, get 3 out3)
+--        (vx,vy) = normalize $ perpendicular $ pos -- perpendicular to earth
+        (vx,vy) = (pos3 - pos1 ) / (2,2)
         goalPoint = (normalize $ -pos) * (sollrad,sollrad)
         cmds   = [(2,force1 * vx), (3,force1 * vy)] 
         params = defParams { thresh = 10, eps=0.1 }
         stat = optimizer2 params vm cmds (2,3) (optPoint goalPoint) (critTime (transtime+20)) getOptTimeMin
         (newcmds, _ , _, opttime) = stat
 
-        vm2 = getN vm newcmds (opttime-1) -- we go one step before to check for position
-        (vm3,out2) = oneRun (mkInp []) vm2 -- this is the step where we apply the second force
-        (vx2,vy2) = normalize(- get 3 out2, get 2 out2) -- new force 
+        vmSm1 = getN vm newcmds (opttime-1) -- we go one step before to check for position
+        (vmS,outS) = oneRun (mkInp []) vmSm1 -- this is the step where we apply the second force
+        (vxS,vyS) = normalize(- get 3 outS, get 2 outS) -- new force 
         rad2  = getRad out2
         force2 = hohmannSpeed2 rad1 rad2 -- use true radius
         -- optimize second force
-        cmds2   = [(2,force2 * vx2), (3,force2 * vy2)] :: [(Addr,Dat)]
+        cmds2   = [(2,force2 * vxS), (3,force2 * vyS)] :: [(Addr,Dat)]
         params2 = defParams { thresh = 10, eps=0.1 }
-        stat2 = optimizer2 params2 vm3 cmds2 (2,3) (optMyOrbit rad2) (critTime 1000) getOptTimeMax
+        stat2 = optimizer2 params2 vmS cmds2 (2,3) (optMyOrbit rad2) (critTime 1000) getOptTimeMax
        
     in trace ((showStat2 stat) ++ "\n" ++ (showStat2 stat2)) $ 
            ((vm3,out2), [(time, mkInp newcmds) , (time + opttime, mkInp cmds2) ])

@@ -15,9 +15,6 @@ import Control.Monad
 import Console
 import VM
 
-
-  
-import Optimizer
         
 main = do
   args <- getArgs

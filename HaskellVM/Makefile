@@ -1,5 +1,12 @@
 
-all: VM createsub output2CSV
+all: runcontroller VM createsub output2CSV
+
+
+simplecontroller: 
+	ghc -O6 --make SimpleController.hs -o sc
+
+runcontroller:
+	ghc -O6 --make RunControl.hs -o runC
 
 VM:
 	ghc -O6 --make Main.hs -o vm

@@ -35,6 +35,35 @@ instance Num a => Num (a,a) where
     fromInteger i   = (fromInteger i, fromInteger i) 
                       
 
+normalize :: (Dat,Dat) -> (Dat,Dat)
+normalize v@(x,y) = let len = (1/vecLen v) in (x*len,y*len)
+
+scalar :: (Dat,Dat) -> (Dat,Dat) -> Dat
+scalar (a,b) (c,d) = a*c+b*d
+
+-- (gegen den Uhrzeiger 90 grad )
+perpendicular :: (Dat,Dat) -> (Dat,Dat) 
+perpendicular (x,y) = (-y,x)
+
+vecLen :: (Dat,Dat) -> Dat
+vecLen (d1,d2) = sqrt(d1*d1 + d2*d2)
+
+-- Operations on Outputs
+
+getRad :: Outp -> Dat
+getRad o = vecLen ( getOut 2 o, getOut 3 o)
+
+getOut :: Addr -> Outp -> Dat
+getOut k = I.findWithDefault 0 k . fromOutp
+
+getVel :: Int -> (Outp,Outp) -> Dat
+getVel k (o1, o2) = getOut k o2 - getOut k o1
+
+getPos :: Outp -> Pos
+getPos o = (getOut 2 o, getOut 3 o)
+
+outIsEmpty :: Outp -> Bool
+outIsEmpty (Outp outp) = I.null outp 
 
 
 ---- RUNNING
