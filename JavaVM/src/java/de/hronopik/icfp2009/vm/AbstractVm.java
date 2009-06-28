@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import static java.util.Arrays.copyOf;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,9 +65,11 @@ abstract class AbstractVm {
 
     @NotNull
     public Map<Integer, Double> step(@NotNull Map<Integer, Double> inputs) {
+
+        // Create a snapshoot for the simple undo function
         createSnapshoot("undo");
 
-        Map<Integer, Double> outputs = new HashMap<Integer, Double>();
+        Map<Integer, Double> outputs = new LinkedHashMap<Integer, Double>();
 
         for (Instruction instruction : instructions) {
             status = instruction.execute(stepIndex, status, values, inputs, outputs);
