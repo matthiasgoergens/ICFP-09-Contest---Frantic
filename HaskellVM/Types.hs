@@ -26,3 +26,6 @@ data VM = VM {  instr  :: [(Int,Instr)]
 
 data Inp  = Inp (IntMap Dat ) deriving (Show)
 data Outp = Outp (IntMap Dat) deriving (Show)
+
+mkInp :: [(Addr,Dat)] -> Inp
+mkInp p = Inp $ fromList p
