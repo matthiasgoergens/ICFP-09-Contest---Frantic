@@ -4,6 +4,7 @@ import Util
 import Types
 import Data.Word
 import Data.Maybe
+import qualified Data.IntMap as I
 import qualified Data.ByteString.Lazy as B
 import Data.Binary
 import System
@@ -56,9 +57,10 @@ main  = do
   let scenario = fromJust $ lookup 16000 (head is)
       header   = Header teamID (floor $ scenario)
       max      = length os
-      frames   = take max $ map (\(i,o) -> Frame {step = i, vals = map MPair o} ) $ zip [0..] is       
+      isfilter = zipWith (I.union `on` I.fromList) is ([] : map (map (mapsnd (const 0))) is)  
+      frames'  = take max $ map (\(i,o) -> Frame {step = i, vals = map MPair (I.toAscList o)} ) $ zip [0..] isfilter
 --      frames'  = map (\ f  -> f { vals = filter ( (==16000) `on` fst) (vals f)}) frames
-      frames'  = map (\ f  -> f { vals = sort (vals f)}) frames
+--      frames'  = map (\ f  -> f { vals = sort (vals f)}) frames
       cleared  = filter (\ Frame {vals = vs} -> length vs > 0) frames'
       sub = B.concat (encode header : 
                       (map encode ( cleared ++ [Frame {step = max, vals = []}])) )
@@ -67,4 +69,4 @@ main  = do
   print cleared
   B.writeFile file sub 
   
-       
+     
