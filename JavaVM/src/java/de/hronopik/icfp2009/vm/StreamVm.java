@@ -41,7 +41,7 @@ public class StreamVm extends AbstractVm implements Runnable {
         boolean running = true;
         while (running) {
             try {
-                running = step();
+                running = ioStep();
             } catch (IOException e) {
                 System.err.println(e.getMessage());
                 break;
@@ -57,7 +57,7 @@ public class StreamVm extends AbstractVm implements Runnable {
      * @return {@code true} if the simulation should continue
      * @throws IOException if an I/O error occurs
      */
-    public boolean step() throws IOException {
+    public boolean ioStep() throws IOException {
         Map<Integer, Double> inputs = in.readInputs();
 
         Map<Integer, Double> outputs = step(inputs);
