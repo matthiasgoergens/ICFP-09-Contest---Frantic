@@ -3,8 +3,8 @@ module ParseInOut where
 import Types
 import Util
 
-type Pairs  = [(Addr, Dat)]
-data MPair = MPair (Addr, Dat) deriving (Show)
+type Pairs  = [(Addr, Dat)] 
+data MPair = MPair (Addr, Dat) deriving (Show,Ord,Eq)
 
 fromMPair :: MPair -> (Addr, Dat)
 fromMPair (MPair a) = a

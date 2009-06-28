@@ -94,7 +94,7 @@ optimizer1 params vm cmds port optfun abortcrit fitfun =
                grad     = (opt'-oldopt) / h
            in  (-(eps params)* oldopt/grad, opt',t')
           
-
+---- UNDER CONSTR
 optimizer :: VM -> [(Addr,Dat)] -> Int -> OptFun -> CritFun -> FitFun -> (Opt,[(Addr,Dat)])
 optimizer vm cmds numparams optfun abortcrit fitfun=
     let (_,r) = test vm cmds optfun abortcrit
@@ -163,7 +163,7 @@ printStat (newcmds, _ , opt, time) =
 
 {-
 
-
+1001
 vm <- loadVMFromFile "../task/bin1.obf"    
 let params = defParams { thresh = 150 }
 let stat@(newcmds, _ , opt, time) = optimizer1 defParams vm init1_1 3 opt1_1a crit1_1 getOptTimeMin
@@ -172,6 +172,8 @@ printStat stat
 let vm2 = getN vm newcmds time
 let stat2 = optimizer1 defParams vm2 init1_1b 3 opt1_1b crit1_1b getOptTimeMax
 printStat stat2
+ -- 18868 : [(3,-2466.484135158279),(16000,1001.0)]
+ -- 
 
 
 
