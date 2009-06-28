@@ -6,18 +6,25 @@ $CFG or die "usage: $0 config";
 
 print "16000 $CFG\n";
 
-my $i=0;
+my $currentTime = 0;
+my $remaningInputs = 0;
 
 while (<STDIN>){   
     chomp;
-    my ($time,$vx,$vy) = split / / , $_;
-    if($time == -1){
-	exit 0;
+    my ($time, $vx, $vy) = split / / , $_;
+    if ($time == -1) {
+	    $remaningInputs = $vx;
+	    last;
     }
-    for( my $i=0; $i < $time ; $i++){
-	print ".\n";
+    for(my $i = $currentTime; $i < $time; $i++) {
+	    print ".\n";
     } 
     print "2 " . $vx . "\n"; 
     print "3 " . $vy . "\n";
+    print ".\n";
+    $currentTime++;
+}
+
+for(my $i = 0; $i < $remaningInputs; $i++) {
     print ".\n";
 }
