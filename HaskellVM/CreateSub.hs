@@ -8,6 +8,8 @@ import qualified Data.ByteString.Lazy as B
 import Data.Binary
 import System
 import Control.Monad
+import Data.Function
+import Data.List
 
 import ParseInOut
 
@@ -55,7 +57,9 @@ main  = do
       header   = Header teamID (floor $ scenario)
       max      = length os
       frames   = take max $ map (\(i,o) -> Frame {step = i, vals = map MPair o} ) $ zip [0..] is       
-      cleared  = filter (\ Frame {vals = vs} -> length vs > 0) frames  
+--      frames'  = map (\ f  -> f { vals = filter ( (==16000) `on` fst) (vals f)}) frames
+      frames'  = map (\ f  -> f { vals = sort (vals f)}) frames
+      cleared  = filter (\ Frame {vals = vs} -> length vs > 0) frames'
       sub = B.concat (encode header : 
                       (map encode ( cleared ++ [Frame {step = max, vals = []}])) )
   putStrLn $ "Scenario: " ++ show scenario
