@@ -1,0 +1,12 @@
+set terminal wxt
+set zeroaxis
+
+set ratio 1
+set xrange [-3e7:3e7]
+set yrange [-3e7:3e7]
+
+plot "test.dat" using (-$3):(-$4) w l,\
+      "" using ($5)*sin($1*0.01):($5)*cos($1*0.01) w l,\
+      "" every ::1::2 using (-$3):(-$4) w p
+
+pause -1
