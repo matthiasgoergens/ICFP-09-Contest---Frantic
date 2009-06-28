@@ -1,5 +1,5 @@
 
-all: VM createsub
+all: VM createsub output2CSV
 
 VM:
 	ghc -O6 --make Main.hs -o vm
