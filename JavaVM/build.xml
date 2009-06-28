@@ -123,6 +123,14 @@
             </manifest>
             <fileset dir="${dir.build.java}" excludes="META-INF/build.number"/>
         </jar>
+
+        <jar destfile="${dir.dist}/submission_printer-${version}.jar">
+            <manifest>
+                <attribute name="Main-Class" value="de.hronopik.icfp2009.util.SubmissionPrinter"/>
+                <!--<attribute name="Class-Path" value=""/>-->
+            </manifest>
+            <fileset dir="${dir.build.java}" excludes="META-INF/build.number"/>
+        </jar>
     </target>
 
 </project>
