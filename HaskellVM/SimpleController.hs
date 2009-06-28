@@ -5,8 +5,9 @@ import Controller
 import ControllerUtils
 import Util
 import Control.Monad.State.Strict
-import Control.Monad.Writer
+import Control.Monad.Writer.Lazy
 import Debug.Trace
+import qualified Data.DList as DL
 
 
 -- type NDS a = WriterT [String] (StateT Int []) a
@@ -34,7 +35,9 @@ type Fahrplan = [(Time,Pos)]
 -- getV :: (Tick z) => z -> Vec
 
 tryInputs :: (Tick z) => [Inp] -> z -> ([Outp])
-tryInputs inps z = fst $ (evalState (runWriterT (sequence . map tick $ inps)) z) 
+tryInputs inps z = map thd . snd $ (runWriter (evalStateT (sequence . map tick $ inps) z))
+--                   (evalState (runWriterT ) z) 
+thd (_,_,c) = c
 -- evalState (sequence . map tick $ inp)
 
 
@@ -82,8 +85,8 @@ task2Controller :: (Tick z) => Dat -> Controller z ()
 task2Controller conf = 
     do out <- tick $ mkInp [(16000, conf)]
        z <- get
-       let outp = tryInputs (replicate 100 (mkInp [])) z
-       trace (unlines $ map show $ outp) noop 
+       let outp = tryInputs (repeat (mkInp [])) z
+       trace (unlines $ map show $ take 100 outp) noop 
        return ()
 
 

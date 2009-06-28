@@ -10,6 +10,7 @@ import Load
 import qualified Data.ByteString as B
 import qualified Data.IntMap as I
 import qualified Data.List as L
+import qualified Data.DList as DL
 import Control.Monad
 import System.IO
 import System
@@ -26,7 +27,7 @@ main = do
                2 -> task2Controller
                _ -> error "not implemented"
   let trace = runController (cont conf) vm 
-  sequence_ ( map showFrame trace)
+  sequence_ ( map showFrame $ trace)
     where showFrame (timeStep, inp, out) = do
             let inmap = fromInp inp
                 outmap = fromOutp out
