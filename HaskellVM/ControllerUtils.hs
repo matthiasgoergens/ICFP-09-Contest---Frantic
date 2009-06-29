@@ -23,6 +23,17 @@ hohmannSpeed2 r1 r2 =
 hohmannTime :: Dat -> Dat -> Dat
 hohmannTime r1 r2 = pi * sqrt ((r1 + r2)^3 / (8 * mu)) 
 
+hohmannTime1R2 :: Dat -> Dat -> Dat
+hohmannTime1R2 r1 th = ((8 * mu)**(1/3)) * ((th/pi)**(2/3)) - r1;
+
+calcCircAng :: Pos -> Dat
+calcCircAng (x,y) = atan2 y x
+
+-- shifts phi into [-pi,pi]
+toPhiRange :: Dat -> Dat
+toPhiRange phi | phi < -pi = phi + 2*pi 
+               | phi >  pi = phi - 2*pi 
+               | otherwise = phi
 
 --- fliehkraft = Gravitation 
 --   m_s v^2 /r = mu m_s / r^2
@@ -40,10 +51,11 @@ calcTick (pos0,v0) =
     in (pos1, v0 + scale 0.5 ((calcG pos0) + (calcG pos1)) )
 
 
--- calcG pos = scale (mu / (vecLen2 pos)) $ normalize pos
+calcG pos = scale (mu / (vecLen2 pos)) $ normalize pos
 
-calcG pos@(x,y) = scale (mu / ((vecLen2 pos))) $ (sqrt (1-y/x),sqrt (1-1/ratio))
-    where ratio = y/x
+
+--calcG pos@(x,y) = scale (mu / ((vecLen2 pos))) $ (sqrt (1-y/x),sqrt (1-1/ratio))
+--    where ratio = y/x
 
 
 {-

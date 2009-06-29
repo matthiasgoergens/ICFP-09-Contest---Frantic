@@ -72,6 +72,9 @@ getVel k (o1, o2) = getOut k o2 - getOut k o1
 getPos :: Outp -> Pos
 getPos o = (getOut 2 o, getOut 3 o)
 
+getPosOther :: Outp -> (Addr,Addr) -> Pos
+getPosOther o (x,y) = (getOut x o, getOut y o) - (getPos o)
+
 outIsEmpty :: Outp -> Bool
 outIsEmpty (Outp outp) = I.null outp 
 

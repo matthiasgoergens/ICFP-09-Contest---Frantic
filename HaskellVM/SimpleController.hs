@@ -85,7 +85,7 @@ hohmann out sollrad =
        let (v@(vx,vy)) = normalize v_
        let rad1 = getRad out           
            pos     = getPos out
-           transtime = fromIntegral $ floor $ hohmannTime rad1 sollrad :: Time
+           transtime = fromIntegral $ round $ hohmannTime rad1 sollrad :: Time
            force1 = - (hohmannSpeed1 rad1 sollrad)
            force2 = hohmannSpeed2 rad1 sollrad       
            goalPoint = (normalize $ -pos) * (sollrad, sollrad)
@@ -93,11 +93,26 @@ hohmann out sollrad =
            cmds2  = mkInp [(2,force2 * vx), (3,force2 * vy)] 
        tick cmds
        sequence_ $ replicate (transtime-1) noop
-       out <- noop -- scheitelpunkt
+       noop -- scheitelpunkt
+       tick cmds2
+
+hohmannEllipse :: (Tick z) => Outp -> Dat -> Controller z (Outp)
+hohmannEllipse out sollrad = 
+    do v_  <- getVLin out
+       let (v@(vx,vy)) = normalize v_
+       let rad1 = getRad out           
+           pos     = getPos out
+           transtime = fromIntegral $ round $ hohmannTime rad1 sollrad :: Time
+           force1 = - (hohmannSpeed1 rad1 sollrad)
+           cmds   = mkInp [(2,force1 * vx), (3,force1 * vy)] 
+           cmds2  = mkInp [(2,-force1 * vx), (3,-force1 * vy)] 
+       tick cmds
+       sequence_ $ replicate (transtime*2-1) noop
+       noop
        tick cmds2
 
 mytrace :: (Show a) => String -> [a] -> b -> b
-mytrace n l = trace (unlines $ L.intersperse " # " $ (n : map show l))
+mytrace n l = trace (concat $ L.intersperse " # " $ (n : map show l))
 
 steuer :: (Tick z) => Outp -> Vec -> Controller z (Outp)
 steuer out (vx,vy) = do
@@ -105,9 +120,10 @@ steuer out (vx,vy) = do
   tick $ mkInp [(2,vx), (3,vy)] 
   
 
+tresh = 0.01
 stayOnCircOrbit :: (Tick z) => Outp -> Dat -> Controller z (Outp)
 stayOnCircOrbit out sollrad = 
-    do v_  <- getVLin out
+    do v_  <- getV out
        let rad1   = getRad out     
            pos    = getPos out     
            sollv2 = vOnCirc sollrad
@@ -115,29 +131,18 @@ stayOnCircOrbit out sollrad =
            tangent  = normalize $ perpendicular pos
            tangent' = if scalar tangent v_ < 0 then negate tangent else tangent
            diff   = sollv2 - (vecLen v_)
-           vdiff  = (scale sollv2 tangent') - (v_)           
---       mytrace "diffs (v,r):" [diff,raddiff] $ steuer out (scale (diff/1000) tangent')       
-       mytrace "diffs (v):" [vdiff] $ steuer out (scale (0.1) vdiff)       
-       mytrace "diffs (v,r):" [diff,raddiff] $ sequence_ $ replicate (1000) noop
-       noop -- scheitelpunkt
-    
-stayOnCircOrbitRad :: (Tick z) => Outp -> Dat -> Controller z (Outp)
-stayOnCircOrbitRad out sollrad = 
-    do v_  <- getVLin out
-       let rad1   = getRad out     
-           pos    = getPos out     
-           sollv1 = vOnCirc rad1
-           sollv2 = vOnCirc sollrad
-           raddiff = sollrad - rad1
-           tangent  = normalize $ perpendicular pos
-           tangent' = if scalar tangent v_ < 0 then negate tangent else tangent
-           diff   = sollv2 - (vecLen v_)
-           vdiff  = (scale sollv2 tangent') - (v_)           
-       mytrace "diffs (v,r):" [diff,raddiff] $ steuer out (scale (diff/1000) tangent')       
---       mytrace "diffs (v):" [vdiff] $ steuer out (scale (0.1) vdiff)       
+--           vdiff  = (scale (sollv2) tangent') - (v_)      
+           vdiff  = scale (diff) tangent'        
+       if  abs(diff) < tresh then mytrace "noop" [raddiff] $ noop
+            else mytrace "diffs (v,r) vd:" [(diff,raddiff),vdiff] $ steuer out (scale (0.0001) vdiff)       
        sequence_ $ replicate (10) noop
-       noop -- scheitelpunkt
-    
+       noop
+
+stayOnCircOrbit2 :: (Tick z) => Outp -> Dat -> Controller z (Outp)
+stayOnCircOrbit2 out sollrad = 
+    do hohmann out sollrad
+
+        
 
 ----------
 
@@ -162,13 +167,27 @@ task2Controller conf =
 georgController :: (Tick z) => Dat -> Controller z ()
 georgController conf = 
     do out <- tick $ mkInp [(16000, conf)]
-       z <- get
-       let sollrad = (getRad out) * 1.2 -- test oribit
-  --     mytrace "sollrad" [sollrad] $ hohmann out sollrad 
---       foldM (stayOnCircOrbit) out $ replicate 100 sollrad
+       {-let pos  = -(getPos out)
+           posO = (getPosOther out (4,5))
+           phi1 = calcCircAng (-(getPos out))
+           phi2 = calcCircAng (getPosOther out (4,5))
+           phidiff = phi1-phi2                     
+       out <- mytrace "pos" [pos, posO]$ noop
+       out <- mytrace "phie" [phi1,phi2,phidiff]$ noop-}
+       let sollrad = vecLen (getPosOther out (4,5))
+       out <- mytrace "sollrad" [sollrad] $ hohmann out sollrad 
+       let phi1 = calcCircAng (-(getPos out))
+           phi2 = calcCircAng (getPosOther out (4,5))
+           phidiff = toPhiRange $ phi1-phi2
+           tau     = (timeOnCirc sollrad)
+           tdiff   = tau * phidiff / (2 * pi) -- he is this time behind
+           horad2  = hohmannTime1R2 sollrad ((tau-tdiff)/2)
+       hohmannEllipse out horad2
+--       foldM (stayOnCircOrbit) out $ replicate 2000 (sollrad)
+--       foldM (stayOnCircOrbit2) out $ replicate 10 (sollrad)
 --       L.foldl' (>>=) (return out) $ replicate 100 (flip stayOnCircOrbit sollrad)
-       sequence_ $ replicate (20000) noop       
-               
+       mytrace "phies" [phi1,phi2,phidiff]$ sequence_ $ replicate (6000) noop                   
+
        return ()
 
 {-
