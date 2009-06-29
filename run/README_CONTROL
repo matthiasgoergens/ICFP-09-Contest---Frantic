@@ -1,0 +1,8 @@
+
+
+../HaskellVM/runC ../task/bin2.obf 2004 with +RTS -M1804m -RTS > 2004.output 
+
+
+./createSub.sh 2004.0.input 2004.output ../submission/2004_187.6550470129079.osf  
+
+../HaskellVM/runC ../task/bin2.obf 2002 with +RTS -M1804m -RTS > 2002.output 
