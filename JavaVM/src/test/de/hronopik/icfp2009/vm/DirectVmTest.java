@@ -19,7 +19,8 @@ public class DirectVmTest {
 
     @Before
     public void setUp() throws IOException {
-        vm = new DirectVm("../../task/bin1.obf");
+        // Patrick: please run the test in icfp2009/run like all other things
+        vm = new DirectVm("../task/bin1.obf");
     }
 
     @Test
