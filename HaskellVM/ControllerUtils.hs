@@ -51,6 +51,11 @@ fliehkraft v r = v^2 / r
 timeOnCirc :: Dat -> Dat
 timeOnCirc r =  2*pi*r / (vOnCirc r)
 
+-- time for one ellipse = 2pi/omega = 2pi*r/v
+timeOnEllipse :: Dat -> Dat
+timeOnEllipse a =  sqrt ( 4*pi*pi*(a*a*a) / mu)
+
+
 
 calcTick :: (Pos, Vec) -> (Pos,Vec)
 calcTick (pos0,v0) = 
