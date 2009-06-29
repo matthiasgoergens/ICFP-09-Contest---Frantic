@@ -2,11 +2,11 @@ set terminal wxt
 
 radius(x,y) = sqrt(x*x + y*y)
 
-rad2 = 7212700
+rad2 = 8357000.000000492
 
 # plot "test.dat" using (radius($3,$4)) w l
 #set yrange [-5000: 5000]
-set yrange [-200: 200]
+set yrange [-500: 500]
 plot "test.dat" using ($1):(rad2 - radius($3,$4)) w l
 
 pause -1
