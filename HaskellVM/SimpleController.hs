@@ -37,31 +37,43 @@ type Fahrplan = [(Time,Pos)]
 
 tryInputs :: (Tick z) => [Inp] -> z -> ([Outp])
 tryInputs inps z = map (\ (Trace1 _ _ x) -> x) . snd $ (runWriter (evalStateT (sequence . map tick $ inps) z))
---                   (evalState (runWriterT ) z) 
-thd (_,_,c) = c
+
+tryInput :: (Tick z) => Inp -> z -> (Outp)
+tryInput inp z = traceOut . head . snd $ (runWriter (evalStateT (tick inp) z))
+
 -- evalState (sequence . map tick $ inp)
 
-
+{-
 getVLin :: (Tick z) => z -> Vec
 getVLin z = 
     let outs = tryInputs (replicate 2 (mkInp [])) z
         poss = map getPos outs
         l    = (fromIntegral $ length poss - 1 ) :: Dat
     in ((last poss) - (head poss)) * (l,l)
-
-
-
-{- 
-getV :: (Tick z) => Pos -> z -> Vec
-getV pos0 z = 
-    let pos1 = head $ getPos (tryInputs (replicate 1 (mkInp [])) z)
-        (pos0N, pos1N) = (normalize pos0, normalize pos1)
-        (r02, r12) = (vecLen2 pos0, vecLen2 pos1)
-        ag = mu * (1 / r02) * pos0N
-        diff_g = ag / 2 * 1*1
-    in ((last poss) - (head poss)) * (l,l)
-
 -}
+
+
+calcV0Lin :: Pos -> Pos -> Vec
+calcV0Lin pos0 pos1 = pos1-pos0
+
+getVLin :: (Tick z) => Outp -> Controller z (Vec)
+getVLin out = 
+    do z <- get
+       let pos1 = getPos $ tryInput (mkInp []) z
+       return $ calcV0Lin (getPos out) pos1
+
+ 
+calcV0 :: Pos -> Pos -> Vec
+calcV0 pos0 pos1 = 
+    let g = calcG pos0
+    in (pos1 - pos0) - scale 0.5 g
+
+getV :: (Tick z) => Outp -> Controller z (Vec)
+getV out = 
+    do z <- get
+       let pos1 = getPos $ tryInput (mkInp []) z
+       return $ calcV0 (getPos out) pos1
+
 
 noop :: (Tick z) => Controller z Outp
 noop = tick (mkInp [])
@@ -69,7 +81,7 @@ noop = tick (mkInp [])
 
 hohmann :: (Tick z) => Outp -> Dat -> Controller z (Outp)
 hohmann out sollrad = 
-    do v_  <- gets getVLin       
+    do v_  <- getVLin out
        let (v@(vx,vy)) = normalize v_
        let rad1 = getRad out           
            pos     = getPos out
@@ -85,7 +97,7 @@ hohmann out sollrad =
        tick cmds2
 
 mytrace :: (Show a) => String -> [a] -> b -> b
-mytrace n l = trace (concat $ L.intersperse " # " $ (n : map show l))
+mytrace n l = trace (unlines $ L.intersperse " # " $ (n : map show l))
 
 steuer :: (Tick z) => Outp -> Vec -> Controller z (Outp)
 steuer out (vx,vy) = do
@@ -95,7 +107,7 @@ steuer out (vx,vy) = do
 
 stayOnCircOrbit :: (Tick z) => Outp -> Dat -> Controller z (Outp)
 stayOnCircOrbit out sollrad = 
-    do v_  <- gets getVLin
+    do v_  <- getVLin out
        let rad1   = getRad out     
            pos    = getPos out     
            sollv2 = vOnCirc sollrad
@@ -111,7 +123,7 @@ stayOnCircOrbit out sollrad =
     
 stayOnCircOrbitRad :: (Tick z) => Outp -> Dat -> Controller z (Outp)
 stayOnCircOrbitRad out sollrad = 
-    do v_  <- gets getVLin
+    do v_  <- getVLin out
        let rad1   = getRad out     
            pos    = getPos out     
            sollv1 = vOnCirc rad1
@@ -167,3 +179,38 @@ georgController conf =
         (newcmds, _ , _, opttime) = stat
 -}
 
+
+getVTestController :: (Tick z) => Dat -> Controller z ()
+getVTestController conf  = 
+    do outm <- tick $ mkInp [(16000, 2001)]
+       out0 <- noop
+       linv0 <- getVLin out0
+       v0_a  <- getV out0
+       out1 <- noop
+       let v0 = scale 0.5 ((getPos out1) - (getPos outm))
+       let pos0 = getPos out0
+           (pos1,v1) = calcTick (pos0, v0)
+           (pos2,v2) = calcTick (pos1, v1)
+       linv1 <- getVLin out1
+       out2 <- noop
+       mytrace "diffP 1,2:" [pos1- (getPos out1),pos2- (getPos out2)] $ return ()
+       mytrace "diffv 1,2:" [linv0 - v0,linv1 - v1] $ return ()
+       mytrace "v linv g p:" [v0,v0_a,linv0,normalize $ calcG pos0, normalize pos0] $ return ()
+       
+getVTestController2 :: (Tick z) => Dat -> Controller z ()
+getVTestController2 conf  = 
+    do tick $ mkInp [(16000, 2001)]
+       out <- noop
+       linv0 <- getVLin out
+       v0   <- getV out
+       let pos0 = getPos out
+           (pos1,v1) = calcTick (pos0, v0)
+           (pos2,v2) = calcTick (pos1, v1)
+       out1 <- noop
+       linv1 <- getVLin out
+       out2 <- noop
+       mytrace "diffP 1,2:" [pos1- (getPos out1),pos2- (getPos out2)] $ return ()
+       mytrace "diffv 1,2:" [linv0 - v0,linv1 - v1] $ return ()
+       mytrace "v linv g p:" [v0,linv0,normalize $ calcG pos0, normalize pos0] $ return ()
+       
+  

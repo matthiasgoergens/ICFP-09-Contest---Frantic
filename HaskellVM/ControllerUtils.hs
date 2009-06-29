@@ -1,6 +1,7 @@
 module ControllerUtils where
 
 import Types
+import Util
 import qualified Data.IntMap as I
 
 
@@ -31,6 +32,19 @@ vOnCirc r =  sqrt (mu/r)
 -- time for one orbit = 2pi/omega = 2pi*r/v
 timeOnCirc :: Dat -> Dat
 timeOnCirc r =  2*pi*r / (vOnCirc r)
+
+
+calcTick :: (Pos, Vec) -> (Pos,Vec)
+calcTick (pos0,v0) = 
+    let pos1 = pos0 + v0 + (scale 0.5 (calcG pos0))
+    in (pos1, v0 + scale 0.5 ((calcG pos0) + (calcG pos1)) )
+
+
+-- calcG pos = scale (mu / (vecLen2 pos)) $ normalize pos
+
+calcG pos@(x,y) = scale (mu / ((vecLen2 pos))) $ (sqrt (1-y/x),sqrt (1-1/ratio))
+    where ratio = y/x
+
 
 {-
 [00:36:37] Alexander Kiel: public static double hohmannTime1R2(double r1, int th) {

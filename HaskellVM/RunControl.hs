@@ -37,6 +37,7 @@ main = do
   let cont = case floor $ conf/1000.0 of
                1 -> task1Controller
                2 -> georgController
+               9 -> getVTestController
                _ -> error "not implemented"
   let trace = runController (cont conf) vm
 --  let vm' = runController2 (cont conf) vm
