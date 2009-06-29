@@ -51,14 +51,19 @@ main = do
                8 -> getVTestController2
                9 -> testHohmannController
                _ -> error "not implemented"
-  let trace = runController (cont conf) vm
+  let trace' = (runController (cont conf) vm)
+      trace = DL.toList trace'
 --  let vm' = runController2 (cont conf) vm
 --  print vm'
 
-  hPutStr stderr $ "Score: " ++ show (getOut 0 (traceOut (last $ DL.toList trace)))
 
-  writeFile ((show conf) ++ ".input") $ mkInputFile trace
-  sequence_ ( map showFrame $ DL.toList trace)
+
+--  writeFile ((show conf) ++ ".input") $ mkInputFile trace'
+  
+
+  sequence_ ( map showFrame $ trace)
+
+--  hPutStr stderr $ "Score: " ++ show (getOut 0 (traceOut (last $ DL.toList trace)))
     where showFrame (Trace1 timeStep  inp out) = do
             let inmap = fromInp inp
                 outmap = fromOutp out
