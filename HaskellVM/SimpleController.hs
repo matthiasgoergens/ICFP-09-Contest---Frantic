@@ -204,11 +204,24 @@ stayOnCircOrbit2 out sollrad =
 
 ----------
 
+task1Controller' :: (Tick z) => Dat -> Controller z ()
+task1Controller' conf = 
+    do out <- tick $ mkInp [(16000, conf)]
+       let sollrad = getOut 4 out
+       hohmann out sollrad 
+       sequence_ $ replicate (1000) noop       
+       return ()
+
 task1Controller :: (Tick z) => Dat -> Controller z ()
 task1Controller conf = 
     do out <- tick $ mkInp [(16000, conf)]
        let sollrad = getOut 4 out
-       hohmann out sollrad 
+       out <- hohmann out sollrad 
+       v   <- getVLin out
+       let sprit = (getOut 1 out) - 0.000000000001
+       out <- steuer out (scale (sprit/4) (normalize v))
+       out <- steuer out (scale (-sprit/2) (normalize v))
+       out <- steuer out (scale (sprit/4) (normalize v))
        sequence_ $ replicate (1000) noop       
        return ()
 
