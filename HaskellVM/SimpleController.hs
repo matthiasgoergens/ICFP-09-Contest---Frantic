@@ -4,7 +4,7 @@ import Types
 import Controller
 import ControllerUtils
 import Util
-import Control.Monad.State.Lazy
+import Control.Monad.State.Strict
 import Control.Monad.Writer.Lazy
 import Debug.Trace
 import Data.Function
@@ -37,10 +37,14 @@ type Fahrplan = [(Time,Pos)]
 -- getV :: (Tick z) => z -> Vec
 
 tryInputs :: (Tick z) => [Inp] -> z -> ([Outp])
-tryInputs inps z = map (\ (Trace1 _ _ x) -> x) . DL.toList . snd $ (runWriter (evalStateT (sequence . map tick $ inps) z))
+-- tryInputs inps z = map (\ (Trace1 _ _ x) -> x) . DL.toList . snd $ (runWriter (evalStateT (sequence . map tick $ inps) z))
+
+tryInputs inps z = map (\ (Trace1 _ _ x) -> x) . DL.toList . snd $
+                   (evalState (runWriterT (sequence . map tick $ inps)) z)
 
 tryInput :: (Tick z) => Inp -> z -> (Outp)
-tryInput inp z = traceOut . DL.head . snd $ (runWriter (evalStateT (tick inp) z))
+tryInput inp z = traceOut . DL.head . snd $ (evalState  (runWriterT (tick inp)) z)
+-- tryInput inp z = traceOut . DL.head . snd $ (runWriter (evalStateT (tick inp) z))
 
 -- evalState (sequence . map tick $ inp)
 

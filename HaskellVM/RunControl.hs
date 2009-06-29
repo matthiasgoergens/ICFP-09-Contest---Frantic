@@ -57,7 +57,7 @@ main = do
 --  hPutStr stderr $ "#Score: " ++ show (getOut 0 (traceOut (last $ DL.toList trace)))
   when withInp $ writeFile ((show conf) ++ ".input") $ mkInputFile trace'
   sequence_ ( map showFrame $ trace)
---  hPutStr stderr $ "Score: " ++ show (getOut 0 (traceOut (last $ DL.toList trace)))
+--  hPutStr stderr $ "Score: " ++ show (getOut 0 (traceOut (last $ trace)))
     where showFrame (Trace1 timeStep  inp out) = do
             let inmap = fromInp inp
                 outmap = fromOutp out

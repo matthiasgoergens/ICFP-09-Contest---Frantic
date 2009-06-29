@@ -1,7 +1,7 @@
 {-# OPTIONS -XRankNTypes #-}
 module Controller where
 import Types
-import Control.Monad.State.Lazy
+import Control.Monad.State.Strict
 import Control.Monad.Writer.Lazy
 import qualified Data.DList as DL
 
@@ -14,14 +14,14 @@ data Trace1  = Trace1 !Time !Inp !Outp
 traceOut :: Trace1 -> Outp
 traceOut (Trace1 _ _ o) = o
 
-type Controller z a = StateT z (Writer Trace) a
---type Controller z a = WriterT Trace (State z) a
+--type Controller z a = StateT z (Writer Trace) a
+type Controller z a = WriterT Trace (State z) a
 
 -- oder anderer Rueckgabewert
 
 runController :: (Controller VM a)  -> VM -> Trace
-runController controller vm = -- snd . fst $ (runState (runWriterT (controller)) vm)
-                              snd $ (runWriter (runStateT (controller) vm))
+runController controller vm = snd . fst $ (runState (runWriterT (controller)) vm)
+                              -- snd $ (runWriter (runStateT (controller) vm))
 
 -- runController2 :: (Controller VM a)  -> VM -> VM
 runController2 controller vm = -- snd . fst $ (runState (runWriterT (controller)) vm)
