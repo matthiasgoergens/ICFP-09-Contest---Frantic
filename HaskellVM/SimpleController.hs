@@ -4,8 +4,8 @@ import Types
 import Controller
 import ControllerUtils
 import Util
-import Control.Monad.State.Strict
-import Control.Monad.Writer.Strict
+import Control.Monad.State.Lazy
+import Control.Monad.Writer.Lazy
 import Debug.Trace
 import qualified Data.List as L
 import qualified Data.DList as DL
@@ -36,10 +36,10 @@ type Fahrplan = [(Time,Pos)]
 -- getV :: (Tick z) => z -> Vec
 
 tryInputs :: (Tick z) => [Inp] -> z -> ([Outp])
-tryInputs inps z = map (\ (Trace1 _ _ x) -> x) . snd $ (runWriter (evalStateT (sequence . map tick $ inps) z))
+tryInputs inps z = map (\ (Trace1 _ _ x) -> x) . DL.toList . snd $ (runWriter (evalStateT (sequence . map tick $ inps) z))
 
 tryInput :: (Tick z) => Inp -> z -> (Outp)
-tryInput inp z = traceOut . head . snd $ (runWriter (evalStateT (tick inp) z))
+tryInput inp z = traceOut . DL.head . snd $ (runWriter (evalStateT (tick inp) z))
 
 -- evalState (sequence . map tick $ inp)
 
@@ -78,6 +78,18 @@ getV out =
 noop :: (Tick z) => Controller z Outp
 noop = tick (mkInp [])
 
+steuer :: (Tick z) => Outp -> Vec -> Controller z (Outp)
+steuer outp (vx,vy) = do  
+  -- TODO optimize here
+  tick $ mkInp [(2,vx), (3,vy)] 
+
+
+steuerDirect :: (Tick z) => Outp -> Vec -> Controller z (Outp)
+steuerDirect outp (vx,vy) = do  
+  let pos  = getPos outp
+--      gvec =  
+  tick $ mkInp [(2,vx), (3,vy)] 
+
 
 hohmann :: (Tick z) => Outp -> Dat -> Controller z (Outp)
 hohmann out sollrad = 
@@ -89,12 +101,35 @@ hohmann out sollrad =
            force1 = - (hohmannSpeed1 rad1 sollrad)
            force2 = hohmannSpeed2 rad1 sollrad       
            goalPoint = (normalize $ -pos) * (sollrad, sollrad)
-           cmds   = mkInp [(2,force1 * vx), (3,force1 * vy)] 
-           cmds2  = mkInp [(2,force2 * vx), (3,force2 * vy)] 
-       tick cmds
+           steuer1 = (force1 * vx, force1 * vy)
+           steuer2 = (force2 * vx, force2 * vy)
+       steuer out steuer1
        sequence_ $ replicate (transtime-1) noop
-       noop -- scheitelpunkt
-       tick cmds2
+       outp <- noop -- scheitelpunkt
+       steuer out steuer2
+
+hohmann' :: (Tick z) => Outp -> Dat -> Controller z (Outp)
+hohmann' out sollrad = 
+    do v_  <- getVLin out
+       let (v@(vx,vy)) = normalize v_
+       let rad1 = getRad out           
+           pos     = getPos out
+           tangent  = normalize $ perpendicular pos
+           tangent' = if scalar tangent v_ < 0 then negate tangent else tangent
+           transtime = fromIntegral $ round $ hohmannTime rad1 sollrad :: Time
+           sollrad'  = sollrad -- hohmannTime1R2 rad1 (fromIntegral $ transtime)
+           force1 = - (hohmannSpeed1 rad1 sollrad')
+           steuer1 = scale force1 (tangent')
+       steuer out steuer1
+       sequence_ $ replicate (transtime-1) noop
+       out <- noop -- scheitelpunkt
+       v_  <- getVLin out
+       let tangent2  = normalize $ perpendicular (getPos out)
+           tangent2' = if scalar tangent v_ < 0 then negate tangent else tangent                       
+           force2 = - (hohmannSpeed2 rad1 sollrad')
+           steuer2 = scale force2 (tangent2')
+       steuer out steuer2
+
 
 hohmannEllipse :: (Tick z) => Outp -> Dat -> Controller z (Outp)
 hohmannEllipse out sollrad = 
@@ -104,21 +139,27 @@ hohmannEllipse out sollrad =
            pos     = getPos out
            transtime = fromIntegral $ round $ hohmannTime rad1 sollrad :: Time
            force1 = - (hohmannSpeed1 rad1 sollrad)
-           cmds   = mkInp [(2,force1 * vx), (3,force1 * vy)] 
-           cmds2  = mkInp [(2,-force1 * vx), (3,-force1 * vy)] 
-       tick cmds
+           steuer1 = (force1 * vx, force1 * vy)
+           steuer2 = (-force1 * vx, -force1 * vy)
+       steuer out steuer1
        sequence_ $ replicate (transtime*2-1) noop
-       noop
-       tick cmds2
+       outp <- noop -- scheitelpunkt
+       steuer out steuer2
 
 mytrace :: (Show a) => String -> [a] -> b -> b
 mytrace n l = trace (concat $ L.intersperse " # " $ (n : map show l))
-
-steuer :: (Tick z) => Outp -> Vec -> Controller z (Outp)
-steuer out (vx,vy) = do
-  -- TODO optimize here
-  tick $ mkInp [(2,vx), (3,vy)] 
   
+
+
+follow :: (Tick z) => Outp -> (Addr,Addr) -> Controller z (Outp)
+follow out other = 
+    do let pos    = -(getPos out)
+           opos   = getPosOther out other
+           pdiff = opos - pos
+           
+       mytrace "pdiff" [pdiff] $ steuer out (scale (0.0000) pdiff)
+
+
 
 tresh = 0.01
 stayOnCircOrbit :: (Tick z) => Outp -> Dat -> Controller z (Outp)
@@ -183,6 +224,8 @@ georgController conf =
            tdiff   = tau * phidiff / (2 * pi) -- he is this time behind
            horad2  = hohmannTime1R2 sollrad ((tau-tdiff)/2)
        hohmannEllipse out horad2
+       foldM (follow) out $ replicate 5000 ((4,5))
+       
 --       foldM (stayOnCircOrbit) out $ replicate 2000 (sollrad)
 --       foldM (stayOnCircOrbit2) out $ replicate 10 (sollrad)
 --       L.foldl' (>>=) (return out) $ replicate 100 (flip stayOnCircOrbit sollrad)
@@ -190,14 +233,15 @@ georgController conf =
 
        return ()
 
-{-
-        goalPoint = (normalize $ -pos) * (sollrad,sollrad)
-        cmds   = [(2,force1 * vx), (3,force1 * vy)] 
-        params = defParams { thresh = 10, eps=0.1 }
-        stat = optimizer2 params vm cmds (2,3) (optPoint goalPoint) (critTime (transtime+20)) getOptTimeMin
-        (newcmds, _ , _, opttime) = stat
--}
 
+testHohmannController :: (Tick z) => Dat -> Controller z ()
+testHohmannController conf = 
+    do out <- tick $ mkInp [(16000, conf)]
+       let sollrad = vecLen (getPosOther out (4,5))
+       out <- mytrace "sollrad" [sollrad] $ hohmann out sollrad 
+       sequence_ $ replicate (300000) noop                   
+
+       return ()
 
 getVTestController :: (Tick z) => Dat -> Controller z ()
 getVTestController conf  = 

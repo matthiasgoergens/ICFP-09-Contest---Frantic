@@ -18,7 +18,7 @@ import System
 
 mkInputFile :: Trace -> String
 mkInputFile trace = 
-    let noCons = map ( \(Trace1 t (Inp m) _) -> (t, m)) trace
+    let noCons = DL.toList $ DL.map ( \(Trace1 t (Inp m) _) -> (t, m)) trace
         imap = I.fromListWith (I.union) noCons
         max  = (maximum $ I.keys imap)
         allsteps = map (\t -> I.findWithDefault I.empty t imap) $ take max [0..]
@@ -37,14 +37,14 @@ main = do
   let cont = case floor $ conf/1000.0 of
                1 -> task1Controller
                2 -> georgController
-               9 -> getVTestController
+               9 -> testHohmannController
                _ -> error "not implemented"
   let trace = runController (cont conf) vm
 --  let vm' = runController2 (cont conf) vm
 --  print vm'
-  hPutStr stderr $ "Score: " ++ show (getOut 0 (traceOut (last trace)))
+  hPutStr stderr $ "Score: " ++ show (getOut 0 (traceOut (last $ DL.toList trace)))
   writeFile ((show conf) ++ ".input") $ mkInputFile trace
-  sequence_ ( map showFrame $ trace)
+  sequence_ ( map showFrame $ DL.toList trace)
     where showFrame (Trace1 timeStep  inp out) = do
             let inmap = fromInp inp
                 outmap = fromOutp out

@@ -1,14 +1,14 @@
 {-# OPTIONS -XRankNTypes #-}
 module Controller where
 import Types
-import Control.Monad.State.Strict
-import Control.Monad.Writer.Strict
+import Control.Monad.State.Lazy
+import Control.Monad.Writer.Lazy
 import qualified Data.DList as DL
 
 import VM
 -- import Monad.List
 
-type Trace  = [Trace1]
+type Trace  = DL.DList Trace1
 data Trace1  = Trace1 !Time !Inp !Outp
 
 traceOut :: Trace1 -> Outp
@@ -36,7 +36,7 @@ instance Tick VM where
     tick inp = do vm <- get
                   let (vm', outp) = oneRun inp vm
                   put vm'
-                  tell $! [Trace1 (time vm') inp outp]
+                  tell $! DL.singleton $ Trace1 (time vm') inp outp
                   return outp
     getTime (VM {time =t}) = t
 

@@ -40,6 +40,9 @@ toPhiRange phi | phi < -pi = phi + 2*pi
 vOnCirc :: Dat -> Dat
 vOnCirc r =  sqrt (mu/r)
 
+fliehkraft :: Dat -> Dat -> Dat
+fliehkraft v r = v^2 / r
+
 -- time for one orbit = 2pi/omega = 2pi*r/v
 timeOnCirc :: Dat -> Dat
 timeOnCirc r =  2*pi*r / (vOnCirc r)
