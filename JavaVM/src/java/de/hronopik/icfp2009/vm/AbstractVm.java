@@ -15,7 +15,7 @@ import java.util.*;
  * @author Alexander Kiel
  * @version $Id$
  */
-abstract class AbstractVm {
+abstract class AbstractVm implements Vm {
 
     private final static Map<Integer, Double> EMPTY_INPUT = Collections.emptyMap();
 
