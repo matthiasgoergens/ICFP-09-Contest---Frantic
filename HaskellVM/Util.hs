@@ -19,6 +19,9 @@ mapfst f (a,c) = (f a,c)
 mapsnd :: (a -> b) ->  (c,a) -> (c,b)
 mapsnd f (c,a) = (c,f a)
                     
+trd3 :: (a,b,c) -> c
+trd3 (_,_,c) = c
+
 trd4 :: (a,b,c,d) -> c
 trd4 (_,_,c,_) = c
 
@@ -40,6 +43,10 @@ normalize v@(x,y) = let len = (1/vecLen v) in (x*len,y*len)
 
 scalar :: (Dat,Dat) -> (Dat,Dat) -> Dat
 scalar (a,b) (c,d) = a*c+b*d
+
+scale :: Dat -> (Dat,Dat) -> (Dat,Dat)
+scale f (a,b) = (a*f,b*f)
+
 
 -- (gegen den Uhrzeiger 90 grad )
 perpendicular :: (Dat,Dat) -> (Dat,Dat) 

@@ -5,8 +5,9 @@ import Controller
 import ControllerUtils
 import Util
 import Control.Monad.State.Strict
-import Control.Monad.Writer.Lazy
+import Control.Monad.Writer.Strict
 import Debug.Trace
+import qualified Data.List as L
 import qualified Data.DList as DL
 
 
@@ -35,7 +36,7 @@ type Fahrplan = [(Time,Pos)]
 -- getV :: (Tick z) => z -> Vec
 
 tryInputs :: (Tick z) => [Inp] -> z -> ([Outp])
-tryInputs inps z = map thd . snd $ (runWriter (evalStateT (sequence . map tick $ inps) z))
+tryInputs inps z = map (\ (Trace1 _ _ x) -> x) . snd $ (runWriter (evalStateT (sequence . map tick $ inps) z))
 --                   (evalState (runWriterT ) z) 
 thd (_,_,c) = c
 -- evalState (sequence . map tick $ inp)
@@ -45,11 +46,12 @@ getVLin :: (Tick z) => z -> Vec
 getVLin z = 
     let outs = tryInputs (replicate 2 (mkInp [])) z
         poss = map getPos outs
-        l    = (fromIntegral $ length poss) :: Dat
+        l    = (fromIntegral $ length poss - 1 ) :: Dat
     in ((last poss) - (head poss)) * (l,l)
 
 
 
+{- 
 getV :: (Tick z) => Pos -> z -> Vec
 getV pos0 z = 
     let pos1 = head $ getPos (tryInputs (replicate 1 (mkInp [])) z)
@@ -58,6 +60,8 @@ getV pos0 z =
         ag = mu * (1 / r02) * pos0N
         diff_g = ag / 2 * 1*1
     in ((last poss) - (head poss)) * (l,l)
+
+-}
 
 noop :: (Tick z) => Controller z Outp
 noop = tick (mkInp [])
@@ -80,6 +84,49 @@ hohmann out sollrad =
        out <- noop -- scheitelpunkt
        tick cmds2
 
+mytrace :: (Show a) => String -> [a] -> b -> b
+mytrace n l = trace (concat $ L.intersperse " # " $ (n : map show l))
+
+steuer :: (Tick z) => Outp -> Vec -> Controller z (Outp)
+steuer out (vx,vy) = do
+  -- TODO optimize here
+  tick $ mkInp [(2,vx), (3,vy)] 
+  
+
+stayOnCircOrbit :: (Tick z) => Outp -> Dat -> Controller z (Outp)
+stayOnCircOrbit out sollrad = 
+    do v_  <- gets getVLin
+       let rad1   = getRad out     
+           pos    = getPos out     
+           sollv2 = vOnCirc sollrad
+           raddiff = sollrad - rad1
+           tangent  = normalize $ perpendicular pos
+           tangent' = if scalar tangent v_ < 0 then negate tangent else tangent
+           diff   = sollv2 - (vecLen v_)
+           vdiff  = (scale sollv2 tangent') - (v_)           
+--       mytrace "diffs (v,r):" [diff,raddiff] $ steuer out (scale (diff/1000) tangent')       
+       mytrace "diffs (v):" [vdiff] $ steuer out (scale (0.1) vdiff)       
+       mytrace "diffs (v,r):" [diff,raddiff] $ sequence_ $ replicate (1000) noop
+       noop -- scheitelpunkt
+    
+stayOnCircOrbitRad :: (Tick z) => Outp -> Dat -> Controller z (Outp)
+stayOnCircOrbitRad out sollrad = 
+    do v_  <- gets getVLin
+       let rad1   = getRad out     
+           pos    = getPos out     
+           sollv1 = vOnCirc rad1
+           sollv2 = vOnCirc sollrad
+           raddiff = sollrad - rad1
+           tangent  = normalize $ perpendicular pos
+           tangent' = if scalar tangent v_ < 0 then negate tangent else tangent
+           diff   = sollv2 - (vecLen v_)
+           vdiff  = (scale sollv2 tangent') - (v_)           
+       mytrace "diffs (v,r):" [diff,raddiff] $ steuer out (scale (diff/1000) tangent')       
+--       mytrace "diffs (v):" [vdiff] $ steuer out (scale (0.1) vdiff)       
+       sequence_ $ replicate (10) noop
+       noop -- scheitelpunkt
+    
+
 ----------
 
 task1Controller :: (Tick z) => Dat -> Controller z ()
@@ -91,7 +138,7 @@ task1Controller conf =
        return ()
 
 
--- simpleController :: forall t a. t -> IO [a]
+
 task2Controller :: (Tick z) => Dat -> Controller z ()
 task2Controller conf = 
     do out <- tick $ mkInp [(16000, conf)]
@@ -100,6 +147,17 @@ task2Controller conf =
        trace (unlines $ map show $ take 100 outp) noop 
        return ()
 
+georgController :: (Tick z) => Dat -> Controller z ()
+georgController conf = 
+    do out <- tick $ mkInp [(16000, conf)]
+       z <- get
+       let sollrad = (getRad out) * 1.2 -- test oribit
+  --     mytrace "sollrad" [sollrad] $ hohmann out sollrad 
+--       foldM (stayOnCircOrbit) out $ replicate 100 sollrad
+--       L.foldl' (>>=) (return out) $ replicate 100 (flip stayOnCircOrbit sollrad)
+       sequence_ $ replicate (20000) noop       
+               
+       return ()
 
 {-
         goalPoint = (normalize $ -pos) * (sollrad,sollrad)

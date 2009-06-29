@@ -2,13 +2,17 @@
 module Controller where
 import Types
 import Control.Monad.State.Strict
-import Control.Monad.Writer.Lazy
+import Control.Monad.Writer.Strict
 import qualified Data.DList as DL
 
 import VM
 -- import Monad.List
 
-type Trace  = [(Time, Inp, Outp)]
+type Trace  = [Trace1]
+data Trace1  = Trace1 !Time !Inp !Outp
+
+traceOut :: Trace1 -> Outp
+traceOut (Trace1 _ _ o) = o
 
 type Controller z a = StateT z (Writer Trace) a
 --type Controller z a = WriterT Trace (State z) a
@@ -19,6 +23,10 @@ runController :: (Controller VM a)  -> VM -> Trace
 runController controller vm = -- snd . fst $ (runState (runWriterT (controller)) vm)
                               snd $ (runWriter (runStateT (controller) vm))
 
+-- runController2 :: (Controller VM a)  -> VM -> VM
+runController2 controller vm = -- snd . fst $ (runState (runWriterT (controller)) vm)
+                              (runWriter (runStateT (controller) vm))
+
 
 class Tick z where
     tick :: Inp -> Controller z Outp
@@ -28,7 +36,7 @@ instance Tick VM where
     tick inp = do vm <- get
                   let (vm', outp) = oneRun inp vm
                   put vm'
-                  tell $ [(time vm', inp, outp)]
+                  tell $! [Trace1 (time vm') inp outp]
                   return outp
     getTime (VM {time =t}) = t
 

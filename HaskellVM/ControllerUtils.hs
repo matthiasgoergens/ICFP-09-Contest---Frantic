@@ -5,6 +5,7 @@ import qualified Data.IntMap as I
 
 
 
+
 mu = let g = 6.67428E-11
          m_e = 6e24
      in g * m_e;
@@ -20,6 +21,16 @@ hohmannSpeed2 r1 r2 =
 
 hohmannTime :: Dat -> Dat -> Dat
 hohmannTime r1 r2 = pi * sqrt ((r1 + r2)^3 / (8 * mu)) 
+
+
+--- fliehkraft = Gravitation 
+--   m_s v^2 /r = mu m_s / r^2
+vOnCirc :: Dat -> Dat
+vOnCirc r =  sqrt (mu/r)
+
+-- time for one orbit = 2pi/omega = 2pi*r/v
+timeOnCirc :: Dat -> Dat
+timeOnCirc r =  2*pi*r / (vOnCirc r)
 
 {-
 [00:36:37] Alexander Kiel: public static double hohmannTime1R2(double r1, int th) {
