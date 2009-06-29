@@ -44,25 +44,15 @@ public class Task1Controller {
         /*System.out.println("16000 " + scenario);
         System.out.println(".");*/
 
+        assert vm.getStepIndex() == 1;
+
         //
         // Calc first Hohmann speed
         //
 
-        // The first position for our direction
+        // Get three positions for our speed
         Vector s0 = getPosition(outputs);
-
-        // Make one more step for our direction
-        outputs = vm.step();
-        //System.out.println(".");
-
-        // This position is our Hohmann start position
-        Vector s1 = getPosition(outputs);
-
-        // Make one more step for our direction
-        outputs = vm.step();
-
-        // This is our second position for our direction
-        Vector s2 = getPosition(outputs);
+        Vector s1 = getPosition(vm.step());
 
         // Our radius around the earth
         double r1 = radius(s1);
@@ -81,14 +71,11 @@ public class Task1Controller {
 
         r2 = rh2;
 
-        // Our target Point of the Hohmann transfer
-        Vector st = s1.flip().scale(r2 / r1);
-
         // The absolute value of the Hohmann speed
         double adv = hohmannSpeed1(r1, r2);
 
-        // Our normalized direction is
-        Vector d = s0.minus(s2).normalize();
+        // Our direction is
+        Vector d = direction(s0, s1).normalize();//.plus(new Vector(-0.001291,0)).normalize();
 
         // The vectorial Hohmann speed is
         Vector dv = d.scale(adv);
@@ -97,13 +84,11 @@ public class Task1Controller {
         // Perform the step with first Hohmann speed
         //
 
-        // First perform a undo to get back into s1
-        vm.undo();
-
         int timeBeforeHohmann1 = vm.getStepIndex();
+        assert timeBeforeHohmann1 == 2;
 
         // Perform the speed change in s1
-        vm.step(buildDeltaVInput(dv));
+        Vector s2 = getPosition(vm.step(buildDeltaVInput(dv)));
         /*System.out.println("2 " + dv.getX());
         System.out.println("3 " + dv.getY());
         System.out.println(".");*/
@@ -114,49 +99,34 @@ public class Task1Controller {
 
         // Skip most of the Hohmann transfer time
         int timeBeforeHohmann2 = timeBeforeHohmann1 + th;
-        while (vm.getStepIndex() < timeBeforeHohmann2 - 10) {
+        while (vm.getStepIndex() < timeBeforeHohmann2 - 1) {
             outputs = vm.step();
             //System.out.println(".");
         }
 
-        /*// Get Hohmann 1 approach
-        Vector sh2;
-        Map<Integer, Double> oldOutputs;
-        do {
-            oldOutputs = outputs;
-            sh2 = getPosition(outputs);
-            outputs = vm.step();
-            //System.out.println(".");
-        } while (h1Approach(oldOutputs, outputs, st, r2));
+        Vector sh21 = getPosition(outputs);
+        outputs = vm.step();
+        //System.out.println(".");
+        Vector sh22 = getPosition(outputs);
 
-        vm.undo();
-
-        System.out.println("stepIndex = " + vm.getStepIndex());
-        System.out.println("timeBeforeHohmann1 + th = " + (timeBeforeHohmann1 + th));
-        System.out.println("delta r   = " + pow(r2 - radius(sh2), 2));*/
-
-        while (vm.getStepIndex() < timeBeforeHohmann2) {
-            outputs = vm.step();
-            //System.out.println(".");
-            System.out.println("delta r   = " + (r2 - radius(getPosition(outputs))));
-        }
 
         if (timeBeforeHohmann2 != vm.getStepIndex()) {
             throw new IllegalStateException();
         }
 
+        r2 = radius(sh22);
+
         // The absolute value of the Hohmann speed 2
         double adv2 = hohmannSpeed2(r1, r2);
 
         // The vectorial Hohmann speed 2 is
-        Vector dv2 = d.flip().scale(adv2);
-        Vector sh2 = getPosition(outputs).normalize().scale(adv2);
+        Vector dv2 = direction(sh21, sh22).normalize().scale(adv2);
 
-        System.out.println("dv2.dot(sh2) = " + dv2.dot(sh2));
-
-        dv2 = sh2.turnAntiClockwise();
+        System.out.println("delta r   = " + (r2 - radius(sh22)));
+        System.out.println("alpha = " + Phys.angle(sh22, dv2));
 
         // Perform the speed change
+        assert vm.getStepIndex() == timeBeforeHohmann2;
         vm.step(buildDeltaVInput(dv2));
         /*System.out.println("2 " + dv2.getX());
         System.out.println("3 " + dv2.getY());
@@ -167,12 +137,12 @@ public class Task1Controller {
         }*/
 
         double maxDeltaR = 0;
-        while (vm.getStepIndex() < timeBeforeHohmann2 + 200) {
+        while (vm.getStepIndex() < timeBeforeHohmann2 + Phys.circulationTime(r2) * 2) {
             outputs = vm.step();
             //System.out.println(".");
             //System.out.println("stepIndex = " + vm.getStepIndex());
-            System.out.printf("%6d %10f, %10f\n", vm.getStepIndex() - timeBeforeHohmann2, (Phys.radius(getPosition(outputs)) - outputs.get(4)),
-                    (Phys.radius(getPosition(outputs)) - r2));
+            /*System.out.printf("%6d %10f, %10f\n", vm.getStepIndex() - timeBeforeHohmann2, (Phys.radius(getPosition(outputs)) - outputs.get(4)),
+                    (Phys.radius(getPosition(outputs)) - r2));*/
             double deltaR = abs(Phys.radius(getPosition(outputs)) - r2);
             if (deltaR > maxDeltaR) {
                 maxDeltaR = deltaR;
@@ -181,6 +151,13 @@ public class Task1Controller {
 
         System.out.println("maxDeltaR = " + maxDeltaR);
         System.out.println("Phys.circulationTime(r2) = " + Phys.circulationTime(r2));
+    }
+
+    private Vector direction(Vector s0, Vector s1) {
+        Vector d0 = s1.minus(s0);
+        Vector d1 = s1.turnClockwise();
+        Vector d2 = s1.turnAntiClockwise();
+        return d0.dot(d1) > d0.dot(d2) ? d1 : d2;
     }
 
     private boolean h1Approach(@NotNull Map<Integer, Double> oldOutputs, @NotNull Map<Integer, Double> outputs,
@@ -211,7 +188,7 @@ public class Task1Controller {
 
     @NotNull
     private Vector getPosition(@NotNull Map<Integer, Double> outputs) {
-        return new Vector(outputs.get(2), outputs.get(3));
+        return new Vector(outputs.get(2), outputs.get(3)).flip();
     }
 
     public static void main(String[] args) throws IOException {

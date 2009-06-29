@@ -39,6 +39,11 @@ public final class Vector {
     //---------------------------------------------------------------------------------------------
 
     @NotNull
+    public Vector plus(@NotNull Vector v) {
+        return new Vector(x + v.x, y + v.y);
+    }
+
+    @NotNull
     public Vector minus(@NotNull Vector v) {
         return new Vector(x - v.x, y - v.y);
     }

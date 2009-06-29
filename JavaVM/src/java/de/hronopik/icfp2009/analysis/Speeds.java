@@ -34,7 +34,7 @@ public class Speeds {
 
                 Vector s_t = new Vector(oldInputs.get(2), oldInputs.get(3));
                 Vector s_tt = new Vector(inputs.get(2), inputs.get(3));
-                Vector speed = Phys.speed(s_t, s_tt);
+                Vector speed = Phys.speedT0(s_t, s_tt);
 
                 System.out.println("r   = " + Phys.radius(s_t));
                 System.out.println("v_x = " + speed.getX());
