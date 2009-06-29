@@ -26,6 +26,13 @@ mkInputFile trace =
        where showStep :: (I.IntMap Dat) -> String
              showStep inp = concat $ filter (not . null) $  (map (\(a,d) -> show a ++ " " ++ show d ++ "\n") $ I.toList inp) ++ ["."]
 
+searchG_mu vm = do let t = I.filter pred (mem vm)
+                   print "Testing Interesting Values"
+                   print t
+    where pred dat = (abs (dat - mu) <= 1)
+                     || (abs (dat*m_e - mu)  <= 1)
+                     || (abs (dat - m_e)  <= 1)
+
 main :: IO()
 main = do
   args <- getArgs
@@ -34,15 +41,22 @@ main = do
   let conf = read (args !! 1) :: Dat
 --  let verbose = (length args > 2)
   vm <- loadVMFromFile file
+  
+  searchG_mu vm
+
   let cont = case floor $ conf/1000.0 of
                1 -> task1Controller
                2 -> georgController
+
+               8 -> getVTestController2
                9 -> testHohmannController
                _ -> error "not implemented"
   let trace = runController (cont conf) vm
 --  let vm' = runController2 (cont conf) vm
 --  print vm'
+
   hPutStr stderr $ "Score: " ++ show (getOut 0 (traceOut (last $ DL.toList trace)))
+
   writeFile ((show conf) ++ ".input") $ mkInputFile trace
   sequence_ ( map showFrame $ DL.toList trace)
     where showFrame (Trace1 timeStep  inp out) = do

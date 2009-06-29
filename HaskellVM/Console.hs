@@ -15,6 +15,11 @@ import Control.Monad
 
 import VM
 
+
+
+-- showConsoleOutput :: (Addr, Dat) -> String
+-- showConsoleOutput (a,d) = show a ++ " " ++ show d
+
 console :: (Inp -> VM -> (VM, Outp)) -> VM -> IO()
 console oneRun vm = helper vm
       where           

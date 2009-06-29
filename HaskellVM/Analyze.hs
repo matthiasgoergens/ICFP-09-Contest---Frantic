@@ -22,37 +22,98 @@ import Console
 import VM
 import qualified Data.Set as S
 
-data NameSpace = NInp Addr | NOutp Addr | NMem Addr deriving (Ord, Eq)
+data NameSpace = NInp Addr | NOutp Addr | NMem  Addr deriving (Ord, Eq)
 
 instance Show NameSpace where
     show (NInp x) = "NInp" ++ show x
     show (NOutp x) = "NOutp" ++ show x
-    show (NMem x) = "NMem" ++ show x
+    show (NMem x) = "NMem_" ++ show x
 
-analyze :: VM -> [(NameSpace, [NameSpace])]
-analyze vm = map go . instr $ vm
+    
+analyze' :: VM -> [(NameSpace, [NameSpace])]
+analyze' vm = map go . instr $ vm
     where go (c, DType Output addr1 addr2) = (NOutp addr1, [NMem addr2])
-          go (c, DType _ addr1 addr2) = (NMem c, [NMem addr1, NMem addr2])
+          go (c, DType op addr1 addr2) = (NMem c, [NMem addr1, NMem addr2])
           go (c, SType Noop _) = (NMem c, [])
           go (c, SType Input addr) = (NMem c, [NInp addr])
-          go (c, SType _ addr) = (NMem c, [NMem addr])
+          go (c, SType op addr) = (NMem c, [NMem addr])
+
+analyze :: VM -> [(NameSpace, [NameSpace])]
+analyze vm = (map go . instr $ vm) ++ phi_cmp (instr vm)
+    where go (c, DType Output addr1 addr2) = (NOutp addr1, [NMem addr2])
+          go (c, DType op addr1 addr2) = (NMem c, [NMem addr1, NMem addr2])
+          go (c, SType Noop _) = (NMem c, [])
+          go (c, SType Input addr) = (NMem c, [NInp addr])
+          go (c, SType op addr) = (NMem c, [NMem addr])
+
+          isPhiCmp t = isPhi t || isCmp t
+          isPhi (DType Phi _ _) = True
+          isPhi _ = False
+          isCmp (SType Cmpz _) = True
+          isCmp _ = False
+
+          -- start with cmp
+          normalize z = rest ++ phis
+              where (phis, rest) = break isCmp z
+
+          phi_cmp instrs = op . normalize . filter (isPhiCmp.snd) inst
+
+          op (
 
 
+{-
+data Instr = DType DOP !Addr !Addr 
+           |  SType SOP !Addr 
+             deriving (Show)
+data DOP  = Add | Sub | Mult | Div | Output | Phi deriving (Read, Show)
+data SOP  = Noop | Cmpz (Dat -> Dat -> Bool) | Sqrt | Copy | Input deriving (Show)
+-}
 
-showAnalysis :: [(NameSpace, [NameSpace])] -> String
-showAnalysis l = "digraph dataflow {\n"
+
+showAnalysis :: VM -> [(NameSpace, [NameSpace])] -> String
+showAnalysis vm l = "digraph dataflow {\n"
                  ++ (shapes . S.toList . S.fromList $ (concat (map snd l) ++ map fst l))
                  ++ (concat . map (uncurry go) $ l)
                  ++ "}\n"
     where go sink = concat . map (goLine sink)
-          goLine sink source = show source ++ " -> " ++ show sink ++ ";\n"
+--           goLine sink source = show source ++ " -> " ++ show sink ++ ";\n"
+
+          goLine sink source                     
+              | sink < source = "edge[style=dashed, dir=back]; "
+                                ++show sink ++ " -> " ++ show source ++ ";\n"
+              | otherwise = "edge[style=solid, dir=forward]; "
+                            ++show source ++ " -> " ++ show sink ++ ";\n"
+
           shapes :: [NameSpace] -> String
-          shapes names = "node [shape = circle];\n"
-                         ++ (concat . map ((++" ").show) . filter isNMem $ names) ++ ";\n"
-                         ++ "node [shape = box];\n"
-                         ++ (concat . map ((++" ").show) . filter isNInp $ names) ++ ";\n"
-                         ++"node [shape = diamond];\n"
-                         ++ (concat . map ((++" ").show) . filter isNOutp $ names) ++ ";\n"
+          shapes names = labelNMems names ++ "\n"
+                         ++ (concat . map labelInp . filter isNInp $ names) ++ "\n"
+                         ++ (concat . map labelOutp . filter isNOutp $ names) ++ "\n"
+
+
+
+
+          labelNMems names = (concat . map labelNMem . filter isNMem $ names)
+
+          labelInp name = "node [shape = box, label=" ++ show name++"];" ++ show name ++";\n"
+          labelOutp name = "node [shape = diamond, label=" ++ show name++"];" ++ show name ++";\n"
+
+
+--          labelNMem name = case snd (instr vm !! addr)
+-- "node [shape = circle, label=" ++ show name++"_" ++ typeShow name++"];" ++ show name ++";\n"
+          labelNMem name@(NMem addr) = "node [shape = circle, label=\"" ++ show addr++"\\n" ++ typeShow addr
+                                       ++"\\n"++show (readMem vm addr)++"\"];" ++ show name ++";\n"
+          typeShow addr = case snd (instr vm !! addr) of
+--                            SType Noop _ -> show (readMem vm addr)
+                            DType t _ _ -> typeD t
+                            SType t _ -> typeS t
+                               
+          typeD = show 
+
+          typeS (Cmpz _) = "Cmpz"
+          typeS t = show t
+                               
+                               
+
 
 invert :: [(NameSpace, [NameSpace])] -> [(NameSpace, [NameSpace])]
 invert l = M.toList . M.fromListWith (++) . concat . map go $ l
@@ -69,11 +130,13 @@ isNOutp _ = False
 
 -- LR_0 -> LR_2 [ label = "SS(B)" ];
 
-analyseDepend :: VM -> NameSpace -> [(NameSpace, [NameSpace])]
+
+
+analyseDepend :: VM -> [NameSpace] -> [(NameSpace, [NameSpace])]
 analyseDepend vm start = filter (flip S.member reached . fst) network
     where network = analyze $ vm
           networkM = M.fromList network
-          reached = follow networkM S.empty [start]
+          reached = follow networkM S.empty start
 
 follow :: Ord a => M.Map a [a] -> S.Set a -> [a] -> S.Set a
 follow networkM exhausted [] = exhausted                    
@@ -95,14 +158,16 @@ prop_follow = follow (M.fromList [(1,[2]), (2,[3]), (4,[5])]) S.empty [1] == S.f
 fullNetworkAnalysis args = do
   let file = args !! 1
   dat <- B.readFile file
-  putStr . showAnalysis . analyze . loadVM $ dat
+  let vm = loadVM dat
+  putStr . showAnalysis vm . analyze $ vm
 
 dependencyAnalysis args = do
   let file = args !! 1
   when (length args < 3) $ do fail "\nWhat do you want to analyses?\n"
   dat <- B.readFile file
+  let vm = loadVM dat
   let n = (NOutp . read $ (args !! 2))
-  putStr $ showAnalysis $ analyseDepend (loadVM $ dat) n
+  putStr $ showAnalysis vm $ analyseDepend (vm) (map NOutp [2, 3])
 
 
 gnuplotter :: [Int] -> (Inp -> VM -> (VM, Outp)) -> VM -> IO()

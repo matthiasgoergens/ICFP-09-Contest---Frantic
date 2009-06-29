@@ -53,21 +53,19 @@ getVLin z =
 -}
 
 
-calcV0Lin :: Pos -> Pos -> Vec
-calcV0Lin pos0 pos1 = pos1-pos0
+
+
+getNextPosNoop :: (Tick z) => Controller z Pos
+getNextPosNoop = do
+  z <- get
+  return (getPos $ tryInput (mkInp []) z)
 
 getVLin :: (Tick z) => Outp -> Controller z (Vec)
 getVLin out = 
-    do z <- get
-       let pos1 = getPos $ tryInput (mkInp []) z
+    do pos1 <- getNextPosNoop
        return $ calcV0Lin (getPos out) pos1
 
  
-calcV0 :: Pos -> Pos -> Vec
-calcV0 pos0 pos1 = 
-    let g = calcG pos0
-    in (pos1 - pos0) - scale 0.5 g
-
 getV :: (Tick z) => Outp -> Controller z (Vec)
 getV out = 
     do z <- get
@@ -241,11 +239,9 @@ testHohmannController conf =
        out <- mytrace "sollrad" [sollrad] $ hohmann out sollrad 
        sequence_ $ replicate (300000) noop                   
 
-       return ()
-
 getVTestController :: (Tick z) => Dat -> Controller z ()
 getVTestController conf  = 
-    do outm <- tick $ mkInp [(16000, 2001)]
+    do outm <- tick $ mkInp [(16000, 1001)]
        out0 <- noop
        linv0 <- getVLin out0
        v0_a  <- getV out0
@@ -260,20 +256,73 @@ getVTestController conf  =
        mytrace "diffv 1,2:" [linv0 - v0,linv1 - v1] $ return ()
        mytrace "v linv g p:" [v0,v0_a,linv0,normalize $ calcG pos0, normalize pos0] $ return ()
        
+
+n = 1000
+
+wait :: Tick z => Int -> Controller z [Outp]
+wait n = sequence $ replicate n noop
+
 getVTestController2 :: (Tick z) => Dat -> Controller z ()
-getVTestController2 conf  = 
-    do tick $ mkInp [(16000, 2001)]
-       out <- noop
+getVTestController2 _  = 
+    do tick $ mkInp [(16000, 2003)]
+       
+       outs <- wait (n+1)
+
+       let poss@(pos0:pos1:_) = map (getPos) outs
+           
+           v0 = calcV0 pos0 pos1
+
+           virts = map fst $ iterate calcTick $ (pos0, v0)
+
+--       trace ("Pos Real1:\t"++ show pos1) $ noop
+--       trace ("Pos Virt1:\t"++ show pos1') $ noop
+
+       trace ("Pos Real0:\t"++ show (poss !! 0)) $ noop
+       trace ("Pos Virt0:\t"++ show (virts !! 0)) $ noop
+
+       trace ("Pos diff0:\t"++ show ((poss !! 0)-(virts !! 0))) $ noop
+
+       trace ("Pos Realn:\t"++ show (poss !! n)) $ noop
+       trace ("Pos Virtn:\t"++ show (virts !! n)) $ noop
+
+       trace ("Pos diffn:\t"++ show ((poss !! n)-(virts !! n))) $ noop
+
+       return ()
+
+{-       trace ("Pos Virt2:\t"++ show pos2) $ noop
+       trace ("Pos Real2:\t"++ show (getPos out2)) $ noop
+
+       trace ("V Virt1:\t"++ show v1) $ noop
+       trace ("V Real1:\t"++ show linv1) $ noop
+
+       trace ("V Virt2:\t"++ show v2) $ noop
+       trace ("V Real2:\t"++ show linv2) $ noop
+
+-}  
+     
+{-
+       trace (show (getPos out)) getNextPosNoop
+       
        linv0 <- getVLin out
+       
        v0   <- getV out
+
        let pos0 = getPos out
            (pos1,v1) = calcTick (pos0, v0)
            (pos2,v2) = calcTick (pos1, v1)
-       out1 <- noop
+
+       out1 <- (noop)
+
        linv1 <- getVLin out
        out2 <- noop
-       mytrace "diffP 1,2:" [pos1- (getPos out1),pos2- (getPos out2)] $ return ()
-       mytrace "diffv 1,2:" [linv0 - v0,linv1 - v1] $ return ()
-       mytrace "v linv g p:" [v0,linv0,normalize $ calcG pos0, normalize pos0] $ return ()
+       linv2 <- getVLin out
+
+
+
+       return ()
+--       mytrace "diffv 1,2:\t" [linv0 - v0,linv1 - v1] $ return ()
+--       mytrace "v linv g p:" [v0,linv0,normalize $ calcG pos0, normalize pos0] $ return ()
        
-  
+       
+
+-}  
