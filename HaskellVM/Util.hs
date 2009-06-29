@@ -48,6 +48,9 @@ perpendicular (x,y) = (-y,x)
 vecLen :: (Dat,Dat) -> Dat
 vecLen (d1,d2) = sqrt(d1*d1 + d2*d2)
 
+vecLen2 :: (Dat,Dat) -> Dat
+vecLen2 (d1,d2) = (d1*d1 + d2*d2)
+
 -- Operations on Outputs
 
 getRad :: Outp -> Dat

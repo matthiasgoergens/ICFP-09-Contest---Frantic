@@ -48,6 +48,17 @@ getVLin z =
         l    = (fromIntegral $ length poss) :: Dat
     in ((last poss) - (head poss)) * (l,l)
 
+
+
+getV :: (Tick z) => Pos -> z -> Vec
+getV pos0 z = 
+    let pos1 = head $ getPos (tryInputs (replicate 1 (mkInp [])) z)
+        (pos0N, pos1N) = (normalize pos0, normalize pos1)
+        (r02, r12) = (vecLen2 pos0, vecLen2 pos1)
+        ag = mu * (1 / r02) * pos0N
+        diff_g = ag / 2 * 1*1
+    in ((last poss) - (head poss)) * (l,l)
+
 noop :: (Tick z) => Controller z Outp
 noop = tick (mkInp [])
 
