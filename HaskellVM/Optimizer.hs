@@ -1,6 +1,7 @@
 
 module Optimizer where
 
+import qualified Data.ByteString as B
 import qualified Data.IntMap as I
 import Data.List
 import Data.Function
@@ -349,16 +350,26 @@ crit1_2a p@(old,o) _
             vToEath = scalar v toEarth
         in trace (show toEarth) $ vToEath < 0
 
+mkInputFile' :: Int -> Dat -> DL.DList Inp -> B.ByteString
+mkInputFile' numEmpties conf inps = 
+    let all = (0,mkInp [(16000, conf)]) : inps
+        noCons = map ( mapsnd (\ (Inp m) -> m)) all
+        imap = I.fromListWith (I.union) noCons
+        max  = numEmpties + (maximum $ I.keys imap)
+        allsteps = map (\t -> I.findWithDefault I.empty t imap) $ take max [0..]
+    in concat $ map (++"\n") $ map showStep allsteps
+       where showStep :: (I.IntMap Dat) -> String
+             showStep inp = concat $ filter (not . null) $  (map (\(a,d) -> show a ++ " " ++ show d ++ "\n") $ I.toList inp) ++ ["."]
 
 
-mkInputFile :: Int -> Dat -> InpSeq -> String
+mkInputFile :: Int -> Dat -> InpSeq -> B.ByteString
 mkInputFile numEmpties conf inps = 
     let all = (0,mkInp [(16000, conf)]) : inps
         noCons = map ( mapsnd (\ (Inp m) -> m)) all
         imap = I.fromListWith (I.union) noCons
         max  = numEmpties + (maximum $ I.keys imap)
         allsteps = map (\t -> I.findWithDefault I.empty t imap) $ take max [0..]
-    in unlines $ map showStep allsteps
+    in concat $ map (++"\n") $ map showStep allsteps
        where showStep :: (I.IntMap Dat) -> String
              showStep inp = concat $ filter (not . null) $  (map (\(a,d) -> show a ++ " " ++ show d ++ "\n") $ I.toList inp) ++ ["."]
 
