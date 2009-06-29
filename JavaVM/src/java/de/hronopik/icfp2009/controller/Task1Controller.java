@@ -121,9 +121,12 @@ public class Task1Controller {
         assert vm.getStepIndex() == timeBeforeHohmann2;
         vm.step(buildDeltaVInput(dv2));
 
-        while (vm.getStepIndex() < timeBeforeHohmann2 + 1000) {
-            vm.step();
+        while (outputs.get(0) == 0) {
+            outputs = vm.step();
         }
+
+        System.err.println("score = " + outputs.get(0));
+        System.err.println("fuel  = " + outputs.get(1));
 
         /*double maxDeltaR = 0;
         while (vm.getStepIndex() < timeBeforeHohmann2 + Phys.circulationTime(r2) * 2) {
