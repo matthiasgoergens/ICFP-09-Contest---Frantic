@@ -16,9 +16,9 @@ Value       | 0.000000
 TimeStep    |      2
 Count       |      2
 Addr        |      2
-Value       | -2.771060
+Value       | -2.771101
 Addr        |      3
-Value       | -1672.681664
+Value       | -1672.706421
 --------------------
 TimeStep    |      3
 Count       |      2
@@ -27,20 +27,69 @@ Value       | 0.000000
 Addr        |      3
 Value       | 0.000000
 --------------------
-TimeStep    |  12224
-Count       |      2
-Addr        |      2
-Value       | 2.019648
-Addr        |      3
-Value       | 1219.110300
---------------------
 TimeStep    |  12225
 Count       |      2
 Addr        |      2
+Value       | 2.213913
+Addr        |      3
+Value       | 1219.119438
+--------------------
+TimeStep    |  12226
+Count       |      2
+Addr        |      2
 Value       | 0.000000
 Addr        |      3
 Value       | 0.000000
 --------------------
-TimeStep    |  13126
+TimeStep    |  12227
+Count       |      2
+Addr        |      2
+Value       | -2.779275
+Addr        |      3
+Value       | -1441.098424
+--------------------
+TimeStep    |  12228
+Count       |      2
+Addr        |      2
+Value       | 0.000000
+Addr        |      3
+Value       | 0.000000
+--------------------
+TimeStep    |  23597
+Count       |      2
+Addr        |      2
+Value       | 5.730176
+Addr        |      3
+Value       | 2111.887039
+--------------------
+TimeStep    |  23598
+Count       |      2
+Addr        |      2
+Value       | -8.535996
+Addr        |      3
+Value       | -2111.876241
+--------------------
+TimeStep    |  23599
+Count       |      2
+Addr        |      2
+Value       | 0.000000
+Addr        |      3
+Value       | 0.000000
+--------------------
+TimeStep    |  34968
+Count       |      2
+Addr        |      2
+Value       | 4.819436
+Addr        |      3
+Value       | 1441.091765
+--------------------
+TimeStep    |  34969
+Count       |      2
+Addr        |      2
+Value       | 0.000000
+Addr        |      3
+Value       | 0.000000
+--------------------
+TimeStep    |  35870
 Count       |      0
 --------------------

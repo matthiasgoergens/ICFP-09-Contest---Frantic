@@ -16,9 +16,9 @@ Value       | 0.000000
 TimeStep    |      2
 Count       |      2
 Addr        |      2
-Value       | -870.118578
+Value       | -870.099490
 Addr        |      3
-Value       | -867.538568
+Value       | -867.519536
 --------------------
 TimeStep    |      3
 Count       |      2
@@ -30,9 +30,9 @@ Value       | 0.000000
 TimeStep    |   9155
 Count       |      2
 Addr        |      2
-Value       | 699.858747
+Value       | 699.935864
 Addr        |      3
-Value       | 697.783579
+Value       | 697.684122
 --------------------
 TimeStep    |   9156
 Count       |      2
@@ -41,6 +41,55 @@ Value       | 0.000000
 Addr        |      3
 Value       | 0.000000
 --------------------
-TimeStep    |  10057
+TimeStep    |   9157
+Count       |      2
+Addr        |      2
+Value       | -985.636804
+Addr        |      3
+Value       | -982.105832
+--------------------
+TimeStep    |   9158
+Count       |      2
+Addr        |      2
+Value       | 0.000000
+Addr        |      3
+Value       | 0.000000
+--------------------
+TimeStep    |  17135
+Count       |      2
+Addr        |      2
+Value       | 1347.991839
+Addr        |      3
+Value       | 1341.008652
+--------------------
+TimeStep    |  17136
+Count       |      2
+Addr        |      2
+Value       | -1349.863914
+Addr        |      3
+Value       | -1339.122230
+--------------------
+TimeStep    |  17137
+Count       |      2
+Addr        |      2
+Value       | 0.000000
+Addr        |      3
+Value       | 0.000000
+--------------------
+TimeStep    |  25114
+Count       |      2
+Addr        |      2
+Value       | 987.171228
+Addr        |      3
+Value       | 980.560923
+--------------------
+TimeStep    |  25115
+Count       |      2
+Addr        |      2
+Value       | 0.000000
+Addr        |      3
+Value       | 0.000000
+--------------------
+TimeStep    |  26016
 Count       |      0
 --------------------
