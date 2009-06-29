@@ -26,7 +26,9 @@ BeginPackage["ICFP09`",{"JLink`"}]
 Simulator::usage="Simulator[{x0,v0},te,controlFunk] simuliert mit {{x1,x2},{vx1,vx2}} genau te Schritte und wendet die controlFunk bei jedem Schriff auf {x1t,x2t} an. Diese muss dann {dvx,dvy} liefern.";
 InitJavaVM::usage="InitJavaVM[pathToOrbitJar] initializes the OrbitVM. Must be called first!";
 VMInit::usage="VMInit[{vx_,vy_},problemFile_String] starts the OrbitVM with initial dvx and dvy.";
-VMStep::usage="VMStep[{{addr1,addr2,...},{value1,value2,...}}] makes one step. For zero input just give {{},{}} as argument.";
+VMStep::usage="VMStep[{vx,vy}] or VMStep[{{addr1,addr2,...},{value1,value2,...}}] makes one step. For zero input just give {{},{}} as argument.";
+CoordinatesOnly::usage="Is an option for VMInit to specify that the results of VMInit and VMStep are only the coordinates of the satellite.";
+TangentialSpeed::usage="TangentialSpeed[{st1_,st2}] calculates the speed of at st1";
 
 
 Begin["Private`"]
@@ -54,18 +56,30 @@ converter=LoadJavaClass["de.hronopik.icfp2009.util.MathematicaConverter"];
 ];
 
 
-
-VMInit[{vx_,vy_},problemFile_String]:=Block[{in,out},
+$CoordinatesOnly=False;
+Options[VMInit]:={
+CoordinatesOnly->False
+};
+VMInit[{vx_,vy_},problemFile_String,opts___Rule]:=Block[{in,out},
 vm=JavaNew[vmClass,problemFile];
+{$CoordinatesOnly}={CoordinatesOnly}/.{opts}/.Options[VMInit];
 in=MathematicaConverter`toMap[{2,3,16000},{vx,vy,1001.0}];
 out=vm@step[in];
-MathematicaConverter`fromMap[out]
+If[$CoordinatesOnly===False,
+MathematicaConverter`fromMap[out],
+Last@Transpose@(MathematicaConverter`fromMap[out][[{3,4}]])
+]
 ];
-VMStep[input_]:=Block[{in,out},
-in=MathematicaConverter`toMap[Sequence@@input];
+VMStep[{vx_?NumericQ,vy_?NumericQ}]:=VMStep[{{2,3},{vx,vy}}];
+VMStep[{addr_List,vals_List}]:=Block[{in,out},
+in=MathematicaConverter`toMap[addr,vals];
 out=vm@step[in];
-MathematicaConverter`fromMap[out]
+If[$CoordinatesOnly===False,
+MathematicaConverter`fromMap[out],
+Last@Transpose@(MathematicaConverter`fromMap[out][[{3,4}]])
+]
 ];
 
+TangentialSpeed[{x1_,x2_}]:=x2-x1+\[ScriptCapitalG]*\[ScriptCapitalM]/Norm[x1]^2*x1/Norm[x1];
 End[]
 EndPackage[]

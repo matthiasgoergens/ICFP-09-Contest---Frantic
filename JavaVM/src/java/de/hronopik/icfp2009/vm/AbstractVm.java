@@ -116,7 +116,7 @@ abstract class AbstractVm {
         if (snapshoot == null) {
             throw new IllegalArgumentException("Unknown snapshoot with name \"" + snapshootName + "\".");
         }
-        values = snapshoot.values;
+        values = copyOf(snapshoot.values,snapshoot.values.length);
         status = snapshoot.status;
         stepIndex = snapshoot.stepIndex;
     }
@@ -142,6 +142,15 @@ abstract class AbstractVm {
         //---------------------------------------------------------------------------------------------
 
         private Snapshoot(@NotNull double[] values, boolean status, int stepIndex) {
+	        /*TODO: Buy a present for patrick since it took him an hour to find this crap..
+	        AAHHHH. WTF?
+	        I added a copyOf here because when I create a vm and do a snapshot and it it is not copied
+	        then every change in the vm causes a change in these values here...
+	        After reloading the snap shot I get exactly the last state of the vm with status and
+	        stepIndex reseted to the snapshot-point.
+	        I really don't know why all your test run fine.
+	        Patrick
+	         */
             this.values = copyOf(values, values.length);
             this.status = status;
             this.stepIndex = stepIndex;

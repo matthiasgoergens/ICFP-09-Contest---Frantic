@@ -1,6 +1,8 @@
 package de.hronopik.icfp2009.util;
 
 import de.hronopik.icfp2009.vm.DirectVm;
+import de.hronopik.icfp2009.util.optimizer.FitnessFunction;
+import de.hronopik.icfp2009.util.optimizer.SimpleMinimizer;
 
 import java.io.IOException;
 import java.util.Map;
@@ -11,12 +13,22 @@ import java.util.ArrayList;
 /**
  * Created by IntelliJ IDEA. User: patrick Purpose:
  */
-public class MathematicaVMRunner {
-	DirectVm vm, vmSave;
+public class MathematicaVMRunner implements FitnessFunction{
+
+	double r2 = 4.2164e7d;
+
+	public static DirectVm vm;
 	String path;
 
 	public MathematicaVMRunner(String pathToProblem) {
 		path = pathToProblem;
+		try {
+			vm = new DirectVm(path);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		vm.createSnapshoot("start");
 
 
 	}
@@ -24,7 +36,7 @@ public class MathematicaVMRunner {
 
 	public Double[] runToTurn(double dvx, double dvy){
 		int MAX_ITER = 100000;
-		vm.reset("startme");
+		vm.reset("start");
 		Map<Integer, Double> inputs = new HashMap<Integer, Double>();
 //		inputs.put(16000, 1001d);
 		inputs.put(2, dvx);
@@ -52,17 +64,12 @@ public class MathematicaVMRunner {
 			y1 = y2;
 		}
 		vm.undo();
-		vm.createSnapshoot("TURN");
 		return(result.toArray(new Double[result.size()]));
 	}
 
 	public double[] runToTurn2(double dvx, double dvy, double rGoal){
 		long MAX_ITER = 1000000;
-		try {
-			vm = new DirectVm(path);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		vm.reset("start");
 		Map<Integer, Double> inputs = new HashMap<Integer, Double>();
 		inputs.put(16000, 1001d);
 		inputs.put(2, dvx);
@@ -74,6 +81,7 @@ public class MathematicaVMRunner {
 		Map<Integer, Double> outputs = vm.step(inputs);
 		x1 = outputs.get(2);
 		y1 = outputs.get(3);
+		System.out.println("POSITION "+ x1 + " " + y1);
 
 		for (long iter = 0; iter < MAX_ITER; ++iter) {
 			outputs = vm.step(Collections.<Integer, Double>emptyMap());
@@ -86,8 +94,8 @@ public class MathematicaVMRunner {
 			x1 = x2;
 			y1 = y2;
 		}
-		vm.undo();
-		vm.createSnapshoot("TURN");
+//		vm.undo();
+//		vm.createSnapshoot("TURN");
 		return(new double[]{vm.getStepIndex(),Math.sqrt(x1*x1+y1*y1)});
 	}
 
@@ -175,11 +183,34 @@ public class MathematicaVMRunner {
 	}
 
 
+	public double f(double[] parms) {
+		double val[] = runToTurn2(0.0d, parms[0],r2);
+		double potential = Math.abs(r2-val[1])/r2;
+
+		System.err.println(parms[0]+ " -> "+ " with "+ potential +"   Iter("+vm.getStepIndex()+")");
+		return potential;
+	}
+
+	public double[] getInitialGuess() {
+		return new double[]{-2466.4};
+	}
+
+	public int getDimension() {
+		return 1;
+	}
+
+	public double[] getInitialStepSize() {
+		return new double[]{0.01};  //To change body of implemented methods use File | Settings | File Templates.
+	}
+
 	public static void main(String[] args) {
+
+		//TODO: start to believe that this is never going to work because the f()'s are far too slow.. shit.
 		MathematicaVMRunner run = new MathematicaVMRunner("/home/patrick/icfp/task/bin1.obf");
-		Double res1[] = run.runToTurn(0,-2466);
-		Double res2[] = run.runToTurn(0,-2466);
-		System.out.println("Laengen: "+res1.length +" und " +res2.length);
+		SimpleMinimizer minimizer = new SimpleMinimizer(run);
+		minimizer.minimize();
+		System.out.println(minimizer.getMin()[0]);
+		
 
 	}
 

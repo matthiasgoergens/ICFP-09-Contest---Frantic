@@ -19,7 +19,7 @@ public class DirectVmTest {
 
     @Before
     public void setUp() throws IOException {
-        vm = new DirectVm("../task/bin1.obf");
+        vm = new DirectVm("../../task/bin1.obf");
     }
 
     @Test
