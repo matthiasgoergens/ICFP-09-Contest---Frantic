@@ -44,9 +44,9 @@ Value       | 0.000000
 TimeStep    |  16641
 Count       |      2
 Addr        |      2
-Value       | -1232.075280
+Value       | -1232.386123
 Addr        |      3
-Value       | -3.394418
+Value       | -3.395274
 --------------------
 TimeStep    |  16642
 Count       |      2
@@ -55,41 +55,41 @@ Value       | 0.000000
 Addr        |      3
 Value       | 0.000000
 --------------------
+TimeStep    |  34757
+Count       |      2
+Addr        |      2
+Value       | 1804.916222
+Addr        |      3
+Value       | 5.903457
+--------------------
+TimeStep    |  34758
+Count       |      2
+Addr        |      2
+Value       | -1804.910260
+Addr        |      3
+Value       | -7.404478
+--------------------
 TimeStep    |  34759
 Count       |      2
 Addr        |      2
-Value       | 1804.258502
-Addr        |      3
-Value       | 5.900732
---------------------
-TimeStep    |  34760
-Count       |      2
-Addr        |      2
-Value       | -1804.252546
-Addr        |      3
-Value       | -7.400310
---------------------
-TimeStep    |  34761
-Count       |      2
-Addr        |      2
 Value       | 0.000000
 Addr        |      3
 Value       | 0.000000
 --------------------
-TimeStep    |  52878
+TimeStep    |  52874
 Count       |      2
 Addr        |      2
-Value       | 1232.071486
+Value       | 1232.382325
 Addr        |      3
-Value       | 4.485540
+Value       | 4.487251
 --------------------
-TimeStep    |  52879
+TimeStep    |  52875
 Count       |      2
 Addr        |      2
 Value       | 0.000000
 Addr        |      3
 Value       | 0.000000
 --------------------
-TimeStep    |  53780
+TimeStep    |  53776
 Count       |      0
 --------------------

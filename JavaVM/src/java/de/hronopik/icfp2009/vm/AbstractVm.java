@@ -84,6 +84,10 @@ abstract class AbstractVm implements Vm {
             status = instruction.execute(stepIndex, status, values, inputs, outputs);
         }
 
+        if (outputs.get(0) == -1) {
+            throw new RuntimeException("CRASHED");
+        }
+
         stepIndex++;
 
         return outputs;
