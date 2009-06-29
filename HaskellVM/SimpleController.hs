@@ -279,7 +279,7 @@ task3Controller conf =
        (out,force2) <- hohmannNoEnd out (vecLen minP) force1
        force3       <- hohmannGetForce1 out (vecLen maxP)
        out <- steuer out (force2+force3)       
-       foldM (follow 0.00001) out $ replicate 1800 ((4,5))
+       foldM (follow 0.00005) out $ replicate 1800 ((4,5))
        sequence_ $ replicate (4000) noop                   
        return ()
 
