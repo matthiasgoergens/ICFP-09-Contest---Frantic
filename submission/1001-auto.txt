@@ -1,0 +1,46 @@
+       Header       
+--------------------
+TeamID      |    151
+ScenarioID  |   1001
+--------------------
+TimeStep    |      0
+Count       |      1
+Addr        |  16000
+Value       | 1001.000000
+--------------------
+TimeStep    |      1
+Count       |      1
+Addr        |  16000
+Value       | 0.000000
+--------------------
+TimeStep    |      2
+Count       |      2
+Addr        |      2
+Value       | -5.879336
+Addr        |      3
+Value       | -2466.479005
+--------------------
+TimeStep    |      3
+Count       |      2
+Addr        |      2
+Value       | 0.000000
+Addr        |      3
+Value       | 0.000000
+--------------------
+TimeStep    |  18877
+Count       |      2
+Addr        |      2
+Value       | 3.534857
+Addr        |      3
+Value       | 1482.931358
+--------------------
+TimeStep    |  18878
+Count       |      2
+Addr        |      2
+Value       | 0.000000
+Addr        |      3
+Value       | 0.000000
+--------------------
+TimeStep    |  19779
+Count       |      0
+--------------------
