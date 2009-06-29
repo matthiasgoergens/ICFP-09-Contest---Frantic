@@ -11,6 +11,7 @@ import System
 import Control.Monad
 import Data.Function
 import Data.List
+import Debug.Trace
 
 import ParseInOut
 
@@ -54,7 +55,7 @@ main  = do
   outf <- readFile outfile
   let is = parseInput inpf
   let os = parseOutput outf
-  let scenario = fromJust $ lookup 16000 (head is)
+  let scenario = fromJust $ lookup 16000 $ trace (show (take 100 is)) (head is)
       header   = Header teamID (floor $ scenario)
       max      = length os
       isfilter = zipWith (I.union `on` I.fromList) is ([] : map (map (mapsnd (const 0))) is)  

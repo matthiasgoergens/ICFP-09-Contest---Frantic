@@ -36,7 +36,7 @@ instance Tick VM where
     tick inp = do vm <- get
                   let (vm', outp) = oneRun inp vm
                   put vm'
-                  tell $! DL.singleton $ Trace1 (time vm') inp outp
+                  tell $! DL.singleton $ Trace1 (time vm) inp outp
                   return outp
     getTime (VM {time =t}) = t
 

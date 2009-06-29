@@ -195,24 +195,30 @@ task1Controller conf =
 
 
 
-task2Controller :: (Tick z) => Dat -> Controller z ()
-task2Controller conf = 
+traceController :: (Tick z) => Dat -> Controller z ()
+traceController conf = 
     do out <- tick $ mkInp [(16000, conf)]
        z <- get
        let outp = tryInputs (repeat (mkInp [])) z
        trace (unlines $ map show $ take 100 outp) noop 
        return ()
 
-georgController :: (Tick z) => Dat -> Controller z ()
-georgController conf = 
+noopController :: (Tick z) => Time -> Dat -> Controller z ()
+noopController maxtime conf = 
+    do out <- tick $ mkInp [(16000, conf-5000)]
+       sequence_ $ replicate (maxtime-1) noop
+       return ()
+
+task2Controller :: (Tick z) => Dat -> Controller z ()
+task2Controller conf = 
     do out <- tick $ mkInp [(16000, conf)]
-       {-let pos  = -(getPos out)
+       let pos  = -(getPos out)
            posO = (getPosOther out (4,5))
            phi1 = calcCircAng (-(getPos out))
            phi2 = calcCircAng (getPosOther out (4,5))
            phidiff = phi1-phi2                     
        out <- mytrace "pos" [pos, posO]$ noop
-       out <- mytrace "phie" [phi1,phi2,phidiff]$ noop-}
+       out <- mytrace "phie" [phi1,phi2,phidiff]$ noop
        let sollrad = vecLen (getPosOther out (4,5))
        out <- mytrace "sollrad" [sollrad] $ hohmann out sollrad 
        let phi1 = calcCircAng (-(getPos out))
@@ -222,7 +228,8 @@ georgController conf =
            tdiff   = tau * phidiff / (2 * pi) -- he is this time behind
            horad2  = hohmannTime1R2 sollrad ((tau-tdiff)/2)
        hohmannEllipse out horad2
-       foldM (follow) out $ replicate 5000 ((4,5))
+       out <- noop
+       foldM (follow) out $ replicate 2000 ((4,5))
        
 --       foldM (stayOnCircOrbit) out $ replicate 2000 (sollrad)
 --       foldM (stayOnCircOrbit2) out $ replicate 10 (sollrad)

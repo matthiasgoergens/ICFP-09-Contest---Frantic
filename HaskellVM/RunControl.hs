@@ -42,12 +42,10 @@ main = do
 --  let verbose = (length args > 2)
   vm <- loadVMFromFile file
   
-  searchG_mu vm
-
   let cont = case floor $ conf/1000.0 of
                1 -> task1Controller
-               2 -> georgController
-
+               2 -> task2Controller
+               7 -> noopController 20000
                8 -> getVTestController2
                9 -> testHohmannController
                _ -> error "not implemented"
@@ -55,14 +53,9 @@ main = do
       trace = DL.toList trace'
 --  let vm' = runController2 (cont conf) vm
 --  print vm'
-
-
-
+--  hPutStr stderr $ "#Score: " ++ show (getOut 0 (traceOut (last $ DL.toList trace)))
 --  writeFile ((show conf) ++ ".input") $ mkInputFile trace'
-  
-
   sequence_ ( map showFrame $ trace)
-
 --  hPutStr stderr $ "Score: " ++ show (getOut 0 (traceOut (last $ DL.toList trace)))
     where showFrame (Trace1 timeStep  inp out) = do
             let inmap = fromInp inp
