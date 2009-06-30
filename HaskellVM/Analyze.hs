@@ -27,12 +27,19 @@ import qualified Data.Set as S
 
 import Test.QuickCheck
 
-data NameSpace = NInp Addr | NOutp Addr | NMem  Addr deriving (Ord, Eq)
+data NameSpace = NIn Addr | NOut Addr | NMem  Addr | NZ Addr deriving (Ord, Eq)
+
+class ToDot a where
+    toDot :: a -> String
 
 instance Show NameSpace where
-    show (NInp x) = "NInp" ++ show x
-    show (NOutp x) = "NOutp" ++ show x
-    show (NMem x) = "NMem_" ++ show x
+    show (NIn x) = "Inp_" ++ show x
+    show (NOut x) = "Outp_" ++ show x
+    show (NMem x) = "Mem_" ++ show x
+    show (NZ x) = "Z_" ++ show x
+
+instance ToDot NameSpace where
+    toDot = show
 
 --instance Show (Int->Bool) where
 --    show 
@@ -56,8 +63,8 @@ data DependType = Plus | Minus | Mal | Durch
 
 
 
-data Senke  = SMem Addr | SOut Addr | SZ Addr
-data Quelle = QMem Addr | QIn  Addr | QZ Addr
+data Senke  = SMem {target :: Addr} | SOut {target :: Addr} | SZ {target :: Addr}
+data Quelle = QMem {src :: Addr} | QIn  {src :: Addr} | QZ {src :: Addr}
 
 newtype IType = IType (Either DOP SOP)
 
@@ -74,24 +81,25 @@ toIType :: Instr -> IType
 toIType (DType op _ _) = IType $ Left op
 toIType (SType op _) = IType $ Right op
 
-type Dataflow = ([Vertice], [Arc])
+data Dataflow = Dataflow [Vertice] [Arc] [Arc]
 
 
 
 analyzeDataflow :: VM -> Dataflow
-analyzeDataflow vm = (vertices, arcs)
+analyzeDataflow vm = Dataflow vertices arcs arcsZ
     where code = instr vm
           vertices = map calcV1 code
     
           calcV1 (addr, instr) = Vertice addr (toIType instr) (readMem vm addr)
 
-          arcs = analyzeZArcs code ++ analyzeOrdinaryArcs code -- analyze' (I.fromList)
+          arcs = analyzeOrdinaryArcs code -- analyze' (I.fromList)
+          arcsZ = analyzeZArcs code 
 
 -- Arc Senke (DependType, Quelle)
 
 analyzeZArcs :: [(Addr,Instr)] -> [Arc]
 analyzeZArcs = concat . map go
-               . splitBy (isCmp.snd)
+               . splitBy (isCmp . snd)
                . rot (isCmp.snd) . filter (isPhiCmp.snd)
     where go :: ((Addr, Instr), [(Addr, Instr)]) -> [Arc]
           go (cmp, phis) = map (go1 cmp) phis
@@ -102,9 +110,26 @@ analyzeZArcs = concat . map go
 
 splitBy :: (a -> Bool) -> [a] -> [(a,[a])]
 splitBy _ [] = []
-splitBy pred (x:xs) | not . pred $ x = error "splitBy: List should start with predicate evals to True"
-                    | otherwise = (x,init) : splitBy pred xs
-                    where (init, tail) = span (not.pred) xs
+splitBy pred l@(x:xs)
+    | not . pred $ x
+        = splitBy pred $ dropWhile (not . pred) xs
+    | otherwise 
+        = (x,init) : splitBy pred tail
+    where (init, tail) = span (not . pred) xs
+
+prop_SplitByConserve (Blind pred) (l::[Int])
+    = any pred l ==>
+      (dropWhile (not . pred) l
+       == (concat . map fuse . splitBy pred $ l))
+    where fuse (a, l) = a : l
+
+prop_SplitByConserve2 (Blind pred) (l::[Int])
+    = any pred l ==>
+      (l'
+       == (concat . map fuse . splitBy pred $ l'))
+    where fuse (a, l) = a : l
+          l' = rot pred l
+
 
 -- L.groupBy ((==) `on` (isPhi.snd))
 
@@ -114,13 +139,13 @@ takeNWhile n pred l = init ++ takeWhile (pred) tail
 prop_rot_idem (Blind pred) (l::[Int]) = rot pred (rot pred l) == rot pred l
 prop_rot_conserve (Blind pred) (l::[Int]) = L.sort (rot pred l) == L.sort l
 
-prop_rot_headTrue (Blind pred) (NonEmpty (l::[Int])) = collect (zip l (map pred l)) h
+prop_rot_headTrue (Blind pred) (NonEmpty (l::[Int])) = any pred l
+                                                       ==> h
     where h = pred ( head (rot pred l))
 
--- make Cmp come first!
-rot :: (a->Bool) -> [a] -> Just [a]
-rot pred l | null rest = Nothing
-           | oterwile = Just (rest ++ phis)
+-- make Cmp come first!, if any
+rot :: (a->Bool) -> [a] -> [a]
+rot pred l = (rest ++ phis)
     where (phis, rest) = break (pred) l 
 
 isPhiCmp t = isPhi t || isCmp t
@@ -132,7 +157,7 @@ isCmp _ = False
 analyzeOrdinaryArcs :: [(Addr,Instr)] -> [Arc]
 analyzeOrdinaryArcs = concat . map (uncurry go)
     where go c (DType Output addr1 addr2) = [Arc (SOut addr1) (Kopie, QMem addr1)]
-          --(NOutp addr1, [NMem addr2])
+          --(NOut addr1, [NMem addr2])
 
           go c (DType op addr1 addr2) = map (Arc (SMem c))
                                         (case op of
@@ -142,7 +167,6 @@ analyzeOrdinaryArcs = concat . map (uncurry go)
                                            Output -> error "Output should have been handled above."
                                            Div  -> [(Mal, QMem addr1),(Durch, QMem addr2)]
                                            Phi  -> [(Then, QMem addr1),(Else, QMem addr2)]
-                                           
                                         )
           
           go c (SType (Cmpz _) addr) = [Arc (SZ c) (Vergleich, QMem addr)]
@@ -157,10 +181,10 @@ analyzeOrdinaryArcs = concat . map (uncurry go)
 
 analyze :: VM -> [(NameSpace, [NameSpace])]
 analyze vm = (map go . instr $ vm) -- ++ phi_cmp (instr vm)
-    where go (c, DType Output addr1 addr2) = (NOutp addr1, [NMem addr2])
+    where go (c, DType Output addr1 addr2) = (NOut addr1, [NMem addr2])
           go (c, DType op addr1 addr2) = (NMem c, [NMem addr1, NMem addr2])
           go (c, SType Noop _) = (NMem c, [])
-          go (c, SType Input addr) = (NMem c, [NInp addr])
+          go (c, SType Input addr) = (NMem c, [NIn addr])
           go (c, SType op addr) = (NMem c, [NMem addr])
 
 
@@ -172,12 +196,15 @@ analyze vm = (map go . instr $ vm) -- ++ phi_cmp (instr vm)
 -}
 
 
-showDataflow :: Dataflow -> String
-showDataflow (vertices, arcs)
-    = "digraph dataflow {\n"
-      ++ (concat . map showVertice $ vertices)
-      ++ (concat . map showArc $ arcs)
-      ++ "}\n"
+instance ToDot Dataflow where
+    toDot (Dataflow vertices arcs0 arcsZ) =
+        "digraph dataflow {\n"
+        ++ (concat . map toDot $ vertices)
+        ++ "\n#Normal Arcs:\n\n"
+        ++ (concat . map toDot $ arcs0)
+        ++ "\n#Z Arcs:\n\n"
+        ++ (concat . map toDot $ arcsZ)
+        ++ "}\n"
 
 -- data Vertice = Vertice Addr IType Dat
 -- data Arc = Arc Senke (DependType, Quelle)
@@ -191,23 +218,79 @@ showDataflow (vertices, arcs)
 -- data Quelle = QMem Addr | QIn  Addr | QZ Addr
 
 
-showVertice :: Vertice -> String
-showVertice (Vertice addr itype dat) = show itype ++ show dat ++ show addr ++ ";\n"
 
-showArc :: Arc -> String
-showArc (Arc senke (dependType, quelle)) = showSenke senke ++ " -> "++ showQuelle quelle ++ ";\n"
+instance ToDot Vertice where
+    toDot (Vertice addr itype dat) = 
+        "node [shape = "++shape name++", label=\"" 
+                       ++ show itype++"\\n"
+                       -- ++ show name++"\\n"
+                       ++show addr++"\\n"
+                       ++show dat++"\"]; "++ toDot name ++";\n"
+            where name = toNameSpace itype addr
+                  shape (NMem _) = "box"
+                  shape (NOut _) = "triangle"
+                  shape (NIn _) = "triangle"
+                  shape (NZ _) = "circle"
+                                     -- ++ show dat ++"_"++ show addr ++ ";\n"
+
+toNameSpace :: IType -> Addr -> NameSpace
+toNameSpace (IType (Left op)) = case op of
+                                  Add  -> NMem
+                                  Sub  -> NMem
+                                  Mult -> NMem
+                                  Output -> NOut
+                                  Div  -> NMem
+                                  Phi  -> NMem
+
+toNameSpace (IType (Right op)) = case op of
+                                   Noop -> NMem
+                                   Cmpz _ -> NZ
+                                   Sqrt -> NMem
+                                   Copy -> NMem
+                                   Input -> NMem
+
+
+
+instance ToDot Arc where
+    toDot (Arc senke (dependType, quelle))
+        = "edge[style="++style isForward++", dir="++dir isForward
+          ++" arrowType=\""++arrowType dependType++"\"]; "
+          ++ q ++ " -> "++ s ++ ";\n"
+              where style True =  "solid"
+                    style False = "dashed"
+                    dir True = "forward"
+                    dir False = "back"
+                    isForward = src quelle <= target senke
+
+                    arrowType Plus = "normal"
+                    arrowType Minus = "inv"
+                    arrowType Mal = "normal"
+                    arrowType Durch = "inv"
+                    arrowType Wurzel = "normal"
+                    arrowType Vergleich = "odot"
+                    arrowType If = "crow"
+                    arrowType Then = "normal"
+                    arrowType Else = "inv"
+                    arrowType Kopie = "normal"
+                    (q,s) = case isForward of
+                              True -> (toDot quelle, toDot senke)
+                              False -> (toDot senke, toDot quelle)
+
 -- ++ show dependType
 
-showSenke (SMem addr) = "Mem"++show addr
-showSenke (SOut addr) = "Out"++show addr
-showSenke (SZ addr) = "Z"++show addr
-showQuelle (QMem addr) = "Mem"++show addr
-showQuelle (QIn addr) = "In"++show addr
-showQuelle (QZ addr) = "Z"++show addr
+instance ToDot Senke where
+    toDot (SMem addr) = toDot (NMem addr) -- "Mem_"++show addr
+    toDot (SOut addr) = toDot (NOut addr) -- "Out_"++show addr
+    toDot (SZ addr) = toDot (NZ addr) -- "Z_"++show addr
 
+instance ToDot Quelle where
+    toDot (QMem addr) = toDot (NMem addr) -- "Mem_"++show addr
+    toDot (QIn addr) = toDot (NIn addr) -- "In_"++show addr
+    toDot (QZ addr) = toDot (NZ addr) -- "Z_"++show addr
 
 -- labelInp name = "node [shape = box, label=" ++ show name++"];" ++ show name ++";\n"
 
+{-
 showAnalysis :: VM -> [(NameSpace, [NameSpace])] -> String
 showAnalysis vm l = "digraph dataflow {\n"
                  ++ (shapes . S.toList . S.fromList $ (concat (map snd l) ++ map fst l))
@@ -224,8 +307,8 @@ showAnalysis vm l = "digraph dataflow {\n"
 
           shapes :: [NameSpace] -> String
           shapes names = labelNMems names ++ "\n"
-                         ++ (concat . map labelInp . filter isNInp $ names) ++ "\n"
-                         ++ (concat . map labelOutp . filter isNOutp $ names) ++ "\n"
+                         ++ (concat . map labelInp . filter isNIn $ names) ++ "\n"
+                         ++ (concat . map labelOutp . filter isNOut $ names) ++ "\n"
 
 
 
@@ -252,9 +335,8 @@ showAnalysis vm l = "digraph dataflow {\n"
           typeS (Cmpz _) = "Cmpz"
           typeS t = show t
                                
+-}
                                
-
-
 invert :: [(NameSpace, [NameSpace])] -> [(NameSpace, [NameSpace])]
 invert l = M.toList . M.fromListWith (++) . concat . map go $ l
     where go (sink, sources) = map (flip (,) [sink]) sources
@@ -262,11 +344,11 @@ invert l = M.toList . M.fromListWith (++) . concat . map go $ l
 isNMem (NMem _) = True
 isNMem _ = False
 
-isNInp (NInp _) = True
-isNInp _ = False
+isNIn (NIn _) = True
+isNIn _ = False
 
-isNOutp (NOutp _) = True
-isNOutp _ = False
+isNOut (NOut _) = True
+isNOut _ = False
 
 -- LR_0 -> LR_2 [ label = "SS(B)" ];
 
@@ -295,19 +377,43 @@ oprop_followCycle a s' = -- trace (show l ++ "\n") $
 
 oprop_follow = follow (M.fromList [(1,[2]), (2,[3]), (4,[5])]) S.empty [1] == S.fromList [1,2,3]
 
+testVM = VM {  instr  = ins 
+            ,  mem    = I.fromList (take s (zip [0..] [0..]))
+            ,  status = False
+            ,  size   = 3 
+            ,  time   = 0
+            }
+    where s = length ins
+          ins = zip [0..]
+                [SType Copy 1
+                ,SType Noop 0
+                ,SType Copy 1]
+--                 [SType Input 0
+--                 ,DType Add 0 7
+--                 ,SType Noop 0
+--                 ,DType Add 1 2
+--                 ,SType (Cmpz (<=)) 1
+--                 ,SType (Cmpz (<=)) 0
+--                 ,SType Noop 0
+--                 ,DType Phi 1 2
+--                 ]
+
 fullNetworkAnalysis args = do
   let file = args !! 1
   dat <- B.readFile file
   let vm = loadVM dat
-  putStr . showDataflow . analyzeDataflow $ vm
+  let vm = testVM
+  putStr . toDot . analyzeDataflow $ vm
 
+{-
 dependencyAnalysis args = do
   let file = args !! 1
   when (length args < 3) $ do fail "\nWhat do you want to analyses?\n"
   dat <- B.readFile file
   let vm = loadVM dat
-  let n = (NOutp . read $ (args !! 2))
-  putStr $ showAnalysis vm $ analyseDepend (vm) (map NOutp [2, 3])
+  let n = (NOut . read $ (args !! 2))
+  putStr $ showAnalysis vm $ analyseDepend (vm) (map NOut [2, 3])
+-}
 
 
 gnuplotter :: [Int] -> (Inp -> VM -> (VM, Outp)) -> VM -> IO()
@@ -344,6 +450,6 @@ main = do
   when (length args < 2) $ do fail "\nUsage: See source.\n"
   case args !! 0 of 
     "full" -> fullNetworkAnalysis args
-    "dep" -> dependencyAnalysis args
-    "plot" -> gnuplotter_wrapper args
+--    "dep" -> dependencyAnalysis args
+--    "plot" -> gnuplotter_wrapper args
     otherwise -> fail "\nUsage: See Source.\n"
