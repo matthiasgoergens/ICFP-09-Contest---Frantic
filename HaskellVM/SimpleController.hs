@@ -81,19 +81,6 @@ getV out =
 noop :: (Tick z) => Controller z Outp
 noop = tick (mkInp [])
 
-steuer :: (Tick z) => Outp -> Vec -> Controller z (Outp)
-steuer outp (vx,vy) = do  
-  -- TODO optimize here
-  tick $ mkInp [(2,vx), (3,vy)] 
-
-
-steuerDirect :: (Tick z) => Outp -> Vec -> Controller z (Outp)
-steuerDirect outp (vx,vy) = do  
-  let pos  = getPos outp
---      gvec =  
-  tick $ mkInp [(2,vx), (3,vy)] 
-
-
 hohmann :: (Tick z) => Outp -> Dat -> Controller z (Outp)
 hohmann out sollrad = 
     do v_  <- getVLin out
@@ -160,6 +147,58 @@ hohmannEllipse out sollrad =
 mytrace :: (Show a) => String -> [a] -> b -> b
 mytrace n l = trace (concat $ L.intersperse " # " $ (n : map show l))
   
+
+steuer :: (Tick z) => Outp -> Vec -> Controller z (Outp)
+steuer outp (vx,vy) = do  
+  -- TODO optimize here
+  tick $ mkInp [(2,vx), (3,vy)] 
+
+steuerWithGravComp :: (Tick z) => Outp -> Vec -> Controller z (Outp)
+steuerWithGravComp outp action = do  
+  v <- getVLin outp
+  let pos  = -(getPos outp)
+      g1    = fliehkraft (vecLen v) (getRad (outp))
+      g2    = fliehkraft (vecLen $ v+action) (getRad (outp))
+      action' = action + (scale ((g2-g1)) $ normalize pos)
+  steuer outp (scale (1) action')
+
+steuerToPoint :: (Tick z) => Outp -> Pos -> Controller z (Outp)
+steuerToPoint outp goalpos = do  
+  let pos  = -(getPos outp)
+      diff = goalpos - pos
+      action = (goalpos - pos)
+  outp <- mytrace "distance: " [diff] $  steuerWithGravComp outp action
+  steuerWithGravComp outp (-action)
+
+
+steuerToHim :: (Tick z) => Outp -> (Addr,Addr) -> Time -> Controller z (Outp)
+steuerToHim outp other steps = do  
+  v <- getVLin outp
+  let pos  = -(getPos outp)
+      opos = getPosOther other outp
+      action = opos - pos
+      scaled = (scale (1/fromIntegral steps) action)
+  outp <- mytrace "distance: " [action] $  steuerWithGravComp outp scaled
+  outp <- if steps > 1 then do 
+                         outs <- wait (steps-1)
+                         return $ last outs
+                      else return outp
+  outp <- steuerWithGravComp outp (scale (-1) scaled)
+  return outp
+            
+steuerAlongHim :: (Tick z) => Outp -> (Addr,Addr) -> Controller z (Outp)
+steuerAlongHim outp other  = do  
+  z <- get
+  let nextout = tryInput (mkInp []) z
+  let pos  = -(getPos outp)
+      opos = getPosOther other outp
+      pos2  = -(getPos nextout)
+      opos2 = getPosOther other nextout
+      v     = pos2-pos
+      ov    = opos2-opos
+      action = ov - v
+  outp <- mytrace "v, hisv" [v, ov] $ steuerWithGravComp outp action
+  return outp 
 
 
 follow :: (Tick z) => Double -> Outp -> (Addr,Addr) -> Controller z (Outp)
@@ -262,7 +301,7 @@ task2Controller conf =
            horad2  = hohmannTime1R2 sollrad ((tau-tdiff)/2)
        hohmannEllipse out horad2
        out <- noop
-       foldM (follow 0) out $ replicate 2000 ((4,5))
+       foldM (follow 0.0) out $ replicate 1000 ((4,5))
        
 --       foldM (stayOnCircOrbit) out $ replicate 2000 (sollrad)
 --       foldM (stayOnCircOrbit2) out $ replicate 10 (sollrad)
@@ -292,8 +331,14 @@ task3Controller conf =
        (out,force2) <- hohmannNoEnd out (vecLen minP) force1
        force3       <- hohmannGetForce1 out (vecLen maxP)
        out <- steuer out (force2+force3)       
-       foldM (follow 0.00005) out $ replicate 1800 ((4,5))
-       sequence_ $ replicate (4000) noop                   
+       z   <- get
+       out <- mytrace "time" [getTime z]  noop
+       -- go to him in 10 steps ;-)
+       out <- steuerToHim out (4,5) 10
+       -- follow his path ;-)
+       out <- steuerAlongHim out (4,5)
+       foldM (follow 0.0) out $ replicate 1000 ((4,5))
+       sequence_ $ replicate (100) noop                   
        return ()
 
 
