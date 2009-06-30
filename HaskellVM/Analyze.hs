@@ -45,8 +45,8 @@ instance ToDot NameSpace where
 --    show 
 
 
-data Vertice = Vertice Addr IType Dat
-data Arc = Arc Senke (DependType, Quelle)
+data Vertice = Vertice Addr IType Dat deriving Show
+data Arc = Arc Senke (DependType, Quelle) deriving Show
 
 data DependType = Plus | Minus | Mal | Durch
                 | Wurzel
@@ -63,8 +63,8 @@ data DependType = Plus | Minus | Mal | Durch
 
 
 
-data Senke  = SMem {target :: Addr} | SOut {target :: Addr} | SZ {target :: Addr}
-data Quelle = QMem {src :: Addr} | QIn  {src :: Addr} | QZ {src :: Addr}
+data Senke  = SMem {target :: Addr} | SOut {target :: Addr} | SZ {target :: Addr} deriving Show
+data Quelle = QMem {src :: Addr} | QIn  {src :: Addr} | QZ {src :: Addr} deriving Show
 
 newtype IType = IType (Either DOP SOP)
 
@@ -81,12 +81,10 @@ toIType :: Instr -> IType
 toIType (DType op _ _) = IType $ Left op
 toIType (SType op _) = IType $ Right op
 
-data Dataflow = Dataflow [Vertice] [Arc] [Arc]
-
-
+data Dataflow = Dataflow [Vertice] [Arc]
 
 analyzeDataflow :: VM -> Dataflow
-analyzeDataflow vm = Dataflow vertices arcs arcsZ
+analyzeDataflow vm = Dataflow vertices (arcs++arcsZ)
     where code = instr vm
           vertices = map calcV1 code
     
@@ -197,13 +195,11 @@ analyze vm = (map go . instr $ vm) -- ++ phi_cmp (instr vm)
 
 
 instance ToDot Dataflow where
-    toDot (Dataflow vertices arcs0 arcsZ) =
+    toDot (Dataflow vertices arcs) =
         "digraph dataflow {\n"
         ++ (concat . map toDot $ vertices)
-        ++ "\n#Normal Arcs:\n\n"
-        ++ (concat . map toDot $ arcs0)
-        ++ "\n#Z Arcs:\n\n"
-        ++ (concat . map toDot $ arcsZ)
+        ++ "\n#Arcs:\n\n"
+        ++ (concat . map toDot $ arcs)
         ++ "}\n"
 
 -- data Vertice = Vertice Addr IType Dat
@@ -254,26 +250,28 @@ toNameSpace (IType (Right op)) = case op of
 instance ToDot Arc where
     toDot (Arc senke (dependType, quelle))
         = "edge[style="++style isForward++", dir="++dir isForward
-          ++" arrowType=\""++arrowType dependType++"\"]; "
+          ++" arrowhead=\""++arrowhead dependType++"\""
+          ++" contraint=\""++(show . not $ isForward)++"\""
+          ++"]; "
           ++ q ++ " -> "++ s ++ ";\n"
               where style True =  "solid"
                     style False = "dashed"
-                    dir True = "forward"
+                    dir _ = "forward"
                     dir False = "back"
                     isForward = src quelle <= target senke
 
-                    arrowType Plus = "normal"
-                    arrowType Minus = "inv"
-                    arrowType Mal = "normal"
-                    arrowType Durch = "inv"
-                    arrowType Wurzel = "normal"
-                    arrowType Vergleich = "odot"
-                    arrowType If = "crow"
-                    arrowType Then = "normal"
-                    arrowType Else = "inv"
-                    arrowType Kopie = "normal"
+                    arrowhead Plus = "normal"
+                    arrowhead Minus = "empty"
+                    arrowhead Mal = "normal"
+                    arrowhead Durch = "empty"
+                    arrowhead Wurzel = "normal"
+                    arrowhead Vergleich = "odot"
+                    arrowhead If = "obox"
+                    arrowhead Then = "normal"
+                    arrowhead Else = "empty"
+                    arrowhead Kopie = "normal"
                     (q,s) = case isForward of
-                              True -> (toDot quelle, toDot senke)
+                              _ -> (toDot quelle, toDot senke)
                               False -> (toDot senke, toDot quelle)
 
 -- ++ show dependType
@@ -403,7 +401,8 @@ fullNetworkAnalysis args = do
   dat <- B.readFile file
   let vm = loadVM dat
   let vm = testVM
-  putStr . toDot . analyzeDataflow $ vm
+
+  trace (show $ instr vm) (putStr . toDot . analyzeDataflow $ vm)
 
 {-
 dependencyAnalysis args = do
