@@ -218,10 +218,10 @@ task1Controller conf =
        let sollrad = getOut 4 out
        out <- hohmann out sollrad 
        v   <- getVLin out
-       let sprit = (getOut 1 out) - 0.000000000001
+       let sprit = (getOut 1 out)
        out <- steuer out (scale (sprit/4) (normalize v))
        out <- steuer out (scale (-sprit/2) (normalize v))
-       out <- steuer out (scale (sprit/4) (normalize v))
+       out <- steuer out (scale ((getOut 1 out)-0.000000000001) (normalize v))
        sequence_ $ replicate (1000) noop       
        return ()
 

@@ -1,0 +1,18 @@
+set terminal wxt
+set zeroaxis
+
+set size square
+#set xrange [-3e7:3e7]
+#set yrange [-3e7:3e7]
+
+
+rad1 = 6557000
+
+
+plot "test.dat" using (-$3):(-$4) t "us" w l,\
+     "" using (-$3+$5):(-$4+$6) t "sat" w l,\
+      "" using (rad1)*sin($1*0.01):(rad1)*cos($1*0.01) t "rad1" w l,\
+      "" every ::1::2 using (-$3):(-$4) notitle w p, \
+      "" every ::1::2 using (-$3+$5):(-$4+$6) notitle w p
+
+pause -1

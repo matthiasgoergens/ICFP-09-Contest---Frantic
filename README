@@ -1,7 +1,7 @@
 ICFP Contest 2009
 Team: I C Frantic People
 
-Team Members: Matthias Görgens, Alexander Kiel, Anya Martius, Georg Martius, Patrick Schreibe
+Team Members: Matthias Goergens, Alexander Kiel, Anya Martius, Georg Martius, Patrick Schreibe
 
 Languages: Haskell, Java, Perl
 
@@ -10,21 +10,26 @@ VM in Haskell and in Java
 Controller in Haskell
 Controller in Java
 Plotting in gnuplot
+A simple controller in perl (only feedforward)
 Analysis Tool of VM in Haskell
 
 How to obtain solutions:  (ROOTDIR =  the root folder of this archive)
+Task 1 in Java:
+cd $ROOTDIR/run
+./run_task1.sh
+
+Task 1,2 in Haskell:
 cd $ROOTDIR/HaskellVM/
 make
-./runC ../task/bin1.obf 1001 with +RTS -M1504m -RTS > 1001.output 
-./createSub.sh 1001.0.input 1001.output 1001.osf  
-# the same for 1002, 1003, 1004
+cd $ROOTDIR/run
+./run_tasks_haskell.sh
 
-./runC ../task/bin2.obf 2001 with +RTS -M1504m -RTS > 2001.output 
-./createSub.sh 2001.0.input 2001.output 2001.osf  
-# the same for 2003, 2004 (2002 did not work because of a memleak in the Controller)
+# for plotting e.g.
+cd $ROOTDIR/run
+./run_controller.sh ../task/bin3.obf 3001 with +RTS -M1504m -RTS | ./output2csv.sh > test.dat
+gnuplot task3.dem
+gnuplot distToSat.dem
 
-# We did not manage task 3 and more
-./runC ../task/bin3.obf 3001 with +RTS -M1504m -RTS > 3001.output 
 
 
 General Remarks:

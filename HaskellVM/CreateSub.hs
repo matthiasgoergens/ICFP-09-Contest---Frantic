@@ -67,7 +67,7 @@ main  = do
                       (map encode ( cleared ++ [Frame {step = max, vals = []}])) )
   putStrLn $ "Scenario: " ++ show scenario
 --  print is
-  print cleared
+--  print cleared
   B.writeFile file sub 
   
      
