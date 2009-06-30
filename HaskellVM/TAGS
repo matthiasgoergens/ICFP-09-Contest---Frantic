@@ -1,0 +1,358 @@
+
+Analyze.hs,1304
+module Main0,1
+data NameSpace = NInp26,27
+data NameSpace = NInp Addr | NOutp26,27
+data NameSpace = NInp Addr | NOutp Addr | NMem26,27
+data NameSpace26,27
+data Vertice34,35
+data Vertice = Vertice34,35
+data Arc35,36
+data Arc = Arc35,36
+data DependType37,38
+data DependType = Plus37,38
+data DependType = Plus | Minus37,38
+data DependType = Plus | Minus | Mal37,38
+data DependType = Plus | Minus | Mal | Durch37,38
+                | Wurzel38,39
+                | Vergleich43,44
+                | If44,45
+                | Then45,46
+                | Else46,47
+                | Kopie47,48
+data Senke51,52
+data Senke  = SMem51,52
+data Senke  = SMem Addr | SOut51,52
+data Senke  = SMem Addr | SOut Addr | SZ51,52
+data Quelle52,53
+data Quelle = QMem52,53
+data Quelle = QMem Addr | QIn52,53
+data Quelle = QMem Addr | QIn  Addr | QZ52,53
+newtype IType54,55
+toIType65,66
+type Dataflow69,70
+analyzeDataflow73,74
+analyzeZArcs84,85
+    where go88,89
+          go190,91
+splitBy95,96
+analyzeOrdinaryArcs117,118
+analyze143,144
+showDataflow160,161
+showVertice177,178
+showAnalysis182,183
+          shapes196,197
+invert229,230
+analyseDepend246,247
+follow252,253
+    where types261,262
+gnuplotter284,285
+        helper287,288
+        loop296,297
+              lookup300,301
+
+Console.hs,106
+module Console0,1
+console oneRun vm = helper23,24
+console22,23
+        helper25,26
+        loop34,35
+
+Controller.hs,221
+module Controller1,2
+type Trace  = DL.DList10,11
+type Trace10,11
+data Trace111,12
+data Trace1  = Trace111,12
+traceOut13,14
+type Controller17,18
+runController21,22
+class Tick30,31
+    tick31,32
+    getTime32,33
+
+ControllerUtils.hs,320
+module ControllerUtils0,1
+g = 6.67428E-119,10
+hohmannSpeed117,18
+hohmannSpeed222,23
+hohmannTime26,27
+hohmannTime1R229,30
+calcCircAng32,33
+toPhiRange36,37
+vOnCirc43,44
+fliehkraft46,47
+timeOnCirc50,51
+timeOnEllipse54,55
+calcTick59,60
+calcV080,81
+calcV0Lin86,87
+          types96,97
+          types109,110
+
+CreateSub.hs,191
+module Main0,1
+data Header = Header17,18
+data Header17,18
+data Frame18,19
+data Frame = Frame18,19
+data Frame = Frame { step18,19
+                   , vals19,20
+teamID22,23
+main48,49
+
+Load.hs,161
+module Load0,1
+    let13,14
+loadLine11,12
+loadInstrDat22,23
+loadIMM30,31
+loadSType38,39
+loadDType52,53
+loadVMFromFile68,69
+loadVM74,75
+    let ls76,77
+
+Main.hs,32
+module Main0,1
+main = do18,19
+
+Optimizer.hs,1262
+module Optimizer1,2
+type Opt = Double15,16
+type Opt15,16
+type TOpt16,17
+type CritFun18,19
+type OptFun19,20
+type FitFun20,21
+test24,25
+        where helper28,29
+testN40,41
+        where helper44,45
+getN55,56
+data OptParams63,64
+data OptParams =  OptParams63,64
+data OptParams =  OptParams { eps63,64
+                            , delta64,65
+                            , thresh65,66
+                            , maxiter66,67
+takeWhile177,78
+optimizer182,83
+ where loop91,92
+changeParams104,105
+optimizer2110,111
+ where loop119,120
+getRunTime134,135
+getOptTimeMin137,138
+getOptTimeMax141,142
+printStat147,148
+showStat2153,154
+type InpSeq249,250
+doHohmann251,252
+        transtime = fromIntegral $ ceiling $ hohmannTime rad1 sollrad256,257
+        cmds2   = [(2,force2 * vxS), (3,force2 * vyS)]275,276
+critTime284,285
+init1_1a,init1_1b297,298
+opt1_1a304,305
+crit1_1a317,318
+init1_2a340,341
+crit1_2a343,344
+mkInputFile'352,353
+       where showStep360,361
+mkInputFile364,365
+       where showStep372,373
+solveTask1375,376
+  let initcmd = (16000,conf)377,378
+let inpseq = [(1,Inp (I.fromList [(2,-869.4326035230357),(3,-868.1635465846844)])),(9152,Inp (I.fromList [(2,699.1992759101576),(3,698.4081077018907)]))]390,391
+
+Output2CSV.hs,67
+module Main0,1
+main  = do15,16
+main14,15
+        showLine23,24
+
+ParseInOut.hs,184
+module ParseInOut0,1
+type Pairs  = [(Addr,5,6
+type Pairs5,6
+data MPair6,7
+data MPair = MPair6,7
+fromMPair8,9
+partitionAt12,13
+isComment17,18
+parseInput23,24
+parseOutput31,32
+
+RunControl.hs,123
+module Main0,1
+    let20,21
+mkInputFile18,19
+       where showStep25,26
+main35,36
+  let conf = read (args !! 1)40,41
+
+SimpleController.hs,1126
+module SimpleController0,1
+--getSolution c i = (runStateT18,19
+--getSolution17,18
+type Fahrplan33,34
+tryInputs38,39
+tryInput44,45
+getVLin51,52
+        l    = (fromIntegral $ length poss - 1 )55,56
+getNextPosNoop62,63
+getVLin67,68
+getV73,74
+noop80,81
+steuer83,84
+steuerDirect89,90
+hohmann96,97
+           transtime = fromIntegral $ round $ hohmannTime rad1 sollrad102,103
+hohmannNoEnd114,115
+           transtime = fromIntegral $ round $ hohmannTime rad1 sollrad120,121
+hohmannGetForce1132,133
+           transtime = fromIntegral $ round $ hohmannTime rad1 sollrad138,139
+hohmannEllipse144,145
+           transtime = fromIntegral $ round $ hohmannTime rad1 sollrad150,151
+mytrace159,160
+follow164,165
+waitWithHo172,173
+stayOnCircOrbit181,182
+stayOnCircOrbit2198,199
+task1Controller'206,207
+task1Controller214,215
+traceController228,229
+noopController236,237
+task2Controller244,245
+task3Controller274,275
+           (maxT,maxP) = (L.maximumBy (compare `on` vecLen . snd) $ zip[1..] possO)280,281
+testHohmannController299,300
+getVTestController306,307
+wait326,327
+getVTestController2329,330
+
+Test.hs,235
+module Main0,1
+type Z = Int8,9
+type Z8,9
+type Trace9,10
+type Controller12,13
+data Blob14,15
+data Blob z = Blob14,15
+getZ16,17
+getTrace19,20
+---tryC28,29
+---tryC :: forall (t28,29
+test46,47
+getZ56,57
+putZ61,62
+testI65,66
+
+Types.hs,987
+module Types1,2
+type Time = Int6,7
+type Time6,7
+type Addr7,8
+type Dat8,9
+type Pos10,11
+type Vec11,12
+data Instr13,14
+data Instr = DType13,14
+           |  SType14,15
+data DOP16,17
+data DOP  = Add16,17
+data DOP  = Add | Sub16,17
+data DOP  = Add | Sub | Mult16,17
+data DOP  = Add | Sub | Mult | Div16,17
+data DOP  = Add | Sub | Mult | Div | Output16,17
+data DOP  = Add | Sub | Mult | Div | Output | Phi16,17
+data SOP17,18
+data SOP  = Noop17,18
+data SOP  = Noop | Cmpz17,18
+data SOP  = Noop | Cmpz (Dat -> Dat -> Bool) | Sqrt17,18
+data SOP  = Noop | Cmpz (Dat -> Dat -> Bool) | Sqrt | Copy17,18
+data SOP  = Noop | Cmpz (Dat -> Dat -> Bool) | Sqrt | Copy | Input17,18
+data VM23,24
+data VM = VM23,24
+data VM = VM {  instr23,24
+             ,  mem24,25
+             ,  status25,26
+             ,  size26,27
+             ,  time27,28
+data Inp30,31
+data Inp  = Inp30,31
+data Outp31,32
+data Outp = Outp31,32
+mkInp33,34
+fromInp36,37
+mkOutp39,40
+fromOutp42,43
+
+Util.hs,674
+module Util2,3
+mapfst f (a,c) = (f16,17
+mapfst15,16
+mapsnd18,19
+trd321,22
+trd424,25
+sqr27,28
+normalize40,41
+scalar43,44
+scale46,47
+perpendicular51,52
+vecLen54,55
+vecLen257,58
+getRad62,63
+getOut65,66
+getVel68,69
+getPos71,72
+getPosOther74,75
+outIsEmpty77,78
+readMem82,83
+writeMem85,86
+readInput89,90
+setInputs98,99
+writeOutput103,104
+readConsoleInput108,109
+showConsoleOutput112,113
+readConsoleLines115,116
+isFinished126,127
+score130,131
+incTime134,135
+partitionN138,139
+word8ToWord32143,144
+convertToDouble146,147
+word64ToDouble149,150
+decodeIEEE154,155
+doubleToWord64170,171
+reverseWord64173,174
+reverseWord32176,177
+encodeIEEE182,183
+
+VM2.hs,386
+module Main0,1
+type Mem = Array27,28
+type Mem27,28
+type Status28,29
+type InPorts29,30
+type OutPorts30,31
+map2array32,33
+array2map35,36
+manyRuns41,42
+parseFullConsoleInput48,49
+cleanLines52,53
+frames58,59
+console'66,67
+                 let inports68,69
+oneRun''101,102
+oneRun'108,109
+          stateMonOneStep111,112
+readInput'121,122
+readMem'124,125
+runInstr128,129
+
+VM.hs,59
+module VM0,1
+    let16,17
+oneRun14,15
+ where step18,19

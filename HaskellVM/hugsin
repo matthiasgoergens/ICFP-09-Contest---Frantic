@@ -1,0 +1,4 @@
+:l Analyze.hs
+putStr "prop_rot_idem: " >> Test.QuickCheck.quickCheck prop_rot_idem
+putStr "prop_rot_conserve: " >> Test.QuickCheck.quickCheck prop_rot_conserve
+putStr "prop_rot_headTrue: " >> Test.QuickCheck.quickCheck prop_rot_headTrue
