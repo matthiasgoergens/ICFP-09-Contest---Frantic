@@ -1,6 +1,7 @@
 package de.hronopik.icfp2009.model;
 
-import org.jetbrains.annotations.NotNull;
+import de.hronopik.icfp2009.util.Maybe;
+import static de.hronopik.icfp2009.util.Maybe.nothing;
 
 import java.util.Map;
 import static java.util.logging.Level.FINE;
@@ -17,7 +18,6 @@ public final class DInstruction extends Instruction {
 
     private static final Logger logger = Logger.getLogger("de.hronopik.icfp2009.vm.InstructionTrace");
 
-    @NotNull
     private final DOp op;
     private final int r1;
     private final int r2;
@@ -26,7 +26,7 @@ public final class DInstruction extends Instruction {
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    public DInstruction(int address, @NotNull DOp op, int r1, int r2) {
+    public DInstruction(int address, DOp op, int r1, int r2) {
         super(address);
         this.op = op;
         this.r1 = r1;
@@ -37,7 +37,7 @@ public final class DInstruction extends Instruction {
     //
     //---------------------------------------------------------------------------------------------
 
-    @NotNull
+
     public DOp getOp() {
         return op;
     }
@@ -54,37 +54,14 @@ public final class DInstruction extends Instruction {
     //
     //---------------------------------------------------------------------------------------------
 
-    public boolean execute(int stepIndex, boolean status, double[] values, @NotNull Map<Integer, Double> inputs,
-                           @NotNull Map<Integer, Double> outputs) {
-
-        switch (op) {
-            case Add:
-                values[address] = values[r1] + values[r2];
-                break;
-            case Sub:
-                values[address] = values[r1] - values[r2];
-                break;
-            case Mult:
-                values[address] = values[r1] * values[r2];
-                break;
-            case Div:
-                values[address] = values[r2] == 0 ? 0 : values[r1] / values[r2];
-                break;
-            case Output:
-                outputs.put(r1, values[r2]);
-                break;
-            case Phi:
-                values[address] = status ? values[r1] : values[r2];
-                break;
-        }
+    public Result execute(int stepIndex, boolean status, ROM memory, InputPorts inputPorts, Map<Integer, Double> outputs) {
 
         // Log into the instruction trace
         if (logger.isLoggable(FINE)) {
-            logger.fine(stepIndex + "," + address + "," + toString() + "," +
-                    op.toSemanticsString(address, r1, r2, values, status));
+            logger.fine(stepIndex + "," + address + "," + toString() + "," + op.toSemanticsString(r1, r2, memory, status));
         }
 
-        return status;
+        return op.execute(r1, r2, memory, status);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -94,6 +71,17 @@ public final class DInstruction extends Instruction {
     @Override
     public String toString() {
         return op + "(" + r1 + ", " + r2 + ")";
+    }
+
+    //---------------------------------------------------------------------------------------------
+    // DResult
+    //---------------------------------------------------------------------------------------------
+
+    abstract static class DResult implements Result {
+
+        public Maybe<Boolean> getStatus() {
+            return nothing();
+        }
     }
 }
 

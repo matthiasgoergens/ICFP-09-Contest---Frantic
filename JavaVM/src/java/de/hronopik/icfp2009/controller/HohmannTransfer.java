@@ -33,7 +33,7 @@ public class HohmannTransfer {
     //
     //---------------------------------------------------------------------------------------------
 
-    public double getFuelConsumption(@NotNull Pair<Vector, Vector> positions) {
+    public double getFuelConsumption(Pair<Vector, Vector> positions) {
         Vector s1 = positions.getB();
 
         // Our radius around the earth
@@ -51,7 +51,7 @@ public class HohmannTransfer {
         return abs(adv) + abs(adv2);
     }
 
-    public Pair<Vector, Vector> perform(@NotNull Vm vm, @NotNull Pair<Vector, Vector> positions) {
+    public Pair<Vector, Vector> perform(Vm vm, Pair<Vector, Vector> positions) {
         Vector s0 = positions.getA();
         Vector s1 = positions.getB();
 
@@ -122,13 +122,13 @@ public class HohmannTransfer {
         return d0.dot(d1) > d0.dot(d2) ? d1 : d2;
     }
 
-    @NotNull
-    private Map<Integer, Double> buildDeltaVInput(@NotNull Vector dv) {
+    
+    private Map<Integer, Double> buildDeltaVInput(Vector dv) {
         return new InputBuilder(2, dv.getX()).add(3, dv.getY()).build();
     }
 
-    @NotNull
-    private Vector getPosition(@NotNull Map<Integer, Double> outputs) {
+
+    private Vector getPosition(Map<Integer, Double> outputs) {
         return new Vector(outputs.get(2), outputs.get(3)).flip();
     }
 }

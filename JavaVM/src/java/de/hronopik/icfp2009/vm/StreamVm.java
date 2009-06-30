@@ -17,17 +17,17 @@ import java.util.Map;
  */
 public class StreamVm extends AbstractVm implements Runnable {
 
-    @NotNull
+
     private final VmReader in;
 
-    @NotNull
+
     private final VmWriter out;
 
     //---------------------------------------------------------------------------------------------
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    public StreamVm(@NotNull List<OrbitBinaryFrame> frames, @NotNull Reader in, @NotNull Writer out) {
+    public StreamVm(List<OrbitBinaryFrame> frames, Reader in, Writer out) {
         super(frames);
         this.in = new VmReader(in);
         this.out = new VmWriter(out);
@@ -58,9 +58,7 @@ public class StreamVm extends AbstractVm implements Runnable {
      * @throws IOException if an I/O error occurs
      */
     public boolean ioStep() throws IOException {
-        Map<Integer, Double> inputs = in.readInputs();
-
-        Map<Integer, Double> outputs = step(inputs);
+        Map<Integer, Double> outputs = step(in.readInputs());
 
         out.writeOutputs(outputs);
 
@@ -108,7 +106,7 @@ public class StreamVm extends AbstractVm implements Runnable {
     }
 
     @Nullable
-    private static List<OrbitBinaryFrame> readFrames(@NotNull File file) {
+    private static List<OrbitBinaryFrame> readFrames(File file) {
         try {
             return Frames.readFromFile(file);
         } catch (IOException e) {

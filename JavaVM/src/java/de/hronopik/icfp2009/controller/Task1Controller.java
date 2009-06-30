@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class Task1Controller {
 
-    @NotNull
+
     private final File binary;
     private final int scenario;
 
@@ -27,7 +27,7 @@ public class Task1Controller {
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    public Task1Controller(@NotNull File binary, int scenario) {
+    public Task1Controller(File binary, int scenario) {
         this.binary = binary;
         this.scenario = scenario;
     }
@@ -154,13 +154,13 @@ public class Task1Controller {
         return d0.dot(d1) > d0.dot(d2) ? d1 : d2;
     }
 
-    @NotNull
-    private Map<Integer, Double> buildDeltaVInput(@NotNull Vector dv) {
+
+    private Map<Integer, Double> buildDeltaVInput(Vector dv) {
         return new InputBuilder(2, dv.getX()).add(3, dv.getY()).build();
     }
 
-    @NotNull
-    private Vector getPosition(@NotNull Map<Integer, Double> outputs) {
+
+    private Vector getPosition(Map<Integer, Double> outputs) {
         return new Vector(outputs.get(2), outputs.get(3)).flip();
     }
 

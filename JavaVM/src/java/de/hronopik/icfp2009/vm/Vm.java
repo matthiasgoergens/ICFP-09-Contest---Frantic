@@ -12,9 +12,9 @@ public interface Vm {
 
     int getStepIndex();
 
-    @NotNull
+
     Map<Integer, Double> step();
 
-    @NotNull
-    Map<Integer, Double> step(@NotNull Map<Integer, Double> inputs);
+
+    Map<Integer, Double> step(Map<Integer, Double> inputs);
 }

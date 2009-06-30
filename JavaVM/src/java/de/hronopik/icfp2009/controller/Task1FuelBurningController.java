@@ -20,7 +20,7 @@ public class Task1FuelBurningController {
 
     private final static double R_EARTH = 6.357E6;
 
-    @NotNull
+
     private final File binary;
     private final int scenario;
 
@@ -28,7 +28,7 @@ public class Task1FuelBurningController {
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    public Task1FuelBurningController(@NotNull File binary, int scenario) {
+    public Task1FuelBurningController(File binary, int scenario) {
         this.binary = binary;
         this.scenario = scenario;
     }
@@ -102,13 +102,13 @@ public class Task1FuelBurningController {
     }
 
 
-    @NotNull
-    private Map<Integer, Double> buildDeltaVInput(@NotNull Vector dv) {
+
+    private Map<Integer, Double> buildDeltaVInput(Vector dv) {
         return new InputBuilder(2, dv.getX()).add(3, dv.getY()).build();
     }
 
-    @NotNull
-    private Vector getPosition(@NotNull Map<Integer, Double> outputs) {
+
+    private Vector getPosition(Map<Integer, Double> outputs) {
         return new Vector(outputs.get(2), outputs.get(3)).flip();
     }
 

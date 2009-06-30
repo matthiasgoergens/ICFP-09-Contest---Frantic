@@ -10,17 +10,17 @@ import java.util.Map;
  */
 public class InputLoggingVmWrapper implements Vm {
 
-    @NotNull
+
     private final Vm vm;
 
-    @NotNull
+
     private final StringBuilder sb = new StringBuilder();
 
     //---------------------------------------------------------------------------------------------
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    public InputLoggingVmWrapper(@NotNull Vm vm) {
+    public InputLoggingVmWrapper(Vm vm) {
         this.vm = vm;
     }
 
@@ -28,7 +28,7 @@ public class InputLoggingVmWrapper implements Vm {
     //
     //---------------------------------------------------------------------------------------------
 
-    @NotNull
+
     public String getInput() {
         return sb.toString();
     }
@@ -41,14 +41,14 @@ public class InputLoggingVmWrapper implements Vm {
         return vm.getStepIndex();
     }
 
-    @NotNull
+
     public Map<Integer, Double> step() {
         sb.append(".\n");
         return vm.step();
     }
 
-    @NotNull
-    public Map<Integer, Double> step(@NotNull Map<Integer, Double> inputs) {
+
+    public Map<Integer, Double> step(Map<Integer, Double> inputs) {
         for (Map.Entry<Integer, Double> entry : inputs.entrySet()) {
             sb.append(String.valueOf(entry.getKey()));
             sb.append(" ");

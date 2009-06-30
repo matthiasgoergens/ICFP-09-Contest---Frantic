@@ -1,5 +1,9 @@
 package de.hronopik.icfp2009.io;
 
+import de.hronopik.icfp2009.model.InputPorts;
+import de.hronopik.icfp2009.vm.EmptyInputPorts;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,10 +29,11 @@ public class VmReader extends FilterReader {
     //
     //---------------------------------------------------------------------------------------------
 
-    public Map<Integer, Double> readInputs() throws IOException {
+
+    public InputPorts readInputs() throws IOException {
         LineNumberReader in = (LineNumberReader) this.in;
 
-        Map<Integer, Double> inputs = new HashMap<Integer, Double>();
+        Map<Integer, Double> inputs = null;
         boolean stopExecution = true;
 
         String line;
@@ -63,6 +68,10 @@ public class VmReader extends FilterReader {
                         ".");
             }
 
+            if (inputs == null) {
+                inputs = new HashMap<Integer, Double>();
+            }
+
             if (inputs.put(address, value) != null) {
                 throw new IOException("Double address " + address + " in line " + in.getLineNumber() + ".");
             }
@@ -72,6 +81,29 @@ public class VmReader extends FilterReader {
             throw new EOFException("EOF");
         }
 
-        return inputs;
+        return inputs == null ? EmptyInputPorts.EMPTY_INPUT : new MapBackedInputPorts(inputs);
+    }
+
+    private static class MapBackedInputPorts implements InputPorts {
+
+
+        private final Map<Integer, Double> map;
+
+        //---------------------------------------------------------------------------------------------
+        // Constructor
+        //---------------------------------------------------------------------------------------------
+
+        private MapBackedInputPorts(Map<Integer, Double> map) {
+            this.map = map;
+        }
+
+        //---------------------------------------------------------------------------------------------
+        //
+        //---------------------------------------------------------------------------------------------
+
+        public double getValue(int address) {
+            Double value = map.get(address);
+            return value == null ? 0d : value;
+        }
     }
 }

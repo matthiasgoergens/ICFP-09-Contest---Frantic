@@ -52,6 +52,7 @@ public class MathematicaVMRunner implements FitnessFunction{
 		result.add(x1);
 		result.add(y1);
 
+        vm.createSnapshoot("undo");
 		for (int iter = 0; iter < MAX_ITER; ++iter) {
 			outputs = vm.step(Collections.<Integer, Double>emptyMap());
 			x2 = outputs.get(2);
@@ -63,7 +64,7 @@ public class MathematicaVMRunner implements FitnessFunction{
 			x1 = x2;
 			y1 = y2;
 		}
-		vm.undo();
+		vm.reset("undo");
 		return(result.toArray(new Double[result.size()]));
 	}
 

@@ -36,7 +36,7 @@ public class SubmissionPrinter {
         }
     }
 
-    private static void print(@NotNull SimulationHeader header) {
+    private static void print(SimulationHeader header) {
         System.out.println("       Header       ");
         System.out.println("--------------------");
         System.out.printf("TeamID      | %6d\n", header.getTeamId());
@@ -44,7 +44,7 @@ public class SubmissionPrinter {
         System.out.println("--------------------");
     }
 
-    private static void print(@NotNull SimulationFrame frame) {
+    private static void print(SimulationFrame frame) {
         System.out.printf("TimeStep    | %6d\n", frame.getTimeStep());
         System.out.printf("Count       | %6d\n", frame.getInputs().size());
         for (Map.Entry<Integer, Double> input : frame.getInputs().entrySet()) {

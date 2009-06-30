@@ -1,37 +1,41 @@
-package de.hronopik.icfp2009.io;
-
-import de.hronopik.icfp2009.model.Instruction;
-import org.jetbrains.annotations.NotNull;
+package de.hronopik.icfp2009.vm;
 
 /**
  * @author Alexander Kiel
  * @version $Id$
  */
-public final class OrbitBinaryFrame {
+public class OutputPort {
 
-
-    private final Instruction instruction;
+    private final int address;
     private final double value;
 
     //---------------------------------------------------------------------------------------------
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    OrbitBinaryFrame(Instruction instruction, double value) {
-        this.instruction = instruction;
+    public OutputPort(int address, double value) {
+        this.address = address;
         this.value = value;
     }
 
     //---------------------------------------------------------------------------------------------
-    //
+    // Properties
     //---------------------------------------------------------------------------------------------
 
-
-    public Instruction getInstruction() {
-        return instruction;
+    public int getAddress() {
+        return address;
     }
 
     public double getValue() {
         return value;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    // Overridden Object Methods
+    //---------------------------------------------------------------------------------------------
+
+    @Override
+    public String toString() {
+        return "OutputPort[address=" + address + ", value=" + value + "]";
     }
 }

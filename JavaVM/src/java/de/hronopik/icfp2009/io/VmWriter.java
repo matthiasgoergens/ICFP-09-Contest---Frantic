@@ -25,7 +25,7 @@ public class VmWriter extends FilterWriter {
     //
     //---------------------------------------------------------------------------------------------
 
-    public void writeOutputs(@NotNull Map<Integer, Double> outputs) throws IOException {
+    public void writeOutputs(Map<Integer, Double> outputs) throws IOException {
         for (Map.Entry<Integer, Double> entry : outputs.entrySet()) {
             out.write(String.valueOf(entry.getKey()));
             out.write(" ");

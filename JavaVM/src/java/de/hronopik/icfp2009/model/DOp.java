@@ -1,6 +1,9 @@
 package de.hronopik.icfp2009.model;
 
-import org.jetbrains.annotations.NotNull;
+import de.hronopik.icfp2009.util.Maybe;
+import static de.hronopik.icfp2009.util.Maybe.nothing;
+import static de.hronopik.icfp2009.util.Maybe.just;
+import de.hronopik.icfp2009.vm.OutputPort;
 
 /**
  * Operation for D-Type instructions.
@@ -15,54 +18,105 @@ public enum DOp implements Op {
 
     Add {
 
-        @NotNull
-        public String toSemanticsString(int rd, int r1, int r2, double[] values, boolean status) {
-            return "mem[" + rd + "] <- " + values[r1] + " + " + values[r2];
+        public MemoryResult execute(final int r1, final int r2, final ROM memory, boolean status) {
+            return new MemoryResult() {
+                public Maybe<Double> getMemoryValue() {
+                    return just(memory.getValue(r1) + memory.getValue(r2));
+                }
+            };
+        }
+
+        public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
+            return "<- " + memory.getValue(r1) + " + " + memory.getValue(r2);
         }
     },
 
     Sub {
 
-        @NotNull
-        public String toSemanticsString(int rd, int r1, int r2, double[] values, boolean status) {
-            return "mem[" + rd + "] <- " + values[r1] + " - " + values[r2];
+        public MemoryResult execute(final int r1, final int r2, final ROM memory, boolean status) {
+            return new MemoryResult() {
+                public Maybe<Double> getMemoryValue() {
+                    return just(memory.getValue(r1) - memory.getValue(r2));
+                }
+            };
+        }
+
+        public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
+            return "<- " + memory.getValue(r1) + " - " + memory.getValue(r2);
         }
     },
 
     Mult {
 
-        @NotNull
-        public String toSemanticsString(int rd, int r1, int r2, double[] values, boolean status) {
-            return "mem[" + rd + "] <- " + values[r1] + " * " + values[r2];
+        public MemoryResult execute(final int r1, final int r2, final ROM memory, boolean status) {
+            return new MemoryResult() {
+                public Maybe<Double> getMemoryValue() {
+                    return just(memory.getValue(r1) * memory.getValue(r2));
+                }
+            };
+        }
+
+        public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
+            return "<- " + memory.getValue(r1) + " * " + memory.getValue(r2);
         }
     },
 
     Div {
 
-        @NotNull
-        public String toSemanticsString(int rd, int r1, int r2, double[] values, boolean status) {
-            return "mem[" + rd + "] <- " + values[r1] + " / " + values[r2];
+        public MemoryResult execute(final int r1, final int r2, final ROM memory, boolean status) {
+            return new MemoryResult() {
+                public Maybe<Double> getMemoryValue() {
+                    return just(memory.getValue(r2) == 0 ? 0 : memory.getValue(r1) / memory.getValue(r2));
+                }
+            };
+        }
+
+        public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
+            return "<- " + memory.getValue(r1) + " / " + memory.getValue(r2);
         }
     },
 
     Output {
 
-        @NotNull
-        public String toSemanticsString(int rd, int r1, int r2, double[] values, boolean status) {
-            return "outport[" + r1 + "] <- " + values[r2];
+        public OutputResult execute(final int r1, final int r2, final ROM memory, boolean status) {
+            return new OutputResult(){
+                public Maybe<OutputPort> getOutputAssignment() {
+                    return just(new OutputPort(r1, memory.getValue(r2)));
+                }
+            };
+        }
+
+        public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
+            return "outport[" + r1 + "] <- " + memory.getValue(r2);
         }
     },
 
     Phi {
 
-        @NotNull
-        public String toSemanticsString(int rd, int r1, int r2, double[] values, boolean status) {
-            return "mem[" + rd + "] <- " + (status ? values[r1] : values[r2]);
+        public MemoryResult execute(final int r1, final int r2, final ROM memory, final boolean status) {
+            return new MemoryResult() {
+                public Maybe<Double> getMemoryValue() {
+                    return just(status ? memory.getValue(r1) : memory.getValue(r2));
+                }
+            };
+        }
+        
+        public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
+            return "<- " + (status ? memory.getValue(r1) : memory.getValue(r2));
         }
     };
 
-    @NotNull
-    public abstract String toSemanticsString(int rd, int r1, int r2, double[] values, boolean status);
+    //---------------------------------------------------------------------------------------------
+    //
+    //---------------------------------------------------------------------------------------------
+
+    public abstract DInstruction.DResult execute(int r1, int r2, ROM memory, boolean status);
+
+    public abstract String toSemanticsString(int r1, int r2, ROM memory, boolean status);
+
+    //---------------------------------------------------------------------------------------------
+    //
+    //---------------------------------------------------------------------------------------------
 
     /**
      * Returns the operation according to the given opcode.
@@ -72,5 +126,27 @@ public enum DOp implements Op {
      */
     public static DOp fromOpcode(int opcode) {
         return values()[opcode - 1];
+    }
+
+    //---------------------------------------------------------------------------------------------
+    // MemoryResult
+    //---------------------------------------------------------------------------------------------
+
+    private static abstract class MemoryResult extends DInstruction.DResult {
+
+        public Maybe<OutputPort> getOutputAssignment() {
+            return nothing();
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------
+    // MemoryResult
+    //---------------------------------------------------------------------------------------------
+
+    private static abstract class OutputResult extends DInstruction.DResult {
+
+        public Maybe<Double> getMemoryValue() {
+            return nothing();
+        }
     }
 }
