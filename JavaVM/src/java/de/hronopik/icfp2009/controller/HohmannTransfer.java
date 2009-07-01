@@ -1,15 +1,11 @@
 package de.hronopik.icfp2009.controller;
 
-import de.hronopik.icfp2009.util.InputBuilder;
-import de.hronopik.icfp2009.util.Pair;
-import static de.hronopik.icfp2009.util.Pair.newPair;
+import de.hronopik.icfp2009.util.*;
+import static de.hronopik.icfp2009.util.Pairs.newPair;
 import static de.hronopik.icfp2009.util.Phys.*;
-import de.hronopik.icfp2009.util.Vector;
 import de.hronopik.icfp2009.vm.Vm;
-import org.jetbrains.annotations.NotNull;
 
 import static java.lang.Math.abs;
-import java.util.Map;
 
 /**
  * Performs one Hohmann transfer from r1 to r2.
@@ -122,13 +118,28 @@ public class HohmannTransfer {
         return d0.dot(d1) > d0.dot(d2) ? d1 : d2;
     }
 
-    
-    private Map<Integer, Double> buildDeltaVInput(Vector dv) {
+
+    private java.util.Map<Integer, Double> buildDeltaVInput(Vector dv) {
         return new InputBuilder(2, dv.getX()).add(3, dv.getY()).build();
     }
 
 
     private Vector getPosition(Map<Integer, Double> outputs) {
-        return new Vector(outputs.get(2), outputs.get(3)).flip();
+        return new Vector(outputs.get(2).maybe(GET_POSITION), outputs.get(3).maybe(GET_POSITION)).flip();
     }
+
+    //---------------------------------------------------------------------------------------------
+    //
+    //---------------------------------------------------------------------------------------------
+
+    private static final MaybeC<Double, Double> GET_POSITION = new MaybeC<Double, Double>() {
+
+        public Double c(Double r) {
+            return r;
+        }
+
+        public Double c() {
+            throw new IllegalArgumentException("No position.");
+        }
+    };
 }

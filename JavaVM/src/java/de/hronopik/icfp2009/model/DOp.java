@@ -3,7 +3,7 @@ package de.hronopik.icfp2009.model;
 import de.hronopik.icfp2009.util.Maybe;
 import static de.hronopik.icfp2009.util.Maybe.nothing;
 import static de.hronopik.icfp2009.util.Maybe.just;
-import de.hronopik.icfp2009.vm.OutputPort;
+import de.hronopik.icfp2009.vm.Output;
 
 /**
  * Operation for D-Type instructions.
@@ -80,8 +80,8 @@ public enum DOp implements Op {
 
         public OutputResult execute(final int r1, final int r2, final ROM memory, boolean status) {
             return new OutputResult(){
-                public Maybe<OutputPort> getOutputAssignment() {
-                    return just(new OutputPort(r1, memory.getValue(r2)));
+                public Maybe<Output> getOutput() {
+                    return just(new Output(r1, memory.getValue(r2)));
                 }
             };
         }
@@ -100,7 +100,7 @@ public enum DOp implements Op {
                 }
             };
         }
-        
+
         public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
             return "<- " + (status ? memory.getValue(r1) : memory.getValue(r2));
         }
@@ -134,7 +134,7 @@ public enum DOp implements Op {
 
     private static abstract class MemoryResult extends DInstruction.DResult {
 
-        public Maybe<OutputPort> getOutputAssignment() {
+        public Maybe<Output> getOutput() {
             return nothing();
         }
     }

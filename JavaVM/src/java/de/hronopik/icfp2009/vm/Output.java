@@ -1,10 +1,12 @@
 package de.hronopik.icfp2009.vm;
 
+import de.hronopik.icfp2009.util.Pair;
+
 /**
  * @author Alexander Kiel
  * @version $Id$
  */
-public class OutputPort {
+public class Output implements Pair<Integer, Double> {
 
     private final int address;
     private final double value;
@@ -13,7 +15,7 @@ public class OutputPort {
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    public OutputPort(int address, double value) {
+    public Output(int address, double value) {
         this.address = address;
         this.value = value;
     }
@@ -31,11 +33,23 @@ public class OutputPort {
     }
 
     //---------------------------------------------------------------------------------------------
+    // Pair
+    //---------------------------------------------------------------------------------------------
+
+    public Integer getA() {
+        return address;
+    }
+
+    public Double getB() {
+        return value;
+    }
+
+    //---------------------------------------------------------------------------------------------
     // Overridden Object Methods
     //---------------------------------------------------------------------------------------------
 
     @Override
     public String toString() {
-        return "OutputPort[address=" + address + ", value=" + value + "]";
+        return "Output[address=" + address + ", value=" + value + "]";
     }
 }

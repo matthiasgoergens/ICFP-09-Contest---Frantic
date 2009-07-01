@@ -3,7 +3,6 @@ package de.hronopik.icfp2009.model;
 import de.hronopik.icfp2009.util.Maybe;
 import static de.hronopik.icfp2009.util.Maybe.nothing;
 
-import java.util.Map;
 import static java.util.logging.Level.FINE;
 import java.util.logging.Logger;
 
@@ -54,7 +53,7 @@ public final class DInstruction extends Instruction {
     //
     //---------------------------------------------------------------------------------------------
 
-    public Result execute(int stepIndex, boolean status, ROM memory, InputPorts inputPorts, Map<Integer, Double> outputs) {
+    public Result execute(int stepIndex, boolean status, ROM memory, InputPorts inputPorts) {
 
         // Log into the instruction trace
         if (logger.isLoggable(FINE)) {

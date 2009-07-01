@@ -4,9 +4,7 @@ package de.hronopik.icfp2009.util;
  * @author Alexander Kiel
  * @version $Id$
  */
-public interface Pair<A, B> {
+public interface Function1<A, B> {
 
-    A getA();
-
-    B getB();
+    B apply(A a);
 }

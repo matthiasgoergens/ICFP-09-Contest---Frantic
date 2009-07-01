@@ -4,9 +4,9 @@ import de.hronopik.icfp2009.util.InputBuilder;
 import de.hronopik.icfp2009.util.Pair;
 import static de.hronopik.icfp2009.util.Phys.radius;
 import de.hronopik.icfp2009.util.Vector;
+import de.hronopik.icfp2009.util.Pairs;
 import de.hronopik.icfp2009.vm.DirectVm;
 import de.hronopik.icfp2009.vm.InputLoggingVmWrapper;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +59,7 @@ public class Task1FuelBurningController {
         // Our target radius
         double r2 = outputs.get(4);
 
-        Pair<Vector, Vector> positions = Pair.newPair(s0, s1);
+        Pair<Vector, Vector> positions = Pairs.newPair(s0, s1);
 
         positions = new HohmannTransfer(r2).perform(vm, positions);
 

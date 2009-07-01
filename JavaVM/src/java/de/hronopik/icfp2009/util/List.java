@@ -1,17 +1,18 @@
 package de.hronopik.icfp2009.util;
 
-import static de.hronopik.icfp2009.util.Maybe.just;
 import static de.hronopik.icfp2009.util.Maybe.nothing;
 
 /**
  * @author Alexander Kiel
  * @version $Id$
  */
-public abstract class List<E> {
+public abstract class List<E> implements Collection<E> {
 
     //---------------------------------------------------------------------------------------------
     // Constructors
     //---------------------------------------------------------------------------------------------
+
+    private static final Nil NIL = new Nil();
 
     /**
      * Returns an empty list.
@@ -20,13 +21,12 @@ public abstract class List<E> {
      * @return an empty list
      */
     public static <E> Nil<E> nil() {
-        return new Nil<E>();
+        return (Nil<E>) NIL;
     }
 
-    public static <E> Element<E> list(E element) {
-        return nil().prepend(element);
-    }
-
+    /**
+     * Private constructor to prevent instantiation.
+     */
     private List() {
     }
 
@@ -34,17 +34,13 @@ public abstract class List<E> {
     //
     //---------------------------------------------------------------------------------------------
 
-    public abstract boolean isEmpty();
-
-    public abstract int size();
-
     public abstract Maybe<E> head();
 
     public abstract Maybe<List<E>> tail();
 
-    public List<E> prepend(E element) {
-        return new Element<E>(element, this);
-    }
+    //---------------------------------------------------------------------------------------------
+    //
+    //---------------------------------------------------------------------------------------------
 
     public abstract List<E> append(List<E> list);
 
@@ -67,40 +63,33 @@ public abstract class List<E> {
         };
     }
 
+    public abstract List<E> remove(E element);
+
+    //---------------------------------------------------------------------------------------------
+    //
+    //---------------------------------------------------------------------------------------------
+
+    public abstract <T> List<T> map(Function1<E, T> mappper);
+
+    public abstract List<E> filter(Function1<E, Boolean> p);
+
     //---------------------------------------------------------------------------------------------
     // Implementations
     //---------------------------------------------------------------------------------------------
 
-    public static class Element<E> extends List<E> {
-
-        private final E element;
-
-        private final List<E> tail;
-
-        private Element(E element, List<E> tail) {
-            this.element = element;
-            this.tail = tail;
-        }
+    public static abstract class Element<E> extends List<E> {
 
         public boolean isEmpty() {
             return false;
         }
 
         public int size() {
-            return 1 + tail.size();
+            return 1 + tail().just().size();
         }
 
-        public Maybe<E> head() {
-            return just(element);
-        }
+        public abstract Maybe.Just<E> head();
 
-        public Maybe<List<E>> tail() {
-            return just(tail);
-        }
-
-        public List<E> append(List<E> list) {
-            return new Element<E>(element, tail.append(list));
-        }
+        public abstract Maybe.Just<List<E>> tail();
     }
 
     public static class Nil<E> extends List<E> {
@@ -116,6 +105,10 @@ public abstract class List<E> {
             return 0;
         }
 
+        public boolean contains(E element) {
+            return false;
+        }
+
         public Maybe<E> head() {
             return nothing();
         }
@@ -126,6 +119,18 @@ public abstract class List<E> {
 
         public List<E> append(List<E> list) {
             return list;
+        }
+
+        public List<E> remove(E element) {
+            return this;
+        }
+
+        public <T> List<T> map(Function1<E, T> mappper) {
+            return (List<T>) this;
+        }
+
+        public List<E> filter(Function1<E, Boolean> p) {
+            return this;
         }
     }
 }

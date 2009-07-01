@@ -22,7 +22,7 @@ public abstract class Maybe<T> {
     public abstract <Q> Q maybe(JustC<Q, T> jc, NothingC<Q> nc);
 
     //---------------------------------------------------------------------------------------------
-    // 
+    //
     //---------------------------------------------------------------------------------------------
 
     public static abstract class Nothing<T> extends Maybe<T> {
@@ -38,10 +38,10 @@ public abstract class Maybe<T> {
     }
 
     //---------------------------------------------------------------------------------------------
-    // 
+    //
     //---------------------------------------------------------------------------------------------
 
-    public static <T> Maybe<T> just(final T t) {
+    public static <T> Just<T> just(final T t) {
         return new Just<T>() {
 
             @Override
@@ -60,7 +60,7 @@ public abstract class Maybe<T> {
         };
     }
 
-    public static <T> Maybe<T> nothing() {
+    public static <T> Nothing<T> nothing() {
         return new Nothing<T>() {
 
             public <Q> Q maybe(MaybeC<Q, T> mc) {

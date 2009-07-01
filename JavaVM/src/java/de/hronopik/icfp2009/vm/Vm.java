@@ -1,8 +1,7 @@
 package de.hronopik.icfp2009.vm;
 
-import org.jetbrains.annotations.NotNull;
+import de.hronopik.icfp2009.util.Map;
 
-import java.util.Map;
 
 /**
  * @author Alexander Kiel
@@ -16,5 +15,5 @@ public interface Vm {
     Map<Integer, Double> step();
 
 
-    Map<Integer, Double> step(Map<Integer, Double> inputs);
+    Map<Integer, Double> step(java.util.Map<Integer, Double> inputs);
 }

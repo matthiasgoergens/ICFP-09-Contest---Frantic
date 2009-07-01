@@ -1,11 +1,9 @@
 package de.hronopik.icfp2009.model;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Map;
 
 import de.hronopik.icfp2009.util.Maybe;
-import de.hronopik.icfp2009.vm.OutputPort;
+import de.hronopik.icfp2009.vm.Output;
 
 /**
  * A 32-bit instruction.
@@ -32,11 +30,9 @@ public abstract class Instruction {
      * @param status    the status register
      * @param memory
      * @param inputPorts
-     * @param outputs   the output register
      * @return the result of the instruction execution
      */
-    public abstract Result execute(int stepIndex, boolean status, ROM memory,
-                                   InputPorts inputPorts, Map<Integer, Double> outputs);
+    public abstract Result execute(int stepIndex, boolean status, ROM memory, InputPorts inputPorts);
 
     //---------------------------------------------------------------------------------------------
     // Result
@@ -49,7 +45,7 @@ public abstract class Instruction {
 
         Maybe<Double> getMemoryValue();
 
-        Maybe<OutputPort> getOutputAssignment();
+        Maybe<Output> getOutput();
 
         Maybe<Boolean> getStatus();
     }

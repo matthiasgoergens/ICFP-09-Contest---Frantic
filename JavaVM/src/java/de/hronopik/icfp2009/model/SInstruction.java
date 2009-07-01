@@ -2,12 +2,12 @@ package de.hronopik.icfp2009.model;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
 import static java.util.logging.Level.FINE;
 import java.util.logging.Logger;
 
 import de.hronopik.icfp2009.util.Maybe;
 import static de.hronopik.icfp2009.util.Maybe.nothing;
+import de.hronopik.icfp2009.vm.Output;
 
 /**
  * A S-Type instruction.
@@ -65,8 +65,7 @@ public final class SInstruction<P extends Maybe<MP>, MP extends Parameter> exten
     //
     //---------------------------------------------------------------------------------------------
 
-    public Result execute(int stepIndex, boolean status, ROM memory, InputPorts inputPorts,
-                          Map<Integer, Double> outputs) {
+    public Result execute(int stepIndex, boolean status, ROM memory, InputPorts inputPorts) {
 
         // Log into the instruction trace
         if (logger.isLoggable(FINE)) {
@@ -92,7 +91,7 @@ public final class SInstruction<P extends Maybe<MP>, MP extends Parameter> exten
 
     abstract static class SResult implements Result {
 
-        public Maybe<OutputPorts.Assignment> getOutputAssignment() {
+        public Maybe<Output> getOutput() {
             return nothing();
         }
     }

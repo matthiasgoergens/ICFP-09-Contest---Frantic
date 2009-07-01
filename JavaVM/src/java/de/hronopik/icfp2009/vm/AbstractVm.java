@@ -4,14 +4,11 @@ import de.hronopik.icfp2009.io.OrbitBinaryFrame;
 import de.hronopik.icfp2009.model.InputPorts;
 import de.hronopik.icfp2009.model.Instruction;
 import de.hronopik.icfp2009.model.RAM;
-import de.hronopik.icfp2009.util.Maybe;
-import de.hronopik.icfp2009.util.List;
-import de.hronopik.icfp2009.util.NothingC;
+import de.hronopik.icfp2009.util.*;
 
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A VM.
@@ -37,7 +34,7 @@ abstract class AbstractVm implements Vm {
     private int stepIndex = 0;
 
 
-    final Map<String, Snapshoot> snapshoots = new HashMap<String, Snapshoot>();
+    final java.util.Map<String, Snapshoot> snapshoots = new HashMap<String, Snapshoot>();
 
     //---------------------------------------------------------------------------------------------
     // Constructor
@@ -81,28 +78,39 @@ abstract class AbstractVm implements Vm {
     }
 
 
-    public Map<Integer, Double> step(Map<Integer, Double> inputs) {
+    public Map<Integer, Double> step(java.util.Map<Integer, Double> inputs) {
         return step(new MapBackedInputPorts(inputs));
     }
 
     public Map<Integer, Double> step(InputPorts inputPorts) {
-        List<OutputPort> outputs = List.nil();
+        Map<Integer, Double> outputs = new ListMap<Integer,  Double>();
 
         for (int i = 0; i < instructions.length; i++) {
-            Instruction.Result result = instructions[i].execute(stepIndex, status.isValue(), memory, inputPorts, outputs);
+            Instruction.Result result = instructions[i].execute(stepIndex, status.isValue(), memory, inputPorts);
             memory.setValue(i, result.getMemoryValue().maybe(Maybe.<Double>idC(), memory.getValueC(i)));
-            status.setValue(result.getStatus().maybe(Maybe.<Boolean>idC(), status));
-            outputs.append(result.getOutputAssignment().maybe(outputs.add()));
+            status= new StatusRegister(result.getStatus().maybe(Maybe.<Boolean>idC(), status));
+            outputs = result.getOutput().maybe(outputs.<Output>add());
         }
 
-        if (outputs.get(0) == -1) {
-            throw new RuntimeException("CRASHED");
-        }
+        outputs.get(0).maybe(CRASH_DETECTION);
 
         stepIndex++;
 
         return outputs;
     }
+
+    private static final MaybeC<Double, Double> CRASH_DETECTION = new MaybeC<Double, Double>() {
+        public Double c(Double r) {
+            if (r == -1) {
+                throw new RuntimeException("CRASHED");
+            }
+            return r;
+        }
+
+        public Double c() {
+            throw new RuntimeException("Score output missing.");
+        }
+    };
 
     /**
      * Creates a new snapshoot with the given name.
@@ -110,7 +118,7 @@ abstract class AbstractVm implements Vm {
      * @param snapshootName the name of the new snapshoot
      */
     public void createSnapshoot(String snapshootName) {
-        snapshoots.put(snapshootName, new Snapshoot(memory.values, status, stepIndex));
+        snapshoots.put(snapshootName, new Snapshoot(memory.values, status.isValue(), stepIndex));
     }
 
     /**
@@ -130,7 +138,7 @@ abstract class AbstractVm implements Vm {
          * removed snapshoots from the map after resetting.
          */
         memory.restoreSnapshoot(snapshoot);
-        status = snapshoot.status;
+        status = new StatusRegister(snapshoot.status);
         stepIndex = snapshoot.stepIndex;
     }
 
@@ -191,7 +199,7 @@ abstract class AbstractVm implements Vm {
 
     private static class StatusRegister implements NothingC<Boolean> {
 
-        private boolean value;
+        private final boolean value;
 
         private StatusRegister(boolean value) {
             this.value = value;
@@ -199,10 +207,6 @@ abstract class AbstractVm implements Vm {
 
         public boolean isValue() {
             return value;
-        }
-
-        public void setValue(boolean value) {
-            this.value = value;
         }
 
         public Boolean c() {
@@ -217,13 +221,13 @@ abstract class AbstractVm implements Vm {
     private static class MapBackedInputPorts implements InputPorts {
 
 
-        private final Map<Integer, Double> map;
+        private final java.util.Map<Integer, Double> map;
 
         //---------------------------------------------------------------------------------------------
         // Constructor
         //---------------------------------------------------------------------------------------------
 
-        private MapBackedInputPorts(Map<Integer, Double> map) {
+        private MapBackedInputPorts(java.util.Map<Integer, Double> map) {
             this.map = new HashMap<Integer, Double>(map);
         }
 
