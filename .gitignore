@@ -2,3 +2,5 @@
 *.hi
 HaskellVM/RunControl
 HaskellVM/Analyze
+#*#
+*~
