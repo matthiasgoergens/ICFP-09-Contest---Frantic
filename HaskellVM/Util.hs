@@ -26,7 +26,13 @@ trd4 :: (a,b,c,d) -> c
 trd4 (_,_,c,_) = c
 
 sqr :: (Num a) => a -> a
-sqr x = x*x
+sqr = (^2)
+
+evalCmpFun Less = (<) 
+evalCmpFun LEq = (<=)
+evalCmpFun Eq = (==)
+evalCmpFun MEq = (>=)
+evalCmpFun More = (>)
 
 instance Num a => Num (a,a) where
     (+) (a,c) (b,d) = (a+b,c+d)

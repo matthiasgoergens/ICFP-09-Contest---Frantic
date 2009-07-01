@@ -21,7 +21,7 @@ oneRun inp vm =
            let v1 = readMem vm addr
                in case sop of
                     Noop -> (vm,out)
-                    Cmpz f -> (vm {status = f v1 0},out)
+                    Cmpz f -> (vm {status = evalCmpFun f v1 0},out)
                     Sqrt -> (writeMem i (sqrt v1) vm,out)
                     Copy -> (writeMem i (v1) vm,out)
                     Input -> (writeMem i (readInput inp addr) vm,out)

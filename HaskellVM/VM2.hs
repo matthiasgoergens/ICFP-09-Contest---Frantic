@@ -133,7 +133,7 @@ runInstr readInput readMem (c, (SType sop addr))
           input = readInput addr
       in case sop of 
            Noop -> return (vc, Nothing)
-           Cmpz f -> do put (f v1 0)
+           Cmpz f -> do put (evalCmpFun f v1 0)
                         return (vc, Nothing)
            Sqrt -> return (sqrt v1, Nothing)
            Copy -> return (v1, Nothing)

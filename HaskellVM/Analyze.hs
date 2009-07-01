@@ -1,5 +1,5 @@
 {-# OPTIONS -XScopedTypeVariables -fglasgow-exts #-}
-module Main where
+module Analyze where
 
 import Load
 import Util
@@ -81,7 +81,7 @@ toIType :: Instr -> IType
 toIType (DType op _ _) = IType $ Left op
 toIType (SType op _) = IType $ Right op
 
-data Dataflow = Dataflow [Vertice] [Arc]
+data Dataflow = Dataflow [Vertice] [Arc] deriving Show
 
 analyzeDataflow :: VM -> Dataflow
 analyzeDataflow vm = Dataflow vertices (arcs++arcsZ)
@@ -247,8 +247,20 @@ toNameSpace (IType (Right op)) = case op of
 
 
 
+forwardP (Arc senke (_,quelle)) = src quelle <= target senke
+
+getMinimalState :: Dataflow -> [Quelle]
+getMinimalState (Dataflow vertices arcs)
+    = map getQuelle . filter (not . forwardP) $  arcs
+    where getQuelle (Arc _ (_, quelle)) = quelle
+
+getMaximalState :: Dataflow -> [Quelle]
+getMaximalState (Dataflow vertices arcs)
+    = map getQuelle . filter (const True) $  arcs
+    where getQuelle (Arc _ (_, quelle)) = quelle
+
 instance ToDot Arc where
-    toDot (Arc senke (dependType, quelle))
+    toDot arc@(Arc senke (dependType, quelle))
         = "edge[style="++style isForward++", dir="++dir isForward
           ++" arrowhead=\""++arrowhead dependType++"\""
           ++" contraint=\""++(show . not $ isForward)++"\""
@@ -258,7 +270,7 @@ instance ToDot Arc where
                     style False = "dashed"
                     dir _ = "forward"
                     dir False = "back"
-                    isForward = src quelle <= target senke
+                    isForward = forwardP arc
 
                     arrowhead Plus = "normal"
                     arrowhead Minus = "empty"
@@ -282,9 +294,12 @@ instance ToDot Senke where
     toDot (SZ addr) = toDot (NZ addr) -- "Z_"++show addr
 
 instance ToDot Quelle where
-    toDot (QMem addr) = toDot (NMem addr) -- "Mem_"++show addr
-    toDot (QIn addr) = toDot (NIn addr) -- "In_"++show addr
-    toDot (QZ addr) = toDot (NZ addr) -- "Z_"++show addr
+    toDot  = toDot . quelleToNamespace
+
+
+quelleToNamespace (QMem addr) = (NMem addr) -- "Mem_"++show addr
+quelleToNamespace (QIn addr) = (NIn addr) -- "In_"++show addr
+quelleToNamespace (QZ addr) = (NZ addr) -- "Z_"++show addr
 
 -- labelInp name = "node [shape = box, label=" ++ show name++"];" ++ show name ++";\n"
 
@@ -400,9 +415,23 @@ fullNetworkAnalysis args = do
   let file = args !! 1
   dat <- B.readFile file
   let vm = loadVM dat
-  let vm = testVM
+--  let vm = testVM
+  let dataflow = analyzeDataflow $ vm
+  
+--  putStr . toDot $ dataflow
+  print . getMinimalState $ dataflow
+  print $ dataflow
+  print . length . getMinimalState $ dataflow
+  print . length . getMaximalState $ dataflow
 
-  trace (show $ instr vm) (putStr . toDot . analyzeDataflow $ vm)
+
+compileLightningVM :: String -> VM -> String  
+compileLightningVM name vm = "module " ++ name
+    where
+      dataflow = analyzeDataflow $ vm
+      state = getMinimalState $ dataflow
+      
+
 
 {-
 dependencyAnalysis args = do
@@ -444,7 +473,8 @@ gnuplotter_wrapper args = do
   let vm  = loadVM dat
   gnuplotter [0,1,2,3,4] oneRun vm
 
-main = do
+
+runAnalysis = do
   args <- getArgs
   when (length args < 2) $ do fail "\nUsage: See source.\n"
   case args !! 0 of 

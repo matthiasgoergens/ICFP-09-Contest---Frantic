@@ -28,12 +28,12 @@ loadInstrDat ins dat =
               False -> loadDType i32
            , convertToDouble dat )
 
-loadIMM :: Word32 -> (Dat -> Dat -> Bool)
-loadIMM 0 = (<) 
-loadIMM 1 = (<=)
-loadIMM 2 = (==)
-loadIMM 3 = (>=)
-loadIMM 4 = (>)
+loadIMM :: Word32 -> CmpFun
+loadIMM 0 = Less -- (<) 
+loadIMM 1 = LEq -- (<=)
+loadIMM 2 = Eq -- (==)
+loadIMM 3 = MEq -- (>=)
+loadIMM 4 = More -- (>)
 loadIMM _ = error "Wrong Imm code"
 
 loadSType :: Word32 -> Instr

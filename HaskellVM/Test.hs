@@ -78,3 +78,7 @@ getSolution c z = (runWriter (evalStateT c z))
 test1 = getSolution (testI) (10, [])
 
 main = print test1
+
+f :: Int -> Int
+f n = (*) n
+      n

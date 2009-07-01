@@ -13,15 +13,25 @@ type Vec = (Dat,Dat)
 
 data Instr = DType DOP !Addr !Addr 
            |  SType SOP !Addr 
-             deriving (Show)
-data DOP  = Add | Sub | Mult | Div | Output | Phi deriving (Read, Show)
-data SOP  = Noop | Cmpz (Dat -> Dat -> Bool) | Sqrt | Copy | Input deriving (Show)
+             deriving (Show, Ord, Eq)
+data DOP  = Add | Sub | Mult | Div | Output | Phi deriving (Read, Show, Ord, Eq)
+data SOP  = Noop | Cmpz CmpFun | Sqrt | Copy | Input deriving (Show, Ord, Eq)
 
-instance Show (Dat -> Dat -> Bool) where
-    show = const "<cmp-fun>"
+data CmpFun = Less | LEq | Eq | MEq | More deriving (Ord, Eq)
+
+instance Show CmpFun
+    where 
+      show Less = "<0"
+      show LEq = "<=0"
+      show Eq = "==0"
+      show MEq = ">=0"
+      show More = ">0"
+
+-- instance Show (Dat -> Dat -> Bool) where
+--    show = const "<cmp-fun>"
 
 -- length and DNA part
-data VM = VM {  instr  :: [(Int,Instr)] 
+data VM = VM {  instr  :: [(Addr,Instr)] 
              ,  mem    :: IntMap Dat
              ,  status :: !Bool
              ,  size   :: Int
