@@ -1,55 +1,85 @@
 
-Analyze.hs,1304
-module Main0,1
-data NameSpace = NInp26,27
-data NameSpace = NInp Addr | NOutp26,27
-data NameSpace = NInp Addr | NOutp Addr | NMem26,27
-data NameSpace26,27
-data Vertice34,35
-data Vertice = Vertice34,35
-data Arc35,36
-data Arc = Arc35,36
-data DependType37,38
-data DependType = Plus37,38
-data DependType = Plus | Minus37,38
-data DependType = Plus | Minus | Mal37,38
-data DependType = Plus | Minus | Mal | Durch37,38
-                | Wurzel38,39
-                | Vergleich43,44
-                | If44,45
-                | Then45,46
-                | Else46,47
-                | Kopie47,48
-data Senke51,52
-data Senke  = SMem51,52
-data Senke  = SMem Addr | SOut51,52
-data Senke  = SMem Addr | SOut Addr | SZ51,52
-data Quelle52,53
-data Quelle = QMem52,53
-data Quelle = QMem Addr | QIn52,53
-data Quelle = QMem Addr | QIn  Addr | QZ52,53
-newtype IType54,55
-toIType65,66
-type Dataflow69,70
-analyzeDataflow73,74
-analyzeZArcs84,85
-    where go88,89
-          go190,91
-splitBy95,96
-analyzeOrdinaryArcs117,118
-analyze143,144
-showDataflow160,161
-showVertice177,178
-showAnalysis182,183
-          shapes196,197
-invert229,230
-analyseDepend246,247
-follow252,253
-    where types261,262
-gnuplotter284,285
-        helper287,288
-        loop296,297
-              lookup300,301
+Analyze.hs,2148
+module Analyze1,2
+data NameSpace = NIn29,30
+data NameSpace = NIn Addr | NOut29,30
+data NameSpace = NIn Addr | NOut Addr | NMem29,30
+data NameSpace = NIn Addr | NOut Addr | NMem  Addr | NZ29,30
+data NameSpace29,30
+class ToDot31,32
+    toDot32,33
+data Vertice47,48
+data Vertice = Vertice47,48
+data Arc48,49
+data Arc = Arc48,49
+data DependType50,51
+data DependType = Plus50,51
+data DependType = Plus | Minus50,51
+data DependType = Plus | Minus | Mal50,51
+data DependType = Plus | Minus | Mal | Durch50,51
+                | Wurzel51,52
+                | Vergleich56,57
+                | If57,58
+                | Then58,59
+                | Else59,60
+                | Kopie60,61
+data Senke65,66
+data Senke  = SMem65,66
+data Senke  = SMem {target :: Addr} | SOut65,66
+data Senke  = SMem {target :: Addr} | SOut {target :: Addr} | SZ65,66
+data Senke  = SMem {target65,66
+data Senke  = SMem {target :: Addr} | SOut {target65,66
+data Senke  = SMem {target :: Addr} | SOut {target :: Addr} | SZ {target65,66
+data Quelle66,67
+data Quelle = QMem66,67
+data Quelle = QMem {src :: Addr} | QIn66,67
+data Quelle = QMem {src :: Addr} | QIn  {src :: Addr} | QZ66,67
+data Quelle = QMem {src66,67
+data Quelle = QMem {src :: Addr} | QIn  {src66,67
+data Quelle = QMem {src :: Addr} | QIn  {src :: Addr} | QZ {src66,67
+newtype IType68,69
+toIType79,80
+data Dataflow83,84
+data Dataflow = Dataflow83,84
+analyzeDataflow85,86
+analyzeZArcs97,98
+    where go101,102
+          go1103,104
+splitBy108,109
+prop_SplitByConserve (Blind pred) (l::[Int])117,118
+prop_SplitByConserve2 (Blind pred) (l::[Int])123,124
+prop_rot_idem (Blind pred) (l::[Int])136,137
+prop_rot_conserve (Blind pred) (l::[Int])137,138
+prop_rot_headTrue (Blind pred) (NonEmpty (l::[Int]))139,140
+rot144,145
+analyzeOrdinaryArcs154,155
+analyze179,180
+toNameSpace231,232
+getMinimalState251,252
+getMaximalState256,257
+showAnalysis306,307
+          shapes320,321
+invert352,353
+analyseDepend369,370
+follow375,376
+    where types384,385
+compileLightningVM427,428
+gnuplotter446,447
+        helper449,450
+        loop458,459
+              lookup462,463
+
+Compile.hs,191
+module Compile1,2
+data LoC = LoC31,32
+data LoC31,32
+class Compile33,34
+    compile34,35
+outputs117,118
+inputs122,123
+constants127,128
+askGHCMinstate134,135
+          extract146,147
 
 Console.hs,106
 module Console0,1
@@ -100,6 +130,20 @@ data Frame = Frame { step18,19
                    , vals19,20
 teamID22,23
 main48,49
+
+L2.hs,38
+module L2(f)0,1
+output = I.empty3,4
+
+L3.hs,38
+module L3(f)0,1
+output = I.empty3,4
+
+l.hs,0
+
+L.hs,37
+module L(f)0,1
+output = I.empty3,4
 
 Load.hs,161
 module Load0,1
@@ -183,6 +227,14 @@ isComment17,18
 parseInput23,24
 parseOutput31,32
 
+RunAnalyze.hs,39
+module Main0,1
+main = runAnalysis3,4
+
+RunCompiler.hs,38
+module Main0,1
+main = runCompile4,5
+
 RunControl.hs,123
 module Main0,1
     let20,21
@@ -231,7 +283,13 @@ getVTestController306,307
 wait326,327
 getVTestController2329,330
 
-Test.hs,235
+temp.hs,0
+
+Test2.hs,2027
+module Test20,1
+t _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ b _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ = b2,3
+
+Test.hs,243
 module Main0,1
 type Z = Int8,9
 type Z8,9
@@ -247,8 +305,11 @@ test46,47
 getZ56,57
 putZ61,62
 testI65,66
+f81,82
 
-Types.hs,987
+t.hs,0
+
+Types.hs,1146
 module Types1,2
 type Time = Int6,7
 type Time6,7
@@ -269,26 +330,32 @@ data DOP  = Add | Sub | Mult | Div | Output | Phi16,17
 data SOP17,18
 data SOP  = Noop17,18
 data SOP  = Noop | Cmpz17,18
-data SOP  = Noop | Cmpz (Dat -> Dat -> Bool) | Sqrt17,18
-data SOP  = Noop | Cmpz (Dat -> Dat -> Bool) | Sqrt | Copy17,18
-data SOP  = Noop | Cmpz (Dat -> Dat -> Bool) | Sqrt | Copy | Input17,18
-data VM23,24
-data VM = VM23,24
-data VM = VM {  instr23,24
-             ,  mem24,25
-             ,  status25,26
-             ,  size26,27
-             ,  time27,28
-data Inp30,31
-data Inp  = Inp30,31
-data Outp31,32
-data Outp = Outp31,32
-mkInp33,34
-fromInp36,37
-mkOutp39,40
-fromOutp42,43
+data SOP  = Noop | Cmpz CmpFun | Sqrt17,18
+data SOP  = Noop | Cmpz CmpFun | Sqrt | Copy17,18
+data SOP  = Noop | Cmpz CmpFun | Sqrt | Copy | Input17,18
+data CmpFun19,20
+data CmpFun = Less19,20
+data CmpFun = Less | LEq19,20
+data CmpFun = Less | LEq | Eq19,20
+data CmpFun = Less | LEq | Eq | MEq19,20
+data CmpFun = Less | LEq | Eq | MEq | More19,20
+data VM33,34
+data VM = VM33,34
+data VM = VM {  instr33,34
+             ,  mem34,35
+             ,  status35,36
+             ,  size36,37
+             ,  time37,38
+data Inp40,41
+data Inp  = Inp40,41
+data Outp41,42
+data Outp = Outp41,42
+mkInp43,44
+fromInp46,47
+mkOutp49,50
+fromOutp52,53
 
-Util.hs,674
+Util.hs,676
 module Util2,3
 mapfst f (a,c) = (f16,17
 mapfst15,16
@@ -296,38 +363,38 @@ mapsnd18,19
 trd321,22
 trd424,25
 sqr27,28
-normalize40,41
-scalar43,44
-scale46,47
-perpendicular51,52
-vecLen54,55
-vecLen257,58
-getRad62,63
-getOut65,66
-getVel68,69
-getPos71,72
-getPosOther74,75
-outIsEmpty77,78
-readMem82,83
-writeMem85,86
-readInput89,90
-setInputs98,99
-writeOutput103,104
-readConsoleInput108,109
-showConsoleOutput112,113
-readConsoleLines115,116
-isFinished126,127
-score130,131
-incTime134,135
-partitionN138,139
-word8ToWord32143,144
-convertToDouble146,147
-word64ToDouble149,150
-decodeIEEE154,155
-doubleToWord64170,171
-reverseWord64173,174
-reverseWord32176,177
-encodeIEEE182,183
+normalize46,47
+scalar49,50
+scale52,53
+perpendicular57,58
+vecLen60,61
+vecLen263,64
+getRad68,69
+getOut71,72
+getVel74,75
+getPos77,78
+getPosOther80,81
+outIsEmpty83,84
+readMem88,89
+writeMem91,92
+readInput95,96
+setInputs104,105
+writeOutput109,110
+readConsoleInput114,115
+showConsoleOutput118,119
+readConsoleLines121,122
+isFinished132,133
+score136,137
+incTime140,141
+partitionN144,145
+word8ToWord32149,150
+convertToDouble152,153
+word64ToDouble155,156
+decodeIEEE160,161
+doubleToWord64176,177
+reverseWord64179,180
+reverseWord32182,183
+encodeIEEE188,189
 
 VM2.hs,386
 module Main0,1
