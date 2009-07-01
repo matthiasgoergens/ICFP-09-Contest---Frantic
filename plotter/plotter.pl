@@ -5,6 +5,7 @@ use warnings;
 use Cairo;
 use Glib qw(TRUE FALSE);
 use Gtk2 -init;
+use Time::HiRes qw(time);
 
 my $window = Gtk2::Window->new;
 my $area = Gtk2::DrawingArea->new;
@@ -12,17 +13,39 @@ my $cr;
 
 my $r_e = 6.357E6;
 my $scale = 1/$r_e;
+my $Pi = 3.14159265;
+
+my $frames = 0;
+my $starttime = time;
+
+my ($width, $height);
+
+$SIG{INT} = sub{ print STDERR "fps: ", $frames/(time - $starttime), "\n"; exit(0); };
 
 
 sub rotation {
 	my $scale = shift @_;
-	my $t = time;
+	my $t = time / $Pi * 10;
+	
 	return ( sin($t) * $scale, cos($t) * $scale );
 }
 
+my $clear_solid = sub {
+	$cr->set_source_rgb(0,0,0);
+	$cr->paint;
+};
+
+my $clear_blur = sub {
+	$cr->set_source_rgba(0,0,0,0.01);
+	$cr->rectangle(0, 0, $width, $height);
+	$cr->fill;
+};
+
+my $clear = $clear_solid;
+
 my $draw_sat = sub {
 	my ($x, $y) = @_;
-print STDERR 	"$x, $y\n";
+# print STDERR 	"$x, $y\n";
 	$cr->arc($x, $y, $r_e * 2, 0, 359);
 	$cr->set_source_rgb(1,0,0);
 	$cr->fill;
@@ -30,9 +53,10 @@ print STDERR 	"$x, $y\n";
 
 my $draw = sub {	
 	return if ! $cr;
+	
+	$frames++;
 
-	$cr->set_source_rgb(0,0,0);
-	$cr->paint;
+	$clear->();	
 	
 	$cr->translate(300, 300);
 	$cr->scale($scale, $scale);
@@ -53,6 +77,10 @@ $area->signal_connect( expose_event => sub {
 
 	$cr = Gtk2::Gdk::Cairo::Context->create($widget->window());
 	$draw->();
+	
+	my ($x, $y);
+	
+	($x, $y, $width, $height) = $widget->window()->get_geometry;
 			
 	return FALSE;
 } );
