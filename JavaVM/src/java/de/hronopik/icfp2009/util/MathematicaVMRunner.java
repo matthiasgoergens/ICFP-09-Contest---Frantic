@@ -5,7 +5,6 @@ import de.hronopik.icfp2009.util.optimizer.FitnessFunction;
 import de.hronopik.icfp2009.util.optimizer.SimpleMinimizer;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.Collections;
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public class MathematicaVMRunner implements FitnessFunction{
 	public Double[] runToTurn(double dvx, double dvy){
 		int MAX_ITER = 100000;
 		vm.reset("start");
-		Map<Integer, Double> inputs = new HashMap<Integer, Double>();
+		java.util.Map<Integer, Double> inputs = new HashMap<Integer, Double>();
 //		inputs.put(16000, 1001d);
 		inputs.put(2, dvx);
 		inputs.put(3, dvy);
@@ -47,16 +46,16 @@ public class MathematicaVMRunner implements FitnessFunction{
 		double x1,y1,x2,y2;
 
 		Map<Integer, Double> outputs = vm.step(inputs);
-		x1 = outputs.get(2);
-		y1 = outputs.get(3);
+		x1 = outputs.get(2).maybe(Continuations.<Double>fail("output 2 not existent"));
+		y1 = outputs.get(3).maybe(Continuations.<Double>fail("output 3 not existent"));
 		result.add(x1);
 		result.add(y1);
 
         vm.createSnapshoot("undo");
 		for (int iter = 0; iter < MAX_ITER; ++iter) {
 			outputs = vm.step(Collections.<Integer, Double>emptyMap());
-			x2 = outputs.get(2);
-			y2 = outputs.get(3);
+			x2 = outputs.get(2).maybe(Continuations.<Double>fail("output 2 not existent"));
+			y2 = outputs.get(3).maybe(Continuations.<Double>fail("output 3 not existent"));
 			result.add(x2);
 			result.add(y2);
 
@@ -71,7 +70,7 @@ public class MathematicaVMRunner implements FitnessFunction{
 	public double[] runToTurn2(double dvx, double dvy, double rGoal){
 		long MAX_ITER = 1000000;
 		vm.reset("start");
-		Map<Integer, Double> inputs = new HashMap<Integer, Double>();
+		java.util.Map<Integer, Double> inputs = new HashMap<Integer, Double>();
 		inputs.put(16000, 1001d);
 		inputs.put(2, dvx);
 		inputs.put(3, dvy);
@@ -80,14 +79,14 @@ public class MathematicaVMRunner implements FitnessFunction{
 		double x1,y1,x2,y2;
 
 		Map<Integer, Double> outputs = vm.step(inputs);
-		x1 = outputs.get(2);
-		y1 = outputs.get(3);
+		x1 = outputs.get(2).maybe(Continuations.<Double>fail("output 2 not existent"));
+		y1 = outputs.get(3).maybe(Continuations.<Double>fail("output 3 not existent"));
 		System.out.println("POSITION "+ x1 + " " + y1);
 
 		for (long iter = 0; iter < MAX_ITER; ++iter) {
 			outputs = vm.step(Collections.<Integer, Double>emptyMap());
-			x2 = outputs.get(2);
-			y2 = outputs.get(3);
+			x2 = outputs.get(2).maybe(Continuations.<Double>fail("output 2 not existent"));
+			y2 = outputs.get(3).maybe(Continuations.<Double>fail("output 3 not existent"));
 
 			double r1 = (x1*x1+y1*y1);
 			double r2 = (x2*x2+y2*y2);
@@ -102,7 +101,7 @@ public class MathematicaVMRunner implements FitnessFunction{
 
 	public Double[] orbitError(double dvx, double dvy, double wantedR, int MAX_ITER){
 		vm.reset("TURN");
-		Map<Integer, Double> inputs = new HashMap<Integer, Double>();
+		java.util.Map<Integer, Double> inputs = new HashMap<Integer, Double>();
 		inputs.put(16000, 1001d);
 		inputs.put(2, dvx);
 		inputs.put(3, dvy);
@@ -112,8 +111,8 @@ public class MathematicaVMRunner implements FitnessFunction{
 		Map<Integer, Double> outputs = vm.step(inputs);
 
 		for (long iter = 0; iter < MAX_ITER; ++iter) {
-			x1 = outputs.get(2);
-			y1 = outputs.get(3);
+			x1 = outputs.get(2).maybe(Continuations.<Double>fail("output 2 not existent"));
+			y1 = outputs.get(3).maybe(Continuations.<Double>fail("output 3 not existent"));
 			pos.add(x1); pos.add(y1);
 			double diff = Math.abs(wantedR - Math.sqrt(x1*x1+y1*y1));
 			resultDiff += diff;
@@ -138,7 +137,7 @@ public class MathematicaVMRunner implements FitnessFunction{
 			e.printStackTrace();
 		}
 		ArrayList<Double> result = new ArrayList<Double>();
-		Map<Integer, Double> inputs = new HashMap<Integer, Double>();
+		java.util.Map<Integer, Double> inputs = new HashMap<Integer, Double>();
 		inputs.put(16000, 1001d);
 		inputs.put(2, 0.0d);
 		inputs.put(3, dvy1);
@@ -148,15 +147,15 @@ public class MathematicaVMRunner implements FitnessFunction{
 
 		Map<Integer, Double> outputs = vm.step(inputs);
 		int step = vm.getStepIndex();
-		x1 = outputs.get(2);
-		y1 = outputs.get(3);
+		x1 = outputs.get(2).maybe(Continuations.<Double>fail("output 2 not existent"));
+		y1 = outputs.get(3).maybe(Continuations.<Double>fail("output 3 not existent"));
 		result.add(x1);
 		result.add(y1);
 
 		for (long iter = step; iter < stepMarker1; ++iter) {
 			outputs = vm.step(Collections.<Integer, Double>emptyMap());
-			x1 = outputs.get(2);
-			y1 = outputs.get(3);
+			x1 = outputs.get(2).maybe(Continuations.<Double>fail("output 2 not existent"));
+			y1 = outputs.get(3).maybe(Continuations.<Double>fail("output 3 not existent"));
 			result.add(x1);
 			result.add(y1);
 		}
@@ -172,14 +171,14 @@ public class MathematicaVMRunner implements FitnessFunction{
 			 breakme = true;
 		 }
 		for(long iter = stepMarker1+1; iter<MAX_ITER; ++iter ){
-			if(breakme && outputs.get(0)>0) break; //If goal reached, break up
-			x1 = outputs.get(2);
-			y1 = outputs.get(3);
+			if(breakme && outputs.get(0).maybe(Continuations.<Double>fail("output 0 not existent"))>0) break; //If goal reached, break up
+			x1 = outputs.get(2).maybe(Continuations.<Double>fail("output 2 not existent"));
+			y1 = outputs.get(3).maybe(Continuations.<Double>fail("output 2 not existent"));
 			result.add(x1);
 			result.add(y1);
 			outputs = vm.step(Collections.<Integer, Double>emptyMap());
 		}
-		result.add(outputs.get(0)); //Store the score
+		result.add(outputs.get(0).maybe(Continuations.<Double>fail("output 0 not existent"))); //Store the score
 		return(result.toArray(new Double[result.size()]));
 	}
 

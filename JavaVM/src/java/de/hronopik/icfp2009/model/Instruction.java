@@ -1,9 +1,7 @@
 package de.hronopik.icfp2009.model;
 
-import java.util.Map;
-
 import de.hronopik.icfp2009.util.Maybe;
-import de.hronopik.icfp2009.vm.Output;
+import de.hronopik.icfp2009.model.Output;
 
 /**
  * A 32-bit instruction.

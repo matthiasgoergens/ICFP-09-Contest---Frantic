@@ -17,24 +17,82 @@ public abstract class Maybe<T> {
     //
     //---------------------------------------------------------------------------------------------
 
-    public abstract <Q> Q maybe(MaybeC<Q, T> mc);
+    public abstract boolean isJust();
 
-    public abstract <Q> Q maybe(JustC<Q, T> jc, NothingC<Q> nc);
+    public abstract boolean isNothing();
 
     //---------------------------------------------------------------------------------------------
     //
     //---------------------------------------------------------------------------------------------
 
-    public static abstract class Nothing<T> extends Maybe<T> {
-        private Nothing() {
+    public abstract <Q> Q maybe(MaybeC<Q, ? super T> mc);
+
+    public abstract <Q> Q maybe(JustC<Q, ? super T> jc, NothingC<Q> nc);
+
+    //---------------------------------------------------------------------------------------------
+    //
+    //---------------------------------------------------------------------------------------------
+
+    public static class Just<T> extends Maybe<T> {
+
+        private final T value;
+
+        public Just(T value) {
+            this.value = value;
+        }
+
+        public boolean isJust() {
+            return true;
+        }
+
+        public boolean isNothing() {
+            return false;
+        }
+
+        public T just() {
+            return value;
+        }
+
+        public <Q> Q maybe(MaybeC<Q, ? super T> mc) {
+            return mc.c(value);
+        }
+
+        @Override
+        public <Q> Q maybe(final JustC<Q, ? super T> jc, final NothingC<Q> nc) {
+            return jc.c(value);
+        }
+
+        //---------------------------------------------------------------------------------------------
+        //
+        //---------------------------------------------------------------------------------------------
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Just just = (Just) o;
+
+            return value.equals(just.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return value.hashCode();
         }
     }
 
-    public static abstract class Just<T> extends Maybe<T> {
-        private Just() {
+    public static abstract class Nothing<T> extends Maybe<T> {
+        private Nothing() {
         }
 
-        public abstract T just();
+        public boolean isJust() {
+            return false;
+        }
+
+        public boolean isNothing() {
+            return true;
+        }
     }
 
     //---------------------------------------------------------------------------------------------
@@ -42,33 +100,18 @@ public abstract class Maybe<T> {
     //---------------------------------------------------------------------------------------------
 
     public static <T> Just<T> just(final T t) {
-        return new Just<T>() {
-
-            @Override
-            public T just() {
-                return t;
-            }
-
-            public <Q> Q maybe(MaybeC<Q, T> mc) {
-                return mc.c(t);
-            }
-
-            @Override
-            public <Q> Q maybe(final JustC<Q, T> jc, final NothingC<Q> nc) {
-                return jc.c(t);
-            }
-        };
+        return new Just<T>(t);
     }
 
     public static <T> Nothing<T> nothing() {
         return new Nothing<T>() {
 
-            public <Q> Q maybe(MaybeC<Q, T> mc) {
+            public <Q> Q maybe(MaybeC<Q, ? super T> mc) {
                 return mc.c();
             }
 
             @Override
-            public <Q> Q maybe(final JustC<Q, T> jc, final NothingC<Q> nc) {
+            public <Q> Q maybe(final JustC<Q, ? super T> jc, final NothingC<Q> nc) {
                 return nc.c();
             }
         };

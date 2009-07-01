@@ -1,11 +1,15 @@
 package de.hronopik.icfp2009.io;
 
-import org.jetbrains.annotations.NotNull;
+import de.hronopik.icfp2009.util.Function2;
+import static de.hronopik.icfp2009.util.LinkedList.fromCollection;
+import static de.hronopik.icfp2009.util.Lists.sort;
+import de.hronopik.icfp2009.util.Map;
+import de.hronopik.icfp2009.util.Pair;
+import de.hronopik.icfp2009.util.Pairs;
 
 import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Map;
 
 /**
  * @author Alexander Kiel
@@ -26,13 +30,16 @@ public class VmWriter extends FilterWriter {
     //---------------------------------------------------------------------------------------------
 
     public void writeOutputs(Map<Integer, Double> outputs) throws IOException {
-        for (Map.Entry<Integer, Double> entry : outputs.entrySet()) {
-            out.write(String.valueOf(entry.getKey()));
-            out.write(" ");
-            out.write(String.valueOf(entry.getValue()));
-            out.write("\n");
-        }
-        out.write(".\n");
+        out.write(sort(fromCollection(outputs), Pairs.<Integer>fstComparator()).foldLeft(new StringBuilder(),
+                new Function2<StringBuilder, Pair<Integer, Double>, StringBuilder>() {
+                    public StringBuilder apply(StringBuilder s, Pair<Integer, Double> mapping) {
+                        return s.append(String.valueOf(mapping.getFst()))
+                                .append(" ")
+                                .append(String.valueOf(mapping.getSnd()))
+                                .append("\n");
+                    }
+                }
+        ).append(".\n").toString());
         out.flush();
     }
 }

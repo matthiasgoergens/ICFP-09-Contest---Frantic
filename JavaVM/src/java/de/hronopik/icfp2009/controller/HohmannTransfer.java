@@ -30,7 +30,7 @@ public class HohmannTransfer {
     //---------------------------------------------------------------------------------------------
 
     public double getFuelConsumption(Pair<Vector, Vector> positions) {
-        Vector s1 = positions.getB();
+        Vector s1 = positions.getSnd();
 
         // Our radius around the earth
         double r1 = radius(s1);
@@ -48,8 +48,8 @@ public class HohmannTransfer {
     }
 
     public Pair<Vector, Vector> perform(Vm vm, Pair<Vector, Vector> positions) {
-        Vector s0 = positions.getA();
-        Vector s1 = positions.getB();
+        Vector s0 = positions.getFst();
+        Vector s1 = positions.getSnd();
 
         // Our radius around the earth
         double r1 = radius(s1);

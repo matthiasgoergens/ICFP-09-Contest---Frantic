@@ -1,8 +1,6 @@
 package de.hronopik.icfp2009.vm;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Map;
+import de.hronopik.icfp2009.util.Map;
 
 /**
  * @author Alexander Kiel
@@ -48,8 +46,8 @@ public class InputLoggingVmWrapper implements Vm {
     }
 
 
-    public Map<Integer, Double> step(Map<Integer, Double> inputs) {
-        for (Map.Entry<Integer, Double> entry : inputs.entrySet()) {
+    public Map<Integer, Double> step(java.util.Map<Integer, Double> inputs) {
+        for (java.util.Map.Entry<Integer, Double> entry : inputs.entrySet()) {
             sb.append(String.valueOf(entry.getKey()));
             sb.append(" ");
             sb.append(String.valueOf(entry.getValue()));

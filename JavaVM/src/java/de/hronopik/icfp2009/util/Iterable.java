@@ -4,33 +4,23 @@ package de.hronopik.icfp2009.util;
  * @author Alexander Kiel
  * @version $Id$
  */
-public interface Map<K, V> extends Set<Pair<K, V>>, Function1<K, Maybe<V>> {
+public interface Iterable<E> {
 
-    Maybe<V> get(K key);
-
-    Map<K, V> add(Pair<K, V> mapping);
-
-    MaybeC<Map<K, V>, Pair<K, V>> add();
-
-    Map<K, V> remove(Pair<K, V> mapping);
-
-    MaybeC<Map<K, V>, Pair<K, V>> remove();
-
-    Map<K, V> removeKey(K key);
-
-    MaybeC<Map<K, V>, K> removeKey();
+    Iterator<E> iterator();
 
     //---------------------------------------------------------------------------------------------
     //
     //---------------------------------------------------------------------------------------------
 
-    <T> Set<T> map(Function1<Pair<K, V>, T> mapper);
+    <T> Iterable<T> map(Function1<E, T> mapper);
 
-    Map<K, V> filter(Function1<Pair<K, V>, Boolean> p);
+    Iterable<E> filter(Function1<E, Boolean> p);
 
     //---------------------------------------------------------------------------------------------
-    // KeySet
+    //
     //---------------------------------------------------------------------------------------------
 
-    //Set<K> keySet();
+    <T> T foldLeft(T start, Function2<T, E, T> f);
+
+    <T> T foldRight(T start, Function2<E, T, T> f);
 }

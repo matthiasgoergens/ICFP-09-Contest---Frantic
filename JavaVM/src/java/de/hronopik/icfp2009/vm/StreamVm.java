@@ -4,12 +4,12 @@ import de.hronopik.icfp2009.io.Frames;
 import de.hronopik.icfp2009.io.OrbitBinaryFrame;
 import de.hronopik.icfp2009.io.VmReader;
 import de.hronopik.icfp2009.io.VmWriter;
-import org.jetbrains.annotations.NotNull;
+import de.hronopik.icfp2009.util.Map;
+import de.hronopik.icfp2009.util.Continuations;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Alexander Kiel
@@ -62,7 +62,7 @@ public class StreamVm extends AbstractVm implements Runnable {
 
         out.writeOutputs(outputs);
 
-        return outputs.get(0) == 0;
+        return outputs.get(0).maybe(Continuations.<Double>fail("output 0 not existent")) == 0;
     }
 
     //---------------------------------------------------------------------------------------------

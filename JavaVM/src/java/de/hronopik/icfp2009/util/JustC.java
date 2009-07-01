@@ -6,5 +6,5 @@ package de.hronopik.icfp2009.util;
 */
 public interface JustC<Q, T> {
 
-    Q c(T r);
+    Q c(T just);
 }

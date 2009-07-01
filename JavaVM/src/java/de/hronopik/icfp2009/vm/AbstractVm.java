@@ -4,6 +4,7 @@ import de.hronopik.icfp2009.io.OrbitBinaryFrame;
 import de.hronopik.icfp2009.model.InputPorts;
 import de.hronopik.icfp2009.model.Instruction;
 import de.hronopik.icfp2009.model.RAM;
+import de.hronopik.icfp2009.model.Output;
 import de.hronopik.icfp2009.util.*;
 
 import static java.lang.System.arraycopy;
@@ -83,13 +84,13 @@ abstract class AbstractVm implements Vm {
     }
 
     public Map<Integer, Double> step(InputPorts inputPorts) {
-        Map<Integer, Double> outputs = new ListMap<Integer,  Double>();
+        Map<Integer, Double> outputs = new ListMap<Integer, Double>();
 
         for (int i = 0; i < instructions.length; i++) {
             Instruction.Result result = instructions[i].execute(stepIndex, status.isValue(), memory, inputPorts);
             memory.setValue(i, result.getMemoryValue().maybe(Maybe.<Double>idC(), memory.getValueC(i)));
             status= new StatusRegister(result.getStatus().maybe(Maybe.<Boolean>idC(), status));
-            outputs = result.getOutput().maybe(outputs.<Output>add());
+            outputs = result.getOutput().maybe(outputs.add());
         }
 
         outputs.get(0).maybe(CRASH_DETECTION);

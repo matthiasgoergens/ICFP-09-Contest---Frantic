@@ -1,9 +1,7 @@
 package de.hronopik.icfp2009.controller;
 
-import de.hronopik.icfp2009.util.InputBuilder;
-import de.hronopik.icfp2009.util.Phys;
 import static de.hronopik.icfp2009.util.Phys.*;
-import de.hronopik.icfp2009.util.Vector;
+import de.hronopik.icfp2009.util.*;
 import de.hronopik.icfp2009.vm.DirectVm;
 import de.hronopik.icfp2009.vm.InputLoggingVmWrapper;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.IOException;
 import static java.lang.Math.abs;
-import java.util.Map;
 
 /**
  * @author Alexander Kiel
@@ -56,7 +53,7 @@ public class Task1Controller {
         double r1 = radius(s1);
 
         // Our target radius
-        double r2 = outputs.get(4);
+        double r2 = outputs.get(4).maybe(Continuations.<Double>fail("missing target radius"));
 
         // The time we need for the Hohmann transfer
         double tho = hohmannTime1(r1, r2);
@@ -121,7 +118,7 @@ public class Task1Controller {
         assert vm.getStepIndex() == timeBeforeHohmann2;
         vm.step(buildDeltaVInput(dv2));
 
-        while (outputs.get(0) == 0) {
+        while (outputs.get(0).maybe(Continuations.<Double>fail("missing score")) == 0) {
             outputs = vm.step();
         }
 
@@ -155,13 +152,16 @@ public class Task1Controller {
     }
 
 
-    private Map<Integer, Double> buildDeltaVInput(Vector dv) {
+    private java.util.Map<Integer, Double> buildDeltaVInput(Vector dv) {
         return new InputBuilder(2, dv.getX()).add(3, dv.getY()).build();
     }
 
 
     private Vector getPosition(Map<Integer, Double> outputs) {
-        return new Vector(outputs.get(2), outputs.get(3)).flip();
+        return new Vector(
+                outputs.get(2).maybe(Continuations.<Double>fail("missing s_x")),
+                outputs.get(3).maybe(Continuations.<Double>fail("missing s_y"))
+        ).flip();
     }
 
     public static void main(String[] args) throws IOException {

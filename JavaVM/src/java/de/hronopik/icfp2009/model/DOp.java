@@ -3,7 +3,7 @@ package de.hronopik.icfp2009.model;
 import de.hronopik.icfp2009.util.Maybe;
 import static de.hronopik.icfp2009.util.Maybe.nothing;
 import static de.hronopik.icfp2009.util.Maybe.just;
-import de.hronopik.icfp2009.vm.Output;
+import de.hronopik.icfp2009.model.Output;
 
 /**
  * Operation for D-Type instructions.

@@ -3,6 +3,7 @@ package de.hronopik.icfp2009.vm;
 import de.hronopik.icfp2009.util.Map;
 import de.hronopik.icfp2009.util.MaybeC;
 import de.hronopik.icfp2009.util.Pair;
+import de.hronopik.icfp2009.util.Function2;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -25,9 +26,11 @@ public class SampleDirectVmRunner {
         } while (outputs.get(0).maybe(RUN));
 
         // Write the output
-        for (Pair<Integer, Double> entry : outputs.mappingSet()) {
-            System.out.println(entry.getKey() + " " + entry.getValue());
-        }
+        System.out.println(outputs.foldRight("", new Function2<Pair<Integer, Double>, String, String>() {
+            public String apply(Pair<Integer, Double> mapping, String s) {
+                return String.valueOf(mapping.getFst()) + " " + String.valueOf(mapping.getSnd()) + "\n" + s;
+            }
+        }));
     }
 
     private static final MaybeC<Boolean, Double> RUN = new MaybeC<Boolean, Double>() {
