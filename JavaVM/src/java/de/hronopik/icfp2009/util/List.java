@@ -37,6 +37,15 @@ public abstract class List<E> implements Collection<E> {
 
     public abstract Maybe<E> head();
 
+    /**
+     * Passes the head of this list to the given maybe continuation.
+     *
+     * @param continuation the maybe continuation to be invoked
+     * @param <Q>          the type of the return value
+     * @return the result of the maybe continuation
+     */
+    public abstract <Q> Q headC(MaybeC<Q, ? super E> continuation);
+
     public abstract Maybe<List<E>> tail();
 
     public abstract List<E> take(int n);
@@ -94,6 +103,17 @@ public abstract class List<E> implements Collection<E> {
 
         public abstract Maybe.Just<E> head();
 
+        /**
+         * Passes the head of this list to the given maybe continuation.
+         *
+         * @param continuation the maybe continuation to be invoked
+         * @param <Q>          the type of the return value
+         * @return the result of the maybe continuation
+         */
+        public <Q> Q headC(MaybeC<Q, ? super E> continuation) {
+            return head().maybe(continuation);
+        }
+
         public abstract Maybe.Just<List<E>> tail();
 
         public List<E> drop(int n) {
@@ -146,11 +166,12 @@ public abstract class List<E> implements Collection<E> {
 
         @Override
         public String toString() {
-            StringBuilder sb = foldLeft(new StringBuilder("["), new Function2<StringBuilder, E, StringBuilder>() {
-                public StringBuilder apply(StringBuilder stringBuilder, E e) {
-                    return stringBuilder.append(e).append(", ");
-                }
-            });
+            StringBuilder sb = foldLeft(new StringBuilder("["),
+                    new Function2<StringBuilder, E, StringBuilder>() {
+                        public StringBuilder apply(StringBuilder stringBuilder, E e) {
+                            return stringBuilder.append(e).append(", ");
+                        }
+                    });
             // TODO: removing the last comma is not very functional
             return sb.delete(sb.length() - 2, sb.length()).append("]").toString();
         }
@@ -175,6 +196,10 @@ public abstract class List<E> implements Collection<E> {
 
         public Maybe.Nothing<E> head() {
             return nothing();
+        }
+
+        public <Q> Q headC(MaybeC<Q, ? super E> continuation) {
+            return continuation.c();
         }
 
         public Maybe.Nothing<List<E>> tail() {

@@ -8,7 +8,7 @@ import static de.hronopik.icfp2009.util.Maybe.just;
  */
 public class LinkedList<E> extends List.Element<E> {
 
-    private final E element;
+    private final E head;
 
     private final List<E> tail;
 
@@ -49,12 +49,12 @@ public class LinkedList<E> extends List.Element<E> {
         });
     }
 
-    public LinkedList(E element) {
-        this(element, List.<E>nil());
+    public LinkedList(E head) {
+        this(head, List.<E>nil());
     }
 
-    public LinkedList(E element, List<E> tail) {
-        this.element = element;
+    public LinkedList(E head, List<E> tail) {
+        this.head = head;
         this.tail = tail;
     }
 
@@ -75,7 +75,18 @@ public class LinkedList<E> extends List.Element<E> {
     }
 
     public Maybe.Just<E> head() {
-        return just(element);
+        return just(head);
+    }
+
+    /**
+     * Passes the head of this list to the given maybe continuation.
+     *
+     * @param continuation the maybe continuation to be invoked
+     * @param <Q>          the type of the return value
+     * @return the result of the maybe continuation
+     */
+    public <Q> Q headC(MaybeC<Q, ? super E> continuation) {
+        return continuation.c(head);
     }
 
     public Maybe.Just<List<E>> tail() {
@@ -83,7 +94,7 @@ public class LinkedList<E> extends List.Element<E> {
     }
 
     public List<E> take(int n) {
-        return n > 0 ? new LinkedList<E>(element, tail.take(n - 1)) : List.<E>nil();
+        return n > 0 ? new LinkedList<E>(head, tail.take(n - 1)) : List.<E>nil();
     }
 
     //---------------------------------------------------------------------------------------------
@@ -91,7 +102,7 @@ public class LinkedList<E> extends List.Element<E> {
     //---------------------------------------------------------------------------------------------
 
     public List<E> append(List<E> list) {
-        return new LinkedList<E>(element, tail.append(list));
+        return new LinkedList<E>(head, tail.append(list));
     }
 
     public List<E> remove(final E element) {
@@ -107,10 +118,10 @@ public class LinkedList<E> extends List.Element<E> {
     //---------------------------------------------------------------------------------------------
 
     public <T> Element<T> map(Function1<E, T> mapper) {
-        return new LinkedList<T>(mapper.apply(element), tail.map(mapper));
+        return new LinkedList<T>(mapper.apply(head), tail.map(mapper));
     }
 
     public List<E> filter(Function1<E, Boolean> p) {
-        return p.apply(element) ? new LinkedList<E>(element, tail.filter(p)) : tail.filter(p);
+        return p.apply(head) ? new LinkedList<E>(head, tail.filter(p)) : tail.filter(p);
     }
 }

@@ -6,13 +6,13 @@ import de.hronopik.icfp2009.util.Pair;
  * @author Alexander Kiel
  * @version $Id$
  */
-public final class Output extends Port {
+public final class Input extends Port {
 
     //---------------------------------------------------------------------------------------------
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    public Output(int address, double value) {
+    public Input(int address, double value) {
         super(address, value);
     }
 
@@ -22,6 +22,6 @@ public final class Output extends Port {
 
     @Override
     public String toString() {
-        return "Output[address=" + address + ", value=" + value + "]";
+        return "Input[address=" + address + ", value=" + value + "]";
     }
 }

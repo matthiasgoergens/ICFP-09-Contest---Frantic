@@ -1,8 +1,15 @@
 package de.hronopik.icfp2009.util;
 
 /**
+ * An abstract data type which encapsulates an optional value.
+ * <p/>
+ * A value of type {@code Maybe<T>} either contains a value of type {@code T} (represented as {@link Just
+ * Just&lt;T>}), or it is empty (represented as {@link Nothing Nothing}). Using Maybe is a good way to deal
+ * with errors or exceptional cases without returning {@code null} or throwing an exception.
+ *
  * @author Alexander Kiel
  * @version $Id$
+ * @param <T> the type of the encapsulates optional value
  */
 public abstract class Maybe<T> {
 
@@ -17,27 +24,48 @@ public abstract class Maybe<T> {
     //
     //---------------------------------------------------------------------------------------------
 
+    /**
+     * Returns {@code true} iff this instance is of type {@link Just Just&lt;T>}.
+     * <p/>
+     * {@code a.isJust() == (a instanceof Maybe.Just)} for all {@code a}
+     *
+     * @return {@code true} iff this instance is of type {@link Just Just&lt;T>}
+     */
     public abstract boolean isJust();
 
+    /**
+     * Returns {@code true} iff this instance is of type {@link Nothing Nothing}.
+     * <p/>
+     * {@code a.isNothing() == (a instanceof Maybe.Nothing)} for all {@code a}
+     *
+     * @return {@code true} iff this instance is of type {@link Nothing Nothing}
+     */
     public abstract boolean isNothing();
 
     //---------------------------------------------------------------------------------------------
     //
     //---------------------------------------------------------------------------------------------
 
-    public abstract <Q> Q maybe(MaybeC<Q, ? super T> mc);
+    /**
+     * Passes the possible value of this maybe type to the given maybe continuation.
+     *
+     * @param continuation the maybe continuation to be invoked
+     * @param <Q>          the type of the return value
+     * @return the result of the maybe continuation
+     */
+    public abstract <Q> Q maybe(MaybeC<Q, ? super T> continuation);
 
     public abstract <Q> Q maybe(JustC<Q, ? super T> jc, NothingC<Q> nc);
 
     //---------------------------------------------------------------------------------------------
-    //
+    // Just
     //---------------------------------------------------------------------------------------------
 
-    public static class Just<T> extends Maybe<T> {
+    public static final class Just<T> extends Maybe<T> {
 
         private final T value;
 
-        public Just(T value) {
+        private Just(T value) {
             this.value = value;
         }
 
@@ -63,7 +91,7 @@ public abstract class Maybe<T> {
         }
 
         //---------------------------------------------------------------------------------------------
-        //
+        // Overridden Object Methods
         //---------------------------------------------------------------------------------------------
 
         @Override
@@ -82,7 +110,8 @@ public abstract class Maybe<T> {
         }
     }
 
-    public static abstract class Nothing<T> extends Maybe<T> {
+    public static final class Nothing<T> extends Maybe<T> {
+
         private Nothing() {
         }
 
@@ -93,28 +122,30 @@ public abstract class Maybe<T> {
         public boolean isNothing() {
             return true;
         }
+
+        public <Q> Q maybe(MaybeC<Q, ? super T> mc) {
+            return mc.c();
+        }
+
+        @Override
+        public <Q> Q maybe(final JustC<Q, ? super T> jc, final NothingC<Q> nc) {
+            return nc.c();
+        }
     }
 
     //---------------------------------------------------------------------------------------------
     //
     //---------------------------------------------------------------------------------------------
 
-    public static <T> Just<T> just(final T t) {
-        return new Just<T>(t);
+    public static <T> Just<T> just(final T value) {
+        return new Just<T>(value);
     }
 
+    private static final Nothing<Object> NOTHING = new Nothing<Object>();
+
+    @SuppressWarnings({"unchecked"})
     public static <T> Nothing<T> nothing() {
-        return new Nothing<T>() {
-
-            public <Q> Q maybe(MaybeC<Q, ? super T> mc) {
-                return mc.c();
-            }
-
-            @Override
-            public <Q> Q maybe(final JustC<Q, ? super T> jc, final NothingC<Q> nc) {
-                return nc.c();
-            }
-        };
+        return (Nothing<T>) NOTHING;
     }
 
     //---------------------------------------------------------------------------------------------
