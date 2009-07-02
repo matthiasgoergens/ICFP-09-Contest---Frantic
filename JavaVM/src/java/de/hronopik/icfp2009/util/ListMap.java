@@ -15,6 +15,10 @@ public class ListMap<K, V> implements Map<K, V> {
     // Constructors
     //---------------------------------------------------------------------------------------------
 
+    public static <K, V> Map<K, V> emptyMap() {
+        return new ListMap<K,V>();
+    }
+
     public ListMap() {
         set = new ListSet<Pair<K,V>>();
     }
@@ -153,6 +157,30 @@ public class ListMap<K, V> implements Map<K, V> {
                 return nothing();
             }
         };
+    }
+
+    //---------------------------------------------------------------------------------------------
+    // Overridden Object Methods
+    //---------------------------------------------------------------------------------------------
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ListMap listMap = (ListMap) o;
+
+        return set.equals(listMap.set);
+    }
+
+    @Override
+    public int hashCode() {
+        return set.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return set.toString();
     }
 
     //---------------------------------------------------------------------------------------------

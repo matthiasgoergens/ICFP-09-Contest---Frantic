@@ -13,8 +13,8 @@ public class Pairs {
     // Constructor
     //---------------------------------------------------------------------------------------------
     
-    public static <A, B> Pair<A, B> newPair(A a, B b) {
-        return new PairImpl<A, B>(a, b);
+    public static <A, B> Pair<A, B> newPair(A fst, B snd) {
+        return new PairImpl<A, B>(fst, snd);
     }
     
     //---------------------------------------------------------------------------------------------

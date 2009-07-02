@@ -108,6 +108,11 @@ public abstract class Maybe<T> {
         public int hashCode() {
             return value.hashCode();
         }
+
+        @Override
+        public String toString() {
+            return "Just(" + value + ")";
+        }
     }
 
     public static final class Nothing<T> extends Maybe<T> {
@@ -130,6 +135,11 @@ public abstract class Maybe<T> {
         @Override
         public <Q> Q maybe(final JustC<Q, ? super T> jc, final NothingC<Q> nc) {
             return nc.c();
+        }
+
+        @Override
+        public String toString() {
+            return "Nothing";
         }
     }
 

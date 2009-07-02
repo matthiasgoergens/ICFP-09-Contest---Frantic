@@ -82,17 +82,6 @@ public final class SInstruction<P extends Maybe<MP>, MP extends Parameter> exten
 
     @Override
     public String toString() {
-        return op + "(" + (param != null ? param + ", " : "") + r1 + ")";
-    }
-
-    //---------------------------------------------------------------------------------------------
-    // SResult
-    //---------------------------------------------------------------------------------------------
-
-    abstract static class SResult implements Result {
-
-        public Maybe<Output> getOutput() {
-            return nothing();
-        }
+        return op + "(" + (param.isJust() ? ((Maybe.Just<MP>) param).just().toString() + ", " : "") + r1 + ")";
     }
 }

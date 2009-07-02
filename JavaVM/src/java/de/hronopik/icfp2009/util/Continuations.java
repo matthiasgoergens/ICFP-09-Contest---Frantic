@@ -7,15 +7,23 @@ package de.hronopik.icfp2009.util;
 public class Continuations {
 
     public static <T> MaybeC<T, T> fail(final String message) {
-        return new MaybeC<T, T>() {
+        return new FailContinuation<T>(message);
+    }
 
-            public T c(T r) {
-                return r;
-            }
+    private static class FailContinuation<T> implements MaybeC<T, T> {
 
-            public T c() {
-                throw new RuntimeException(message);
-            }
-        };
+        private final String message;
+
+        private FailContinuation(String message) {
+            this.message = message;
+        }
+
+        public T c(T r) {
+            return r;
+        }
+
+        public T c() {
+            throw new RuntimeException(message);
+        }
     }
 }

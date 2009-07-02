@@ -37,6 +37,11 @@ public class LinkedListTest {
     }
 
     @Test
+    public void testReverse() {
+        Assert.assertEquals("[3, 2, 1]", LinkedList.newInstance3("1", "2", "3").reverse().toString());        
+    }
+
+    @Test
     public void testToString() {
         Assert.assertEquals("[1, 2, 3]", LinkedList.newInstance3("1", "2", "3").toString()); 
     }

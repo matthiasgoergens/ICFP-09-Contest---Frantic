@@ -87,6 +87,10 @@ public abstract class List<E> implements Collection<E> {
 
     public abstract List<E> filter(Function1<E, Boolean> p);
 
+    public abstract List<E> reverse();
+
+    abstract List<E> rev(List<E> a);
+
     //---------------------------------------------------------------------------------------------
     // Implementations
     //---------------------------------------------------------------------------------------------
@@ -129,6 +133,11 @@ public abstract class List<E> implements Collection<E> {
 
                 public Iterator<E> next() {
                     return tail().just().iterator();
+                }
+
+                @Override
+                public String toString() {
+                    return "Iterator(" + head() + ", " + tail().just() + ")";
                 }
             };
         }
@@ -249,6 +258,14 @@ public abstract class List<E> implements Collection<E> {
 
         public <T> T foldRight(T start, Function2<E, T, T> f) {
             return start;
+        }
+
+        public List<E> reverse() {
+            return this;
+        }
+
+        List<E> rev(List<E> a) {
+            return a;
         }
 
         //---------------------------------------------------------------------------------------------

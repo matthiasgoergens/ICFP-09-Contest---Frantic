@@ -107,4 +107,28 @@ public class ListSet<E> implements Set<E> {
     public <T> T foldRight(T start, Function2<E, T, T> f) {
         return list.foldRight(start, f);
     }
+
+    //---------------------------------------------------------------------------------------------
+    // Overridden Object Methods
+    //---------------------------------------------------------------------------------------------
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ListSet listSet = (ListSet) o;
+
+        return list.equals(listSet.list);
+    }
+
+    @Override
+    public int hashCode() {
+        return list.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return list.toString();
+    }
 }

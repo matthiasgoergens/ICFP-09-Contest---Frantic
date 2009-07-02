@@ -1,10 +1,5 @@
 package de.hronopik.icfp2009.model;
 
-import de.hronopik.icfp2009.util.Maybe;
-import static de.hronopik.icfp2009.util.Maybe.nothing;
-import static de.hronopik.icfp2009.util.Maybe.just;
-import de.hronopik.icfp2009.model.Output;
-
 /**
  * Operation for D-Type instructions.
  *
@@ -18,12 +13,8 @@ public enum DOp implements Op {
 
     Add {
 
-        public MemoryResult execute(final int r1, final int r2, final ROM memory, boolean status) {
-            return new MemoryResult() {
-                public Maybe<Double> getMemoryValue() {
-                    return just(memory.getValue(r1) + memory.getValue(r2));
-                }
-            };
+        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory, boolean status) {
+            return Instruction.memoryResult(memory.getValue(r1) + memory.getValue(r2));
         }
 
         public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
@@ -33,12 +24,8 @@ public enum DOp implements Op {
 
     Sub {
 
-        public MemoryResult execute(final int r1, final int r2, final ROM memory, boolean status) {
-            return new MemoryResult() {
-                public Maybe<Double> getMemoryValue() {
-                    return just(memory.getValue(r1) - memory.getValue(r2));
-                }
-            };
+        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory, boolean status) {
+            return Instruction.memoryResult(memory.getValue(r1) - memory.getValue(r2));
         }
 
         public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
@@ -48,12 +35,8 @@ public enum DOp implements Op {
 
     Mult {
 
-        public MemoryResult execute(final int r1, final int r2, final ROM memory, boolean status) {
-            return new MemoryResult() {
-                public Maybe<Double> getMemoryValue() {
-                    return just(memory.getValue(r1) * memory.getValue(r2));
-                }
-            };
+        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory, boolean status) {
+            return Instruction.memoryResult(memory.getValue(r1) * memory.getValue(r2));
         }
 
         public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
@@ -63,12 +46,8 @@ public enum DOp implements Op {
 
     Div {
 
-        public MemoryResult execute(final int r1, final int r2, final ROM memory, boolean status) {
-            return new MemoryResult() {
-                public Maybe<Double> getMemoryValue() {
-                    return just(memory.getValue(r2) == 0 ? 0 : memory.getValue(r1) / memory.getValue(r2));
-                }
-            };
+        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory, boolean status) {
+            return Instruction.memoryResult(memory.getValue(r2) == 0 ? 0 : memory.getValue(r1) / memory.getValue(r2));
         }
 
         public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
@@ -78,12 +57,8 @@ public enum DOp implements Op {
 
     Output {
 
-        public OutputResult execute(final int r1, final int r2, final ROM memory, boolean status) {
-            return new OutputResult(){
-                public Maybe<Output> getOutput() {
-                    return just(new Output(r1, memory.getValue(r2)));
-                }
-            };
+        public Instruction.Result.OutputResult execute(final int r1, final int r2, final ROM memory, boolean status) {
+            return Instruction.outputResult(new Output(r1, memory.getValue(r2)));
         }
 
         public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
@@ -93,12 +68,8 @@ public enum DOp implements Op {
 
     Phi {
 
-        public MemoryResult execute(final int r1, final int r2, final ROM memory, final boolean status) {
-            return new MemoryResult() {
-                public Maybe<Double> getMemoryValue() {
-                    return just(status ? memory.getValue(r1) : memory.getValue(r2));
-                }
-            };
+        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory, final boolean status) {
+            return Instruction.memoryResult(status ? memory.getValue(r1) : memory.getValue(r2));
         }
 
         public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
@@ -110,7 +81,7 @@ public enum DOp implements Op {
     //
     //---------------------------------------------------------------------------------------------
 
-    public abstract DInstruction.DResult execute(int r1, int r2, ROM memory, boolean status);
+    public abstract Instruction.Result execute(int r1, int r2, ROM memory, boolean status);
 
     public abstract String toSemanticsString(int r1, int r2, ROM memory, boolean status);
 
@@ -126,27 +97,5 @@ public enum DOp implements Op {
      */
     public static DOp fromOpcode(int opcode) {
         return values()[opcode - 1];
-    }
-
-    //---------------------------------------------------------------------------------------------
-    // MemoryResult
-    //---------------------------------------------------------------------------------------------
-
-    private static abstract class MemoryResult extends DInstruction.DResult {
-
-        public Maybe<Output> getOutput() {
-            return nothing();
-        }
-    }
-
-    //---------------------------------------------------------------------------------------------
-    // MemoryResult
-    //---------------------------------------------------------------------------------------------
-
-    private static abstract class OutputResult extends DInstruction.DResult {
-
-        public Maybe<Double> getMemoryValue() {
-            return nothing();
-        }
     }
 }

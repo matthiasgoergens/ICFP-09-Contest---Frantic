@@ -71,16 +71,5 @@ public final class DInstruction extends Instruction {
     public String toString() {
         return op + "(" + r1 + ", " + r2 + ")";
     }
-
-    //---------------------------------------------------------------------------------------------
-    // DResult
-    //---------------------------------------------------------------------------------------------
-
-    abstract static class DResult implements Result {
-
-        public Maybe<Boolean> getStatus() {
-            return nothing();
-        }
-    }
 }
 
