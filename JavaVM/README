@@ -1,0 +1,8 @@
+If ANT doesn't run, please install the optional package.
+
+Under Debian like Linux:
+
+    sudo apt-get install ant-optional
+
+To build all JARS simply type 'ant' in this directory.
+If something gets messy, please run 'ant clean-all'.
