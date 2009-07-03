@@ -97,6 +97,10 @@ public class LinkedList<E> extends List.Element<E> {
         return just(tail);
     }
 
+    public List<E> drop(int n) {
+        return n > 0 ? tail.drop(n - 1) : this;
+    }
+
     public List<E> take(int n) {
         return n > 0 ? new LinkedList<E>(head, tail.take(n - 1)) : List.<E>nil();
     }
