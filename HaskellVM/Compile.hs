@@ -13,6 +13,7 @@ import VM
 import qualified Data.Set as S
 import Data.Char
 
+import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString as B
 import qualified Data.IntMap as I
 import qualified Data.List as L
@@ -27,6 +28,8 @@ import Data.Function
 
 import Debug.Trace
 import Data.Maybe
+import NameSpace
+import Data.Binary
 
 -- LoC -> Line of Code
 data LoC = LoC Addr Instr deriving (Ord, Eq)
@@ -35,7 +38,7 @@ class Compile a where
     compile :: a -> String -> String
 
 instance (Compile a) => Compile [a] where
-    compile code inner = foldr compile inner code    
+    compile code inner = foldr compile inner code
 
 instance Compile LoC where
     compile (LoC c  (SType sop addr)) inner
@@ -84,29 +87,48 @@ instance Compile LoC where
              
 
 nest s = "("++s++")"
-cLet senke quelle inner = nest ("let "++senke++" = " ++ quelle
-                                ++ " in " ++ inner)
+cLet senke quelle inner = ("let "++senke++" = " ++ quelle ++"\n"
+                                ++ "\tin " ++ inner)
 
 instance Compile CmpFun where
     compile f inner = nest (inner++show f)
 
 instance Compile NameSpace where
-    compile f _ = map toLower $ show f
+    compile f _ = show f
+
+instance Compile (S.Set NameSpace) where
+    compile s undefined = nest (concat . L.intersperse ", " . map show . S.toAscList $ s)
 
 instance Compile (String,VM) where
-    compile (name,vm) undefined = src -- ++ "\n"++minstate
-        where minstate_raw = "minstate_raw"
-              src_raw = "module Temp where \nf "++minstate_raw++" = "++(compile locs minstate_raw)
-
-              minstate = askGHCMinstate src_raw
-              src = "module "++name++"(f) where \n"++
+    compile (name,vm) undefined = src -- ++ "\n"++compile minstate ()
+        where 
+              minstate = getMinState locs
+              minstateStr = compile minstate undefined
+              src = "module "++name++"(f,mem0) where \n"++
                     "import Data.IntMap as I\n"++
                     "import Types\n"++
+                    "import Data.ByteString.Lazy\n"++
+                    "import Data.Binary\n"++
                     "output = I.empty\n"++
-                    "f "++nest (minstate++", Inp input")++" = "++(compile (map (uncurry LoC) (instr vm))
-                                                               (nest (minstate ++", Outp output")))
+                    "f "++minstateStr++" (Inp input)"++" = "
+                            ++compile (map (uncurry LoC) (instr vm))
+                             (nest (minstateStr ++", Outp output")++"\n\t")++
+                    "\n"++
+                    -- "minstate = "++minstateStr++"\n"++
+                    renderMem (mem vm) (S.union (constants locs) minstate) ++"\n"++
+                    "fromList = I.fromList\n"++
+                    "mem0 = " ++ minstateStr ++"\n"
+                    ++"\n"
 
               locs = (map (uncurry LoC) (instr vm))
+
+renderMem :: I.IntMap Dat -> S.Set NameSpace -> String
+renderMem mem m = concat . map go . S.toAscList $ m
+    where readMem addr = BL.unpack $ encode $ I.findWithDefault 0 addr mem
+          go n@(NMem addr) = compile n undefined ++ ":: Double\n" ++
+                             compile n undefined ++ " = decode $ pack $ " ++ show (readMem addr) ++ "\n"
+
+              
 
 -- (VM{  instr  :: [(Addr,Instr)] 
 --    ,  mem    :: IntMap Dat
@@ -131,21 +153,34 @@ constants = S.fromList . catMaybes . map constant
           constant (LoC c (SType (Cmpz _) _)) = Just (NMem c)
 
           constant (LoC c (DType Output _ _)) = Just (NMem c)
+          constant _ = Nothing
 
-askGHCMinstate :: String -> S.Set [NameSpace]
-askGHCMinstate src
-    = unsafePerformIO
-      (do writeFileAtomic "Temp.hs" src
-          system ("ghc Temp.hs 2> temp_err_raw")
-          system ("grep \"Not in scope\" temp_err_raw | grep -i mem > temp_err")
-          l <- readFile "temp_err"
-          return $ nest (concat . L.intersperse ", " . L.nub . L.sortBy cmp
-                         . map (takeWhile (/='\''). tail.dropWhile (/='`'))
-                         . lines $ l))
+uncompile :: String -> NameSpace
+uncompile ('i':'n':'p':'_':x) = NIn $ read x
+uncompile ('o':'u':'t':'_':x) = NOut $ read x
+uncompile ('m':'e':'m':'_':x) = NMem $ read x
+uncompile ('z':'_':x) = NIn $ read x
+
+getMinState :: [LoC] -> S.Set NameSpace
+getMinState locs
+    = unsafePerformIO $
+      do writeFileAtomic "Temp.hs" src_raw
+         system ("ghc Temp.hs 2> temp_err_raw")
+         system ("grep \"Not in scope\" temp_err_raw | grep \\`mem_ > temp_err")
+         l <- readFile "temp_err"
+         return $ (S.difference (S.fromList . map uncompile
+                                . map (takeWhile (/='\''). tail . dropWhile (/='`'))
+                                . lines $ l)
+                   (constants locs))
+         
+--          return $ nest (concat . L.intersperse ", " . L.nub . L.sortBy cmp
+--                         . map (takeWhile (/='\''). tail.dropWhile (/='`'))
+--                         . lines $ l))
 
     where cmp = (compare `on` extract)
           extract :: String -> Int
           extract = read . drop 4
+          src_raw = "module Temp where \nf state= "++(compile locs "state") ++ "\n"
 
 doCodeCompile args = do
   let file = args !! 1

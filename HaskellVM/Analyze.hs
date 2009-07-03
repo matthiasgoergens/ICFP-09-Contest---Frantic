@@ -9,6 +9,7 @@ import qualified Data.Map as M
 import qualified Data.ByteString as B
 import qualified Data.IntMap as I
 import qualified Data.List as L
+import qualified Data.Set as S
 
 import Data.Function
 
@@ -23,23 +24,13 @@ import Control.Monad
 
 import Console
 import VM
-import qualified Data.Set as S
+import qualified Data.Set as S2
 
 import Test.QuickCheck
+import NameSpace
 
-data NameSpace = NIn Addr | NOut Addr | NMem  Addr | NZ Addr deriving (Ord, Eq)
 
-class ToDot a where
-    toDot :: a -> String
 
-instance Show NameSpace where
-    show (NIn x) = "Inp_" ++ show x
-    show (NOut x) = "Outp_" ++ show x
-    show (NMem x) = "Mem_" ++ show x
-    show (NZ x) = "Z_" ++ show x
-
-instance ToDot NameSpace where
-    toDot = show
 
 --instance Show (Int->Bool) where
 --    show 

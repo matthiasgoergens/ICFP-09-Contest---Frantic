@@ -52,3 +52,4 @@ mkOutp = Outp . fromList
 
 fromOutp :: Outp -> IntMap Dat
 fromOutp (Outp p) = p
+
