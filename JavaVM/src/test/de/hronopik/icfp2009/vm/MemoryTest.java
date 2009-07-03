@@ -15,7 +15,7 @@ public class MemoryTest {
 
     @Before
     public void setUp() {
-        memory = new Memory(LinkedList.newInstance4(1d, 2d, 3d, 4d).reverse(), false);
+        memory = new Memory(LinkedList.newInstance4(1d, 2d, 3d, 4d), false);
     }
 
     @Test

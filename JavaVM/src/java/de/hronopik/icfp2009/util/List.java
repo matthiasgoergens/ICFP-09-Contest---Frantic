@@ -152,6 +152,8 @@ public abstract class List<E> implements Collection<E> {
             return f.apply(head().just(), tail().just().foldRight(start, f));
         }
 
+        public abstract Element<E> reverse();
+
         //---------------------------------------------------------------------------------------------
         // Overridden Object Methods
         //---------------------------------------------------------------------------------------------
@@ -260,7 +262,7 @@ public abstract class List<E> implements Collection<E> {
             return start;
         }
 
-        public List<E> reverse() {
+        public Nil<E> reverse() {
             return this;
         }
 

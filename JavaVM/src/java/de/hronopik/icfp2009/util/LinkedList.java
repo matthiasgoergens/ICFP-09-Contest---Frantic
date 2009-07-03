@@ -129,14 +129,14 @@ public class LinkedList<E> extends List.Element<E> {
         return p.apply(head) ? new LinkedList<E>(head, tail.filter(p)) : tail.filter(p);
     }
 
-    public List<E> reverse() {
+    public LinkedList<E> reverse() {
         /*
          * reverse l =  rev l []
          *   where
          *     rev []     a = a
          *     rev (x:xs) a = rev xs (x:a)
          */
-        return rev(List.<E>nil());
+        return (LinkedList<E>) rev(List.<E>nil());
     }
 
     List<E> rev(List<E> a) {

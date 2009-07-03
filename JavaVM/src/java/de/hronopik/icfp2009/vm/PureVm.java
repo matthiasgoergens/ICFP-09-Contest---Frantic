@@ -28,6 +28,11 @@ public class PureVm {
      * @param frames the frames which are read from a orbit binary
      */
     public PureVm(java.util.List<OrbitBinaryFrame> frames) {
+
+        if (frames.isEmpty()) {
+            throw new IllegalArgumentException("empty frames");
+        }
+
         List<Instruction> instructions = nil();
         List<Double> memory = nil();
 
@@ -37,7 +42,7 @@ public class PureVm {
         }
 
         this.instructions = instructions.reverse();
-        this.memory = new Memory(memory, false);
+        this.memory = new Memory((List.Element<Double>) memory.reverse(), false);
     }
 
     public PureVm(List<Instruction> instructions, Memory memory) {
