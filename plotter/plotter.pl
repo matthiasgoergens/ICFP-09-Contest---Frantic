@@ -12,7 +12,7 @@ my $area = Gtk2::DrawingArea->new;
 my $cr;
 
 my $r_e = 6.357E6;
-my $scale = 1/$r_e;
+my $scale = 1/$r_e * 100;
 my $Pi = 3.14159265;
 
 my $frames = 0;
@@ -46,10 +46,52 @@ my $clear = $clear_solid;
 my $draw_sat = sub {
 	my ($x, $y) = @_;
 # print STDERR 	"$x, $y\n";
-	$cr->arc($x, $y, $r_e * 2, 0, 359);
+	$cr->arc($x, $y, $r_e * 0.01, 0, 359);
 	$cr->set_source_rgb(1,0,0);
 	$cr->fill;
 };
+
+my $parse_frame_task1 = sub{
+    my %r;
+
+    while(<>){
+        if(/^\./){
+            return %r;
+        }elsif(/^#time: (\d+)/){
+            $r{frame} = $1;
+        }elsif(/0 (-?\d+\.?\d*e?-?\d+)/){
+            $r{score} = $1;
+        }elsif(/1 (-?\d+\.?\d*e?-?\d+)/){
+            $r{fuel} = $1;
+        }elsif(/2 (-?\d+\.?\d*e?-?\d+)/){
+            $r{x} = $1;
+        }elsif(/3 (-?\d+\.?\d*e?-?\d+)/){
+            $r{y} = $1;
+        }elsif(/4 (-?\d+\.?\d*e?-?\d+)/){
+            $r{target_obit} = $1;
+        }
+    }
+
+    return undef;
+};
+
+my $draw_frame_task1 = sub{
+    my %frame = @_;
+
+    $draw_sat->($frame{x}, $frame{y});
+    $cr->set_source_rgb(0,1,0);
+
+    my $lw;
+    ($lw, $lw) = $cr->device_to_user_distance(1,1);
+
+    $cr->set_line_width( $lw );
+    $cr->arc(0,0, $r_e * 2, 0, 359);
+    $cr->stroke;
+};
+
+my $parse_frame = $parse_frame_task1;
+my $draw_frame = $draw_frame_task1;
+
 
 my $draw = sub {	
 	return if ! $cr;
@@ -61,13 +103,13 @@ my $draw = sub {
 	$cr->translate(300, 300);
 	$cr->scale($scale, $scale);
 	
-	$cr->arc(0, 0, $r_e * 5, 0, 359);
+	$cr->arc(0, 0, $r_e, 0, 359);
 	$cr->set_source_rgb(0,0,1);
 	$cr->fill;
 	
-	$draw_sat->(rotation(100 * $r_e));
-	
-add_stuff_to_display_here:
+	#$draw_sat->(rotation(100 * $r_e));
+  my %frame = $parse_frame->();
+  $draw_frame->(%frame) if %frame;
 	
 	return TRUE;
 };
@@ -91,10 +133,10 @@ $window->add($area);
 $window->show_all();
 
 my $work = sub{
-	$draw->();
-	$area->queue_draw();
+    $draw->();
+    $area->queue_draw();
 		
-	return TRUE;
+    return TRUE;
 };
 
 Glib::Idle->add($work);
