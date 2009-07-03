@@ -9,7 +9,7 @@ $maxstep = 0xFFFFF if(!$maxstep);
 
 use IPC::Open2;
 open2(\*READ, \*WRITE, "../HaskellVM/vm ../task/bin1.obf");
-#open2(\*READ, \*WRITE, "./test.pl");
+open(\*LOG, "> log.dat");
 
 READ->autoflush(1);
 WRITE->autoflush(1);
@@ -48,10 +48,14 @@ for( my $i=0; $i < $maxstep ; $i++){
     print STDERR "reg2: $register{2}\n";
     print STDERR "reg3: $register{3}\n";
     
+    
+    $score = $register{0};
     $fuel = $register{1};
     $sx = $register{2};
     $sy = $register{3};
     $target_orbit_radius = $register{4};
+    
+    die "We seam to have hit Earth. Please look for a new home!\n" if($score == -1);
     
     if(defined $last_sx && defined $last_sy){
       $vx = $last_sx - $sx;
@@ -65,13 +69,15 @@ for( my $i=0; $i < $maxstep ; $i++){
       $GM = 398600.4418;
       
       $r = sqrt( $sx**2 + $sy**2 );
+      $h = $r - $r_e;
       
-      print STDERR "speed: $v, radius: $r";
+      print STDERR "speed: $v, radius: $r, height: $h\n";
     }
+
     
     if( $time == 2 ){
-      my $nvx = -$sy * 1/$r * 2466.49;
-      my $nvy = -$sx * 1/$r * 2466.49;      
+      my $nvx = -$sy * 1/$r * 1;
+      my $nvy = -$sx * 1/$r * 1;      
       
       $command = sub{
         print WRITE "2 $nvx\n";
@@ -85,4 +91,6 @@ for( my $i=0; $i < $maxstep ; $i++){
     
     $last_sx = $sx;
     $last_sy = $sy;
+    
+    print LOG "$sx $sy\n";
 } 
