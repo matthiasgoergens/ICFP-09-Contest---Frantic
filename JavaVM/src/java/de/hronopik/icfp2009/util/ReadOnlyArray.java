@@ -48,14 +48,17 @@ public class ReadOnlyArray<E> implements Array<E> {
     // Collection Implementation
     //---------------------------------------------------------------------------------------------
 
+    @Complexity("O(1)")
     public boolean isEmpty() {
         return size() == 0;
     }
 
+    @Complexity("O(1)")
     public int size() {
         return values.length;
     }
 
+    @Complexity("O(n)")
     public boolean contains(E element) {
         for (Object value : values) {
             if (value.equals(element)) {
@@ -65,6 +68,7 @@ public class ReadOnlyArray<E> implements Array<E> {
         return false;
     }
 
+    @Complexity("O(n)")
     public <T> Collection<T> map(Function1<E, T> mapper) {
         Object[] newValues = new Object[values.length];
         for (int i = 0; i < values.length; i++) {
@@ -74,6 +78,7 @@ public class ReadOnlyArray<E> implements Array<E> {
         return new ReadOnlyArray<T>(newValues);
     }
 
+    @Complexity("O(n)")
     public Collection<E> filter(Function1<E, Boolean> p) {
         Object[] newValues = new Object[values.length];
         int i = 0;

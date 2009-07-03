@@ -29,6 +29,10 @@ public class LinkedList<E> extends List.Element<E> {
         };
     }
 
+    public static <E> LinkedList<E> newInstance4(E x0, E x1, E x2, E x3) {
+        return new LinkedList<E>(x0, newInstance3(x1, x2, x3));
+    }
+
     public static <E> LinkedList<E> newInstance3(E x0, E x1, E x2) {
         return new LinkedList<E>(x0, newInstance2(x1, x2));
     }

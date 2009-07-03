@@ -4,7 +4,6 @@ import de.hronopik.icfp2009.io.OrbitBinaryFrame;
 import de.hronopik.icfp2009.model.InputPorts;
 import de.hronopik.icfp2009.model.Instruction;
 import de.hronopik.icfp2009.model.Output;
-import de.hronopik.icfp2009.model.ROM;
 import de.hronopik.icfp2009.util.*;
 import static de.hronopik.icfp2009.util.List.nil;
 import static de.hronopik.icfp2009.util.Pairs.newPair;
@@ -38,12 +37,12 @@ public class PureVm {
         }
 
         this.instructions = instructions.reverse();
-        this.memory = new Memory(memory.reverse(), false);
+        this.memory = new Memory(memory, false);
     }
 
     public PureVm(List<Instruction> instructions, Memory memory) {
         this.instructions = instructions;
-        this.memory = memory.rewind();
+        this.memory = memory;
     }
 
     //---------------------------------------------------------------------------------------------
@@ -62,7 +61,8 @@ public class PureVm {
         return newPair(new PureVm(instructions, memOut.getFst()), memOut.getSnd());
     }
 
-    private static class MicroStep implements Function2<Pair<Memory, Map<Integer, Double>>, Instruction, Pair<Memory, Map<Integer, Double>>> {
+    private static class MicroStep implements
+            Function2<Pair<Memory, Map<Integer, Double>>, Instruction, Pair<Memory, Map<Integer, Double>>> {
 
         private final InputPorts input;
 
@@ -70,7 +70,8 @@ public class PureVm {
             this.input = input;
         }
 
-        public Pair<Memory, Map<Integer, Double>> apply(Pair<Memory, Map<Integer, Double>> state, Instruction instruction) {
+        public Pair<Memory, Map<Integer, Double>> apply(Pair<Memory, Map<Integer, Double>> state,
+                                                        Instruction instruction) {
             final Memory memory = state.getFst();
             final Map<Integer, Double> output = state.getSnd();
 
@@ -97,69 +98,4 @@ public class PureVm {
         }
     }
 
-    /**
-     * This class represents the memory of the VM.
-     */
-    private static class Memory implements ROM {
-
-        private final Array<Double> oldMemory;
-
-        private final List<Double> newMemory;
-
-        private final boolean status;
-
-        private final int insertPos;
-
-        private Memory(Collection<Double> values, boolean status) {
-            this.oldMemory = new ReadOnlyArray<Double>(values);
-            this.newMemory = nil();
-            this.status = status;
-            this.insertPos = 0;
-        }
-
-        private Memory(Array<Double> oldMemory, List<Double> newMemory, boolean status, int insertPos) {
-            this.oldMemory = oldMemory;
-            this.newMemory = newMemory;
-            this.status = status;
-            this.insertPos = insertPos;
-        }
-
-        //---------------------------------------------------------------------------------------------
-        //
-        //---------------------------------------------------------------------------------------------
-
-        public double getValue(final int address) {
-            return (address >= insertPos ? oldMemory.get(address) : newMemory.drop(address).head()).maybe(
-                    Continuations.<Double>fail("Illegal memory access at address " + address + ". " +
-                            "insertPos = " + insertPos + ", old memory size = " + oldMemory.size() +
-                            ", new memory size = " + newMemory.size())
-            );
-        }
-
-        public boolean isStatus() {
-            return status;
-        }
-
-        /**
-         * Sets the given value at the insert position.
-         *
-         * @param value the value to set
-         * @return a new memory instance
-         */
-        private Memory setValue(double value) {
-            return new Memory(oldMemory, new LinkedList<Double>(value, newMemory), status, insertPos + 1);
-        }
-
-        private Memory setStatus(boolean value) {
-            return new Memory(oldMemory, new LinkedList<Double>(getValue(insertPos), newMemory), value, insertPos + 1);
-        }
-
-        private Memory copy() {
-            return new Memory(oldMemory, new LinkedList<Double>(getValue(insertPos), newMemory), status, insertPos + 1);
-        }
-
-        public Memory rewind() {
-            return new Memory(newMemory.reverse(), status);
-        }
-    }
 }

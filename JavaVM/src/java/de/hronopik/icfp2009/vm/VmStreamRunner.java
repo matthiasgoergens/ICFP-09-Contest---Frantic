@@ -64,7 +64,11 @@ public class VmStreamRunner {
         vm = state.getFst();
         out.writeOutputs(state.getSnd());
 
-        return state.getSnd().get(0).maybe(Continuations.<Double>fail("output 0 not existent")) == 0;
+        final Double score = state.getSnd().get(0).maybe(Continuations.<Double>fail("score missing"));
+        if (score == -1) {
+            throw new RuntimeException("CRASHED");
+        }
+        return score == 0;
     }
 
     //---------------------------------------------------------------------------------------------

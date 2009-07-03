@@ -41,7 +41,7 @@ public class SOp {
 
         public String toSemanticsString(Maybe.Just<CompParam> param, int r1, ROM memory,
                                         InputPorts inputPorts) {
-            return "status <- " + memory.getValue(r1) + " " + param + " 0.0";
+            return "status <- " + memory.getValue(r1) + " " + param.just() + " 0.0";
         }
 
         @Override

@@ -105,5 +105,14 @@ public class VmReader extends FilterReader {
             Double value = map.get(address);
             return value == null ? 0d : value;
         }
+
+        //---------------------------------------------------------------------------------------------
+        // Overridden Object Methods
+        //---------------------------------------------------------------------------------------------
+
+        @Override
+        public String toString() {
+            return "MapBackedInputPorts(" + map + ")";
+        }
     }
 }

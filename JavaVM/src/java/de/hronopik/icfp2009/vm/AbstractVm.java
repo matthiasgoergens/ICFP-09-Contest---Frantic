@@ -3,10 +3,9 @@ package de.hronopik.icfp2009.vm;
 import de.hronopik.icfp2009.io.OrbitBinaryFrame;
 import de.hronopik.icfp2009.model.InputPorts;
 import de.hronopik.icfp2009.model.Instruction;
-import de.hronopik.icfp2009.model.RAM;
 import de.hronopik.icfp2009.model.Output;
+import de.hronopik.icfp2009.model.RAM;
 import de.hronopik.icfp2009.util.*;
-import static de.hronopik.icfp2009.util.Pairs.newPair;
 
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
@@ -87,18 +86,49 @@ abstract class AbstractVm implements Vm {
     public Map<Integer, Double> step(InputPorts inputPorts) {
         Map<Integer, Double> outputs = new ListMap<Integer, Double>();
 
-        /*for (int i = 0; i < instructions.length; i++) {
+        for (int i = 0; i < instructions.length; i++) {
             Instruction.Result result = instructions[i].execute(stepIndex, status.isValue(), memory, inputPorts);
-            memory.setValue(i, result.getMemoryValue().maybe(Maybe.<Double>idC(), memory.getValueC(i)));
-            status= new StatusRegister(result.getStatus().maybe(Maybe.<Boolean>idC(), status));
-            outputs = result.getOutput().maybe(outputs.add());
-        }*/
+            outputs = result.cont(new ResultContuniation(outputs, i));
+
+            /*memory.setValue(i, result.getMemoryValue().maybe(Maybe.<Double>idC(), memory.getValueC(i)));
+            status = new StatusRegister(result.getStatus().maybe(Maybe.<Boolean>idC(), status));
+            outputs = result.getOutput().maybe(outputs.add());*/
+        }
 
         outputs.get(0).maybe(CRASH_DETECTION);
 
         stepIndex++;
 
         return outputs;
+    }
+
+    private class ResultContuniation implements Instruction.ResultC<Map<Integer, Double>> {
+
+        private final Map<Integer, Double> outputs;
+        private final int destAddress;
+
+        private ResultContuniation(Map<Integer, Double> outputs, int destAddress) {
+            this.outputs = outputs;
+            this.destAddress = destAddress;
+        }
+
+        public Map<Integer, Double> memoryResult(double value) {
+            memory.setValue(destAddress, value);
+            return outputs;
+        }
+
+        public Map<Integer, Double> outputResult(Output output) {
+            return outputs.add(output);
+        }
+
+        public Map<Integer, Double> statusResult(boolean value) {
+            status = new StatusRegister(value);
+            return outputs;
+        }
+
+        public Map<Integer, Double> noopResult() {
+            return outputs;
+        }
     }
 
     private static final MaybeC<Double, Double> CRASH_DETECTION = new MaybeC<Double, Double>() {

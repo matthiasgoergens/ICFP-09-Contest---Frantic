@@ -76,6 +76,11 @@ public abstract class Instruction {
             public <T> T cont(ResultC<T> continuation) {
                 return continuation.memoryResult(value);
             }
+
+            @Override
+            public String toString() {
+                return "MemoryResult(" + value + ")";
+            }
         }
 
         public static final class OutputResult extends Result {
@@ -92,6 +97,11 @@ public abstract class Instruction {
 
             public <T> T cont(ResultC<T> continuation) {
                 return continuation.outputResult(output);
+            }
+
+            @Override
+            public String toString() {
+                return "OutputResult(" + output + ")";
             }
         }
 
@@ -110,6 +120,11 @@ public abstract class Instruction {
             public <T> T cont(ResultC<T> continuation) {
                 return continuation.statusResult(value);
             }
+
+            @Override
+            public String toString() {
+                return "StatusResult(" + value + ")";
+            }
         }
 
         public static final class NoopResult extends Result {
@@ -119,6 +134,11 @@ public abstract class Instruction {
 
             public <T> T cont(ResultC<T> continuation) {
                 return continuation.noopResult();
+            }
+
+            @Override
+            public String toString() {
+                return "NoopResult()";
             }
         }
     }

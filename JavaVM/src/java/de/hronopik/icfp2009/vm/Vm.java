@@ -1,6 +1,8 @@
 package de.hronopik.icfp2009.vm;
 
 import de.hronopik.icfp2009.util.Map;
+import de.hronopik.icfp2009.util.Pair;
+import de.hronopik.icfp2009.model.InputPorts;
 
 
 /**
