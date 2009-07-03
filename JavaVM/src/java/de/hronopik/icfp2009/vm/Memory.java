@@ -56,11 +56,7 @@ class Memory implements ROM {
         return (address >= insertPos
                 ? oldMemory.get(oldMemory.size() - address - 1)
                 : newMemory.drop(insertPos - address - 1).head()
-        ).maybe(Continuations.<Double>fail("Illegal memory access at address " + address +
-                ". insertPos = " + insertPos +
-                ", old memory size = " + oldMemory.size() +
-                ", new memory size = " + newMemory.size()
-        ));
+        ).maybe(new FailContinuation(address));
     }
 
     public boolean isStatus() {
@@ -101,5 +97,30 @@ class Memory implements ROM {
             sb.append(getValue(i));
         }
         return sb.append(']').toString();
+    }
+
+    //---------------------------------------------------------------------------------------------
+    //
+    //---------------------------------------------------------------------------------------------
+
+    private class FailContinuation implements MaybeC<Double, Double> {
+
+        private final int address;
+
+        private FailContinuation(int address) {
+            this.address = address;
+        }
+
+        public Double c(Double r) {
+            return r;
+        }
+
+        public Double c() {
+            throw new RuntimeException("Illegal memory access at address " + address +
+                    ". insertPos = " + insertPos +
+                    ", old memory size = " + oldMemory.size() +
+                    ", new memory size = " + insertPos
+            );
+        }
     }
 }
