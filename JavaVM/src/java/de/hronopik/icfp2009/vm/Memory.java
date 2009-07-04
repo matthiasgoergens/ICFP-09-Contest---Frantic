@@ -14,6 +14,10 @@ import de.hronopik.icfp2009.util.MaybeC;
  */
 class Memory implements ROM {
 
+    //private static long readTime = 0;
+    //private static long writeTime = 0;
+    //private static int step = 0;
+
     private final List<Double> left;
 
     private final List<Double> right;
@@ -33,12 +37,7 @@ class Memory implements ROM {
      * @param status the value of the status register
      */
     Memory(List.Element<Double> values, boolean status) {
-        this.left = nil();
-        this.right = values.tail().just();
-        this.value = values.head().just();
-        this.status = status;
-        this.insertPos = 0;
-        this.size = values.size();
+        this(List.<Double>nil(), values.tail().just(), values.head().just(), status, 0, values.size());
     }
 
     private Memory(List<Double> left, List<Double> right, double value, boolean status, int insertPos, int size) {
@@ -48,6 +47,13 @@ class Memory implements ROM {
         this.value = value;
         this.insertPos = insertPos;
         this.size = size;
+        /*if (insertPos == 0) {
+            step++;
+            if (step == 60000) {
+                System.err.println("readTime  = " + (readTime / 1000) + " ms");
+                System.err.println("writeTime = " + (writeTime / 1000) + " ms");
+            }
+        }*/
     }
 
     //---------------------------------------------------------------------------------------------
@@ -55,13 +61,17 @@ class Memory implements ROM {
     //---------------------------------------------------------------------------------------------
 
     public double getValue(final int address) {
+        final double result;
+        //long begin = System.nanoTime();
         if (address < insertPos) {
-            return left.drop(insertPos - address - 1).head().maybe(new FailContinuation(address));
+            result = left.drop(insertPos - address - 1).head().maybe(new FailContinuation(address));
         } else if (address > insertPos) {
-            return right.drop(address - 1 - insertPos).head().maybe(new FailContinuation(address));
+            result = right.drop(address - 1 - insertPos).head().maybe(new FailContinuation(address));
         } else {
-            return value;
+            result = value;
         }
+        //readTime += System.nanoTime() - begin;
+        return result;
     }
 
     public boolean isStatus() {
@@ -87,11 +97,15 @@ class Memory implements ROM {
     }
 
     private Memory advance(final double value, final boolean status) {
+        final Memory result;
+        //long begin = System.nanoTime();
         if (right instanceof List.Element) {
-            return advance((List.Element<Double>) this.right, value, status);
+            result = advance((List.Element<Double>) this.right, value, status);
         } else {
-            return advance((List.Nil<Double>) this.right, value, status);
+            result = advance((List.Nil<Double>) this.right, value, status);
         }
+        //writeTime += System.nanoTime() - begin;
+        return result;
     }
 
     private Memory advance(List.Element<Double> right, final double value, final boolean status) {
