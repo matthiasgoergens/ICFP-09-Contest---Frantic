@@ -5,6 +5,7 @@ import static de.hronopik.icfp2009.util.Maybe.nothing;
 /**
  * @author Alexander Kiel
  * @version $Id$
+ * @see "http://www.haskell.org/haskellwiki/Non-empty_list"
  */
 public abstract class List<E> implements Collection<E> {
 
@@ -34,19 +35,6 @@ public abstract class List<E> implements Collection<E> {
     //---------------------------------------------------------------------------------------------
     //
     //---------------------------------------------------------------------------------------------
-
-    public abstract Maybe<E> head();
-
-    /**
-     * Passes the head of this list to the given maybe continuation.
-     *
-     * @param continuation the maybe continuation to be invoked
-     * @param <Q>          the type of the return value
-     * @return the result of the maybe continuation
-     */
-    public abstract <Q> Q headC(MaybeC<Q, ? super E> continuation);
-
-    public abstract Maybe<List<E>> tail();
 
     public abstract List<E> take(int n);
 
@@ -102,42 +90,31 @@ public abstract class List<E> implements Collection<E> {
         }
 
         public int size() {
-            return 1 + tail().just().size();
+            return 1 + tail().size();
         }
 
-        public abstract Maybe.Just<E> head();
+        public abstract E head();
 
-        /**
-         * Passes the head of this list to the given maybe continuation.
-         *
-         * @param continuation the maybe continuation to be invoked
-         * @param <Q>          the type of the return value
-         * @return the result of the maybe continuation
-         */
-        public <Q> Q headC(MaybeC<Q, ? super E> continuation) {
-            return head().maybe(continuation);
-        }
-
-        public abstract Maybe.Just<List<E>> tail();
+        public abstract List<E> tail();
 
         public List<E> drop(int n) {
-            return n > 0 ? tail().just().drop(n - 1) : this;
+            return n > 0 ? tail().drop(n - 1) : this;
         }
 
         public Iterator<E> iterator() {
             return new Iterator<E>() {
 
                 public Maybe<E> current() {
-                    return head();
+                    return Maybe.just(head());
                 }
 
                 public Iterator<E> next() {
-                    return tail().just().iterator();
+                    return tail().iterator();
                 }
 
                 @Override
                 public String toString() {
-                    return "Iterator(" + head() + ", " + tail().just() + ")";
+                    return "Iterator(" + head() + ", " + tail() + ")";
                 }
             };
         }
@@ -145,11 +122,11 @@ public abstract class List<E> implements Collection<E> {
         public abstract <T> Element<T> map(Function1<E, T> mappper);
 
         public <T> T foldLeft(T start, Function2<T, E, T> f) {
-            return tail().just().foldLeft(f.apply(start, head().just()), f);
+            return tail().foldLeft(f.apply(start, head()), f);
         }
 
         public <T> T foldRight(T start, Function2<E, T, T> f) {
-            return f.apply(head().just(), tail().just().foldRight(start, f));
+            return f.apply(head(), tail().foldRight(start, f));
         }
 
         public abstract Element<E> reverse();
@@ -165,12 +142,12 @@ public abstract class List<E> implements Collection<E> {
 
             Element that = (Element) o;
 
-            return head().just().equals(that.head().just()) && tail().equals(that.tail());
+            return head().equals(that.head()) && tail().equals(that.tail());
         }
 
         @Override
         public final int hashCode() {
-            int result = head().just().hashCode();
+            int result = head().hashCode();
             result = 31 * result + tail().hashCode();
             return result;
         }
@@ -203,18 +180,6 @@ public abstract class List<E> implements Collection<E> {
 
         public boolean contains(E element) {
             return false;
-        }
-
-        public Maybe.Nothing<E> head() {
-            return nothing();
-        }
-
-        public <Q> Q headC(MaybeC<Q, ? super E> continuation) {
-            return continuation.c();
-        }
-
-        public Maybe.Nothing<List<E>> tail() {
-            return nothing();
         }
 
         public List<E> take(int n) {

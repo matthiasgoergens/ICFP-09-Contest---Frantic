@@ -37,7 +37,7 @@ class Memory implements ROM {
      * @param status the value of the status register
      */
     Memory(List.Element<Double> values, boolean status) {
-        this(List.<Double>nil(), values.tail().just(), values.head().just(), status, 0, values.size());
+        this(List.<Double>nil(), values.tail(), values.head(), status, 0, values.size());
     }
 
     private Memory(List<Double> left, List<Double> right, double value, boolean status, int insertPos, int size) {
@@ -61,12 +61,16 @@ class Memory implements ROM {
     //---------------------------------------------------------------------------------------------
 
     public double getValue(final int address) {
+        if (address < 0 || address >= size) {
+            throw new IndexOutOfBoundsException("address = " + address + "; size = " + size);
+        }
+
         final double result;
         //long begin = System.nanoTime();
         if (address < insertPos) {
-            result = left.drop(insertPos - address - 1).head().maybe(new FailContinuation(address));
+            result = ((List.Element<Double>) left.drop(insertPos - address - 1)).head();
         } else if (address > insertPos) {
-            result = right.drop(address - 1 - insertPos).head().maybe(new FailContinuation(address));
+            result = ((List.Element<Double>) right.drop(address - 1 - insertPos)).head();
         } else {
             result = value;
         }
@@ -110,8 +114,8 @@ class Memory implements ROM {
 
     private Memory advance(List.Element<Double> right, final double value, final boolean status) {
         return new Memory(new LinkedList<Double>(value, this.left)
-                , right.tail().just()
-                , right.head().just()
+                , right.tail()
+                , right.head()
                 , status
                 , insertPos + 1
                 , size
@@ -121,8 +125,8 @@ class Memory implements ROM {
     private Memory advance(List.Nil<Double> right, final double value, final boolean status) {
         final LinkedList<Double> list = new LinkedList<Double>(value, this.left).reverse();
         return new Memory(right
-                , list.tail().just()
-                , list.head().just()
+                , list.tail()
+                , list.head()
                 , status
                 , 0
                 , size

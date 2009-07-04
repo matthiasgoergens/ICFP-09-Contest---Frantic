@@ -14,7 +14,7 @@ public class LinkedListTest {
         LinkedList<String> list = LinkedList.newInstance1("1");
         Assert.assertFalse(list.isEmpty());
         Assert.assertEquals(1, list.size());
-        assertEquals("1", list.head());
+        Assert.assertEquals("1", list.head());
     }
 
     @Test
@@ -22,8 +22,8 @@ public class LinkedListTest {
         LinkedList<String> list = LinkedList.newInstance2("1", "2");
         Assert.assertFalse(list.isEmpty());
         Assert.assertEquals(2, list.size());
-        assertEquals("1", list.head());
-        assertEquals("2", list.drop(1).head());
+        Assert.assertEquals("1", list.head());
+        Assert.assertEquals("2", ((List.Element<String>) list.drop(1)).head());
     }
 
     @Test
@@ -31,36 +31,18 @@ public class LinkedListTest {
         LinkedList<String> list = LinkedList.newInstance3("1", "2", "3");
         Assert.assertFalse(list.isEmpty());
         Assert.assertEquals(3, list.size());
-        assertEquals("1", list.head());
-        assertEquals("2", list.drop(1).head());
-        assertEquals("3", list.drop(2).head());
+        Assert.assertEquals("1", list.head());
+        Assert.assertEquals("2", ((List.Element<String>) list.drop(1)).head());
+        Assert.assertEquals("3", ((List.Element<String>) list.drop(2)).head());
     }
 
     @Test
     public void testReverse() {
-        Assert.assertEquals("[3, 2, 1]", LinkedList.newInstance3("1", "2", "3").reverse().toString());        
+        Assert.assertEquals("[3, 2, 1]", LinkedList.newInstance3("1", "2", "3").reverse().toString());
     }
 
     @Test
     public void testToString() {
-        Assert.assertEquals("[1, 2, 3]", LinkedList.newInstance3("1", "2", "3").toString()); 
-    }
-
-    //---------------------------------------------------------------------------------------------
-    // Helper Methods
-    //---------------------------------------------------------------------------------------------
-
-    public static <T> void assertEquals(final Object expected, final Maybe<T> actual) {
-        actual.maybe(new MaybeC<Void, T>() {
-            public Void c(T r) {
-                Assert.assertEquals(expected, r);
-                return null;
-            }
-
-            public Void c() {
-                Assert.fail();
-                return null;
-            }
-        });
+        Assert.assertEquals("[1, 2, 3]", LinkedList.newInstance3("1", "2", "3").toString());
     }
 }

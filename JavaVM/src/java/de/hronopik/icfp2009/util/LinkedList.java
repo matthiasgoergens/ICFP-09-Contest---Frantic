@@ -78,23 +78,12 @@ public class LinkedList<E> extends List.Element<E> {
         }).isEmpty();
     }
 
-    public Maybe.Just<E> head() {
-        return just(head);
+    public E head() {
+        return head;
     }
 
-    /**
-     * Passes the head of this list to the given maybe continuation.
-     *
-     * @param continuation the maybe continuation to be invoked
-     * @param <Q>          the type of the return value
-     * @return the result of the maybe continuation
-     */
-    public <Q> Q headC(MaybeC<Q, ? super E> continuation) {
-        return continuation.c(head);
-    }
-
-    public Maybe.Just<List<E>> tail() {
-        return just(tail);
+    public List<E> tail() {
+        return tail;
     }
 
     public List<E> drop(int n) {
