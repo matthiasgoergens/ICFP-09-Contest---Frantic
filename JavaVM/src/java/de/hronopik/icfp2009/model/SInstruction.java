@@ -80,6 +80,6 @@ public final class SInstruction<P extends Maybe<MP>, MP extends Parameter> exten
 
     @Override
     public String toString() {
-        return op + "(" + (param.isJust() ? ((Maybe.Just<MP>) param).just().toString() + ", " : "") + r1 + ")";
+        return op + "(" + (param.isJust() ? ((Maybe.Just<MP>) param).getValue().toString() + ", " : "") + r1 + ")";
     }
 }

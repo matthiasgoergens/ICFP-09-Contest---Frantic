@@ -316,7 +316,7 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
         private Node<K, V> putAndRotateRightRight(Node<K, V> newRight) {
             return new ZeroNode<K, V>(newRight.key
                     , newRight.value
-                    , new ZeroNode<K, V>(this.key, this.value, left, newRight.right)
+                    , new ZeroNode<K, V>(this.key, this.value, left, newRight.left)
                     , newRight.right
             );
         }

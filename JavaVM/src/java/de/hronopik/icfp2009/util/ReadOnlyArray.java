@@ -22,7 +22,7 @@ public class ReadOnlyArray<E> implements Array<E> {
         Iterator<? super E> iterator = collection.iterator();
         Maybe<? super E> maybe;
         for (int i = 0; (maybe = iterator.current()).isJust(); i++) {
-            values[i] = ((Maybe.Just<E>) maybe).just();
+            values[i] = ((Maybe.Just<E>) maybe).getValue();
             iterator = iterator.next();
         }
     }

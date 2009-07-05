@@ -80,7 +80,7 @@ public abstract class Maybe<T> {
             return false;
         }
 
-        public T just() {
+        public T getValue() {
             return value;
         }
 

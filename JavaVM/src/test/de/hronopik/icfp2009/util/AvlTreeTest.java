@@ -135,6 +135,11 @@ public class AvlTreeTest {
         testZeroNode(node2.getLeft(), 0, "0");
         testZeroNode(node2.getRight(), 2, "2");
 
+        final AvlTree<Integer, String> tree3 = AvlTree.fromList(LinkedList.newInstance4("0", "1", "2", "3"));
+        final AvlTree.Node<Integer, String> node3 = testNegativeNode(tree3, 1, "1");
+        testZeroNode(node3.getLeft(), 0, "0");
+        final AvlTree.Node<Integer, String> node33 = testNegativeNode(node3.getRight(), 2, "2");
+        testZeroNode(node33.getRight(), 3, "3");
     }
 
     //---------------------------------------------------------------------------------------------

@@ -27,6 +27,6 @@ public class ReadOnlyArrayTest {
         Assert.assertTrue("value at index -1 is Nothing", array.get(-1).isNothing());
         Assert.assertTrue("value at index 0 is Just", array.get(0).isJust());
         Assert.assertTrue("value at index 1 is Nothing", array.get(1).isNothing());
-        Assert.assertEquals("value at index 0 is 1", 1, ((Maybe.Just) array.get(0)).just());
+        Assert.assertEquals("value at index 0 is 1", 1, ((Maybe.Just) array.get(0)).getValue());
     }
 }

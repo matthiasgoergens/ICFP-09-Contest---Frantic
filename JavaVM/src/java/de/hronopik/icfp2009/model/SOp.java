@@ -35,13 +35,13 @@ public class SOp {
         public Instruction.Result execute(final Maybe.Just<CompParam> param, final int r1,
                                           final ROM memory,
                                           InputPorts inputPorts) {
-            return Instruction.statusResult(param.just().isCompZero(memory.getValue(r1)));
+            return Instruction.statusResult(param.getValue().isCompZero(memory.getValue(r1)));
         }
 
 
         public String toSemanticsString(Maybe.Just<CompParam> param, int r1, ROM memory,
                                         InputPorts inputPorts) {
-            return "status <- " + memory.getValue(r1) + " " + param.just() + " 0.0";
+            return "status <- " + memory.getValue(r1) + " " + param.getValue() + " 0.0";
         }
 
         @Override

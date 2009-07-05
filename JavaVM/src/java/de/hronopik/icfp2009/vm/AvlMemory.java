@@ -1,10 +1,7 @@
 package de.hronopik.icfp2009.vm;
 
 import de.hronopik.icfp2009.model.ROM;
-import de.hronopik.icfp2009.util.LinkedList;
-import de.hronopik.icfp2009.util.List;
-import static de.hronopik.icfp2009.util.List.nil;
-import de.hronopik.icfp2009.util.MaybeC;
+import de.hronopik.icfp2009.util.*;
 
 /**
  * This class represents the memory of the VM.
@@ -12,15 +9,15 @@ import de.hronopik.icfp2009.util.MaybeC;
  * @author Alexander Kiel
  * @version $Id$
  */
-class Memory implements ROM {
+class AvlMemory implements ROM {
 
     //private static long readTime = 0;
     //private static long writeTime = 0;
     //private static int step = 0;
 
-    private final List<Double> left;
+    private final AvlTree<Integer, Double> left;
 
-    private final List<Double> right;
+    private final AvlTree<Integer, Double> right;
 
     private final double value;
 
@@ -36,11 +33,13 @@ class Memory implements ROM {
      * @param values a list of the values in the memory
      * @param status the value of the status register
      */
-    Memory(List.Element<Double> values, boolean status) {
-        this(List.<Double>nil(), values.tail(), values.head(), status, 0, values.size());
+    AvlMemory(List.Element<Double> values, boolean status) {
+        this(AvlTree.fromList(List.<Double>nil()), AvlTree.fromList(values), values.head(), status, 0,
+                values.size());
     }
 
-    private Memory(List<Double> left, List<Double> right, double value, boolean status, int insertPos, int size) {
+    private AvlMemory(AvlTree<Integer, Double> left, AvlTree<Integer, Double> right, double value,
+                      boolean status, int insertPos, int size) {
         this.left = left;
         this.right = right;
         this.status = status;
@@ -68,9 +67,17 @@ class Memory implements ROM {
         final double result;
         //long begin = System.nanoTime();
         if (address < insertPos) {
-            result = ((List.Element<Double>) left.drop(insertPos - address - 1)).head();
+            result = left.get(address).maybe(new MaybeC<Double, Double>() {
+                public Double c(Double just) {
+                    return just;
+                }
+
+                public Double c() {
+                    throw new RuntimeException("left: " + left.size() + ", address: " + address + ", insertPos: " + insertPos);
+                }
+            });
         } else if (address > insertPos) {
-            result = ((List.Element<Double>) right.drop(address - 1 - insertPos)).head();
+            result = ((Maybe.Just<Double>) right.get(address)).getValue();
         } else {
             result = value;
         }
@@ -88,45 +95,45 @@ class Memory implements ROM {
      * @param value the value to set
      * @return a new memory instance
      */
-    Memory setValue(final double value) {
+    AvlMemory setValue(final double value) {
         return advance(value, status);
     }
 
-    Memory setStatus(boolean status) {
+    AvlMemory setStatus(boolean status) {
         return advance(value, status);
     }
 
-    Memory copy() {
+    AvlMemory copy() {
         return advance(value, status);
     }
 
-    private Memory advance(final double value, final boolean status) {
-        final Memory result;
+    private AvlMemory advance(final double value, final boolean status) {
+        final AvlMemory result;
         //long begin = System.nanoTime();
-        if (right instanceof List.Element) {
-            result = advance((List.Element<Double>) this.right, value, status);
+        if (insertPos < size - 1) {
+            result = advance1(this.right, value, status);
         } else {
-            result = advance((List.Nil<Double>) this.right, value, status);
+            result = advance2(value, status);
         }
         //writeTime += System.nanoTime() - begin;
         return result;
     }
 
-    private Memory advance(List.Element<Double> right, final double value, final boolean status) {
-        return new Memory(new LinkedList<Double>(value, this.left)
-                , right.tail()
-                , right.head()
+    private AvlMemory advance1(AvlTree<Integer, Double> right, final double value, final boolean status) {
+        return new AvlMemory(left.put(insertPos, value)
+                , right
+                , ((Maybe.Just<Double>) right.get(insertPos + 1)).getValue()
                 , status
                 , insertPos + 1
                 , size
         );
     }
 
-    private Memory advance(List.Nil<Double> right, final double value, final boolean status) {
-        final LinkedList<Double> list = new LinkedList<Double>(value, this.left).reverse();
-        return new Memory(right
-                , list.tail()
-                , list.head()
+    private AvlMemory advance2(final double value, final boolean status) {
+        final AvlTree.Node<Integer, Double> tree = left.put(insertPos, value);
+        return new AvlMemory(AvlTree.<Integer, Double>empty()
+                , tree
+                , ((Maybe.Just<Double>) tree.get(0)).getValue()
                 , status
                 , 0
                 , size
