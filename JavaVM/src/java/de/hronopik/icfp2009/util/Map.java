@@ -8,9 +8,11 @@ public interface Map<K, V> extends Set<Pair<K, V>>, Function1<K, Maybe<V>> {
 
     Maybe<V> get(K key);
 
+    Map<K, V> put(K key, V value);
+
     Map<K, V> add(Pair<K, V> mapping);
 
-    MaybeC<Map<K, V>, Pair<K, V>> add();
+    MaybeC<? extends Map<K, V>, Pair<K, V>> add();
 
     Map<K, V> remove(Pair<K, V> mapping);
 

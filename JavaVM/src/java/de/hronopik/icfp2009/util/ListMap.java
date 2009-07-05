@@ -87,18 +87,22 @@ public class ListMap<K, V> implements Map<K, V> {
     //
     //---------------------------------------------------------------------------------------------
 
-    public Map<K, V> add(Pair<K, V> element) {
+    public ListMap<K, V> put(K key, V value) {
+        return add(Pairs.newPair(key, value));
+    }
+
+    public ListMap<K, V> add(Pair<K, V> element) {
         return new ListMap<K, V>(set.add(element));
     }
 
-    public MaybeC<Map<K, V>, Pair<K, V>> add() {
-        return new MaybeC<Map<K, V>, Pair<K, V>>() {
+    public MaybeC<ListMap<K, V>, Pair<K, V>> add() {
+        return new MaybeC<ListMap<K, V>, Pair<K, V>>() {
 
-            public Map<K, V> c(Pair<K, V> r) {
+            public ListMap<K, V> c(Pair<K, V> r) {
                 return add(r);
             }
 
-            public Map<K, V> c() {
+            public ListMap<K, V> c() {
                 return ListMap.this;
             }
         };

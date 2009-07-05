@@ -17,6 +17,9 @@ public abstract class Maybe<T> {
     // Constructor
     //---------------------------------------------------------------------------------------------
 
+    /**
+     * This private constructor prevents foreign instantiations.
+     */
     private Maybe() {
     }
 
