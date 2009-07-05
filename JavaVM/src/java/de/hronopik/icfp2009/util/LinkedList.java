@@ -96,7 +96,11 @@ public class LinkedList<E> extends List.Element<E> {
     //
     //---------------------------------------------------------------------------------------------
 
-    public List<E> append(List<E> list) {
+    public LinkedList<E> append(List<E> list) {
+        return new LinkedList<E>(head, tail.append(list));
+    }
+
+    public Element<E> append(Element<E> list) {
         return new LinkedList<E>(head, tail.append(list));
     }
 

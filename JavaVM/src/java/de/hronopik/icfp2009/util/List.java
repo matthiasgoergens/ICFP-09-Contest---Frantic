@@ -46,6 +46,8 @@ public abstract class List<E> implements Collection<E> {
 
     public abstract List<E> append(List<E> list);
 
+    public abstract Element<E> append(Element<E> list);
+
     /**
      * Partial application of append.
      *
@@ -100,6 +102,8 @@ public abstract class List<E> implements Collection<E> {
         public List<E> drop(int n) {
             return n > 0 ? tail().drop(n - 1) : this;
         }
+
+        public abstract Element<E> append(List<E> list);
 
         public Iterator<E> iterator() {
             return new Iterator<E>() {
@@ -218,6 +222,10 @@ public abstract class List<E> implements Collection<E> {
         }
 
         public List<E> append(List<E> list) {
+            return list;
+        }
+
+        public Element<E> append(Element<E> list) {
             return list;
         }
 

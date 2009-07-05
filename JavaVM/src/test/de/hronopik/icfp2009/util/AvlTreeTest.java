@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.Assert;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static de.hronopik.icfp2009.util.AvlTree.fromList;
 
 /**
  * @author Alexander Kiel
@@ -121,26 +122,37 @@ public class AvlTreeTest {
 
     @Test
     public void testFromList() {
-        assertTrue(AvlTree.fromList(List.nil()).isEmpty());
+        assertTrue(fromList(List.nil()).isEmpty());
 
-        final AvlTree<Integer, String> tree = AvlTree.fromList(LinkedList.newInstance1("0"));
+        final AvlTree<Integer, String> tree = fromList(LinkedList.newInstance1("0"));
         testZeroNode(tree, 0, "0");
 
-        final AvlTree<Integer, String> tree1 = AvlTree.fromList(LinkedList.newInstance2("0", "1"));
+        final AvlTree<Integer, String> tree1 = fromList(LinkedList.newInstance2("0", "1"));
         final AvlTree.Node<Integer, String> node1 = testNegativeNode(tree1, 0, "0");
         testZeroNode(node1.getRight(), 1, "1");
 
-        final AvlTree<Integer, String> tree2 = AvlTree.fromList(LinkedList.newInstance3("0", "1", "2"));
+        final AvlTree<Integer, String> tree2 = fromList(LinkedList.newInstance3("0", "1", "2"));
         final AvlTree.Node<Integer, String> node2 = testZeroNode(tree2, 1, "1");
         testZeroNode(node2.getLeft(), 0, "0");
         testZeroNode(node2.getRight(), 2, "2");
 
-        final AvlTree<Integer, String> tree3 = AvlTree.fromList(LinkedList.newInstance4("0", "1", "2", "3"));
+        final AvlTree<Integer, String> tree3 = fromList(LinkedList.newInstance4("0", "1", "2", "3"));
         final AvlTree.Node<Integer, String> node3 = testNegativeNode(tree3, 1, "1");
         testZeroNode(node3.getLeft(), 0, "0");
         final AvlTree.Node<Integer, String> node33 = testNegativeNode(node3.getRight(), 2, "2");
         testZeroNode(node33.getRight(), 3, "3");
     }
+
+    @Test
+    public void testToList() {
+        assertTrue(fromList(List.nil()).toList().isEmpty());
+
+        assertEquals(LinkedList.newInstance1("0"), fromList(LinkedList.newInstance1("0")).toList());
+        assertEquals(LinkedList.newInstance2("0", "1"), fromList(LinkedList.newInstance2("0", "1")).toList());
+        assertEquals(LinkedList.newInstance3("0", "1", "2"), fromList(LinkedList.newInstance3("0", "1", "2")).toList());
+        assertEquals(LinkedList.newInstance4("0", "1", "2", "3"), fromList(LinkedList.newInstance4("0", "1", "2", "3")).toList());
+    }
+
 
     //---------------------------------------------------------------------------------------------
     // Helper Methods

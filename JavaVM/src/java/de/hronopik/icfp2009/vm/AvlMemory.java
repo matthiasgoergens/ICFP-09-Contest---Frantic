@@ -67,15 +67,7 @@ class AvlMemory implements ROM {
         final double result;
         //long begin = System.nanoTime();
         if (address < insertPos) {
-            result = left.get(address).maybe(new MaybeC<Double, Double>() {
-                public Double c(Double just) {
-                    return just;
-                }
-
-                public Double c() {
-                    throw new RuntimeException("left: " + left.size() + ", address: " + address + ", insertPos: " + insertPos);
-                }
-            });
+            result = ((Maybe.Just<Double>) left.get(address)).getValue();
         } else if (address > insertPos) {
             result = ((Maybe.Just<Double>) right.get(address)).getValue();
         } else {
