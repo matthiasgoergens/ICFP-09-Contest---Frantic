@@ -14,7 +14,7 @@ public class SOp {
     public static final SOpI<Maybe.Nothing<Parameter>, Parameter> Noop = new SOpI<Maybe.Nothing<Parameter>, Parameter>() {
 
         public Instruction.Result execute(Maybe.Nothing<Parameter> param, int r1, final ROM memory,
-                                          boolean status, InputPorts inputPorts) {
+                                          InputPorts inputPorts) {
             return Instruction.noopResult();
         }
 
@@ -33,7 +33,7 @@ public class SOp {
     public static final SOpI<Maybe.Just<CompParam>, CompParam> Cmpz = new SOpI<Maybe.Just<CompParam>, CompParam>() {
 
         public Instruction.Result execute(final Maybe.Just<CompParam> param, final int r1,
-                                          final ROM memory, final boolean status,
+                                          final ROM memory,
                                           InputPorts inputPorts) {
             return Instruction.statusResult(param.just().isCompZero(memory.getValue(r1)));
         }
@@ -53,7 +53,7 @@ public class SOp {
     public static final SOpI<Maybe.Nothing<Parameter>, Parameter> Sqrt = new SOpI<Maybe.Nothing<Parameter>, Parameter>() {
 
         public Instruction.Result execute(Maybe.Nothing<Parameter> param, final int r1, final ROM memory,
-                                          boolean status, InputPorts inputPorts) {
+                                          InputPorts inputPorts) {
             double value = memory.getValue(r1);
             if (value < 0) {
                 // sqrt is undefined for negative values; see page 4
@@ -76,7 +76,7 @@ public class SOp {
     public static final SOpI<Maybe.Nothing<Parameter>, Parameter> Copy = new SOpI<Maybe.Nothing<Parameter>, Parameter>() {
 
         public Instruction.Result execute(Maybe.Nothing<Parameter> param, final int r1, final ROM memory,
-                                          boolean status, InputPorts inputPorts) {
+                                          InputPorts inputPorts) {
             return Instruction.memoryResult(memory.getValue(r1));
         }
 
@@ -94,7 +94,7 @@ public class SOp {
     public static final SOpI<Maybe.Nothing<Parameter>, Parameter> Input = new SOpI<Maybe.Nothing<Parameter>, Parameter>() {
 
         public Instruction.Result execute(Maybe.Nothing<Parameter> param, final int r1, ROM memory,
-                                          boolean status, final InputPorts inputPorts) {
+                                          final InputPorts inputPorts) {
             return Instruction.memoryResult(inputPorts.getValue(r1));
         }
 

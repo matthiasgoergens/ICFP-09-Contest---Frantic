@@ -1,8 +1,5 @@
 package de.hronopik.icfp2009.model;
 
-import de.hronopik.icfp2009.util.Maybe;
-import static de.hronopik.icfp2009.util.Maybe.nothing;
-
 import static java.util.logging.Level.FINE;
 import java.util.logging.Logger;
 
@@ -53,14 +50,14 @@ public final class DInstruction extends Instruction {
     //
     //---------------------------------------------------------------------------------------------
 
-    public Result execute(int stepIndex, boolean status, ROM memory, InputPorts inputPorts) {
+    public Result execute(int stepIndex, ROM memory, InputPorts inputPorts) {
 
         // Log into the instruction trace
         if (logger.isLoggable(FINE)) {
-            logger.fine(stepIndex + "," + address + "," + toString() + "," + op.toSemanticsString(r1, r2, memory, status));
+            logger.fine(stepIndex + "," + address + "," + toString() + "," + op.toSemanticsString(r1, r2, memory));
         }
 
-        return op.execute(r1, r2, memory, status);
+        return op.execute(r1, r2, memory);
     }
 
     //---------------------------------------------------------------------------------------------

@@ -80,7 +80,7 @@ public class PureVm {
             final Memory memory = state.getFst();
             final Map<Integer, Double> output = state.getSnd();
 
-            return instruction.execute(0, memory.isStatus(), memory, input).cont(
+            return instruction.execute(0, memory, input).cont(
                     new Instruction.ResultC<Pair<Memory, Map<Integer, Double>>>() {
 
                         public Pair<Memory, Map<Integer, Double>> memoryResult(double value) {

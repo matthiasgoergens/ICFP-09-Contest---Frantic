@@ -87,7 +87,7 @@ abstract class AbstractVm implements Vm {
         Map<Integer, Double> outputs = new ListMap<Integer, Double>();
 
         for (int i = 0; i < instructions.length; i++) {
-            Instruction.Result result = instructions[i].execute(stepIndex, status.isValue(), memory, inputPorts);
+            Instruction.Result result = instructions[i].execute(stepIndex, memory, inputPorts);
             outputs = result.cont(new ResultContuniation(outputs, i));
 
             /*memory.setValue(i, result.getMemoryValue().maybe(Maybe.<Double>idC(), memory.getValueC(i)));
@@ -193,6 +193,10 @@ abstract class AbstractVm implements Vm {
         //---------------------------------------------------------------------------------------------
         //
         //---------------------------------------------------------------------------------------------
+
+        public boolean isStatus() {
+            return false;
+        }
 
         public double getValue(int address) {
             if (address >= values.length) {

@@ -6,8 +6,6 @@ import static java.util.logging.Level.FINE;
 import java.util.logging.Logger;
 
 import de.hronopik.icfp2009.util.Maybe;
-import static de.hronopik.icfp2009.util.Maybe.nothing;
-import de.hronopik.icfp2009.model.Output;
 
 /**
  * A S-Type instruction.
@@ -65,7 +63,7 @@ public final class SInstruction<P extends Maybe<MP>, MP extends Parameter> exten
     //
     //---------------------------------------------------------------------------------------------
 
-    public Result execute(int stepIndex, boolean status, ROM memory, InputPorts inputPorts) {
+    public Result execute(int stepIndex, ROM memory, InputPorts inputPorts) {
 
         // Log into the instruction trace
         if (logger.isLoggable(FINE)) {
@@ -73,7 +71,7 @@ public final class SInstruction<P extends Maybe<MP>, MP extends Parameter> exten
                     op.toSemanticsString(param, r1, memory, inputPorts));
         }
 
-        return op.execute(param, r1, memory, status, inputPorts);
+        return op.execute(param, r1, memory, inputPorts);
     }
 
     //---------------------------------------------------------------------------------------------

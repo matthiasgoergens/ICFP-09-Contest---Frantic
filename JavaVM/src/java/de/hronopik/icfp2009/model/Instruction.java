@@ -22,12 +22,11 @@ public abstract class Instruction {
      * Executes the instruction.
      *
      * @param stepIndex  the index of the current simulation step
-     * @param status     the status register
      * @param memory
      * @param inputPorts
      * @return the result of the instruction execution
      */
-    public abstract Result execute(int stepIndex, boolean status, ROM memory, InputPorts inputPorts);
+    public abstract Result execute(int stepIndex, ROM memory, InputPorts inputPorts);
 
     //---------------------------------------------------------------------------------------------
     // Result

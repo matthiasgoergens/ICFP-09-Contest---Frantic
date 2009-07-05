@@ -1,7 +1,5 @@
 package de.hronopik.icfp2009.util;
 
-import static de.hronopik.icfp2009.util.Maybe.just;
-
 /**
  * @author Alexander Kiel
  * @version $Id$

@@ -122,7 +122,21 @@ public abstract class List<E> implements Collection<E> {
         public abstract <T> Element<T> map(Function1<E, T> mappper);
 
         public <T> T foldLeft(T start, Function2<T, E, T> f) {
-            return tail().foldLeft(f.apply(start, head()), f);
+            /*
+             * Normal recursive implementation:
+             *
+             * return tail().foldLeft(f.apply(start, head()), f);
+             */
+
+            // Iterative implementation
+            T result = start;
+            List<E> list = this;
+            while (!list.isEmpty()) {
+                Element<E> nonEmptyList = (Element<E>) list;
+                result = f.apply(result, nonEmptyList.head());
+                list = nonEmptyList.tail();
+            }
+            return result;
         }
 
         public <T> T foldRight(T start, Function2<E, T, T> f) {

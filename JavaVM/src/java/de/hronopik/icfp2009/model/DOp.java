@@ -13,67 +13,73 @@ public enum DOp implements Op {
 
     Add {
 
-        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory, boolean status) {
+        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory
+        ) {
             return Instruction.memoryResult(memory.getValue(r1) + memory.getValue(r2));
         }
 
-        public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
+        public String toSemanticsString(int r1, int r2, ROM memory) {
             return "<- " + memory.getValue(r1) + " + " + memory.getValue(r2);
         }
     },
 
     Sub {
 
-        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory, boolean status) {
+        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory
+        ) {
             return Instruction.memoryResult(memory.getValue(r1) - memory.getValue(r2));
         }
 
-        public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
+        public String toSemanticsString(int r1, int r2, ROM memory) {
             return "<- " + memory.getValue(r1) + " - " + memory.getValue(r2);
         }
     },
 
     Mult {
 
-        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory, boolean status) {
+        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory
+        ) {
             return Instruction.memoryResult(memory.getValue(r1) * memory.getValue(r2));
         }
 
-        public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
+        public String toSemanticsString(int r1, int r2, ROM memory) {
             return "<- " + memory.getValue(r1) + " * " + memory.getValue(r2);
         }
     },
 
     Div {
 
-        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory, boolean status) {
+        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory
+        ) {
             return Instruction.memoryResult(memory.getValue(r2) == 0 ? 0 : memory.getValue(r1) / memory.getValue(r2));
         }
 
-        public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
+        public String toSemanticsString(int r1, int r2, ROM memory) {
             return "<- " + memory.getValue(r1) + " / " + memory.getValue(r2);
         }
     },
 
     Output {
 
-        public Instruction.Result.OutputResult execute(final int r1, final int r2, final ROM memory, boolean status) {
+        public Instruction.Result.OutputResult execute(final int r1, final int r2, final ROM memory
+        ) {
             return Instruction.outputResult(new Output(r1, memory.getValue(r2)));
         }
 
-        public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
+        public String toSemanticsString(int r1, int r2, ROM memory) {
             return "outport[" + r1 + "] <- " + memory.getValue(r2);
         }
     },
 
     Phi {
 
-        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory, final boolean status) {
-            return Instruction.memoryResult(status ? memory.getValue(r1) : memory.getValue(r2));
+        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory
+        ) {
+            return Instruction.memoryResult(memory.isStatus() ? memory.getValue(r1) : memory.getValue(r2));
         }
 
-        public String toSemanticsString(int r1, int r2, ROM memory, boolean status) {
-            return "<- " + (status ? memory.getValue(r1) : memory.getValue(r2));
+        public String toSemanticsString(int r1, int r2, ROM memory) {
+            return "<- " + (memory.isStatus() ? memory.getValue(r1) : memory.getValue(r2));
         }
     };
 
@@ -81,9 +87,9 @@ public enum DOp implements Op {
     //
     //---------------------------------------------------------------------------------------------
 
-    public abstract Instruction.Result execute(int r1, int r2, ROM memory, boolean status);
+    public abstract Instruction.Result execute(int r1, int r2, ROM memory);
 
-    public abstract String toSemanticsString(int r1, int r2, ROM memory, boolean status);
+    public abstract String toSemanticsString(int r1, int r2, ROM memory);
 
     //---------------------------------------------------------------------------------------------
     //
