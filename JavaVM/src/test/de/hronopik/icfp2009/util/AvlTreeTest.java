@@ -153,6 +153,82 @@ public class AvlTreeTest {
         assertEquals(LinkedList.newInstance4("0", "1", "2", "3"), fromList(LinkedList.newInstance4("0", "1", "2", "3")).toList());
     }
 
+    @Test
+    public void testBigTree8() {
+        List<Integer> list = List.nil();
+        for (int i = 0; i < 8; i++) {
+            list = new LinkedList<Integer>(i, list);
+        }
+        final AvlTree<Integer, Integer> tree = fromList(list.reverse());
+        assertEquals("size", 8, tree.size());
+        assertEquals("height", 4, tree.height());
+    }
+
+    @Test
+    public void testBigTree16() {
+        List<Integer> list = List.nil();
+        for (int i = 0; i < 16; i++) {
+            list = new LinkedList<Integer>(i, list);
+        }
+        final AvlTree<Integer, Integer> tree = fromList(list.reverse());
+        assertEquals("size", 16, tree.size());
+        assertEquals("height", 5, tree.height());
+    }
+
+    @Test
+    public void testBigTree32() {
+        List<Integer> list = List.nil();
+        for (int i = 0; i < 32; i++) {
+            list = new LinkedList<Integer>(i, list);
+        }
+        final AvlTree<Integer, Integer> tree = fromList(list.reverse());
+        assertEquals("size", 32, tree.size());
+        assertEquals("height", 6, tree.height());
+    }
+
+    @Test
+    public void testBigTree64() {
+        List<Integer> list = List.nil();
+        for (int i = 0; i < 64; i++) {
+            list = new LinkedList<Integer>(i, list);
+        }
+        final AvlTree<Integer, Integer> tree = fromList(list.reverse());
+        assertEquals("size", 64, tree.size());
+        assertEquals("height", 7, tree.height());
+    }
+    
+    @Test
+    public void testBigTree128() {
+        List<Integer> list = List.nil();
+        for (int i = 0; i < 128; i++) {
+            list = new LinkedList<Integer>(i, list);
+        }
+        final AvlTree<Integer, Integer> tree = fromList(list.reverse());
+        assertEquals("size", 128, tree.size());
+        assertEquals("height", 8, tree.height());
+    }
+
+    @Test
+    public void testBigTree256() {
+        List<Integer> list = List.nil();
+        for (int i = 0; i < 256; i++) {
+            list = new LinkedList<Integer>(i, list);
+        }
+        final AvlTree<Integer, Integer> tree = fromList(list.reverse());
+        assertEquals("size", 256, tree.size());
+        assertEquals("height", 9, tree.height());
+    }
+    
+    @Test
+    public void testBigTree512() {
+        List<Integer> list = List.nil();
+        for (int i = 0; i < 512; i++) {
+            list = new LinkedList<Integer>(i, list);
+        }
+        final AvlTree<Integer, Integer> tree = fromList(list.reverse());
+        assertEquals("size", 512, tree.size());
+        assertEquals("height", 10, tree.height());
+    }
 
     //---------------------------------------------------------------------------------------------
     // Helper Methods
