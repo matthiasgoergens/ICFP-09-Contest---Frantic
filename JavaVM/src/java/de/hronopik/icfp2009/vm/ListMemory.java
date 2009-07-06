@@ -3,8 +3,6 @@ package de.hronopik.icfp2009.vm;
 import de.hronopik.icfp2009.model.ROM;
 import de.hronopik.icfp2009.util.LinkedList;
 import de.hronopik.icfp2009.util.List;
-import static de.hronopik.icfp2009.util.List.nil;
-import de.hronopik.icfp2009.util.MaybeC;
 
 /**
  * This class represents the memory of the VM.
@@ -12,7 +10,7 @@ import de.hronopik.icfp2009.util.MaybeC;
  * @author Alexander Kiel
  * @version $Id$
  */
-class Memory implements ROM {
+class ListMemory implements ROM {
 
     //private static long readTime = 0;
     //private static long writeTime = 0;
@@ -36,11 +34,11 @@ class Memory implements ROM {
      * @param values a list of the values in the memory
      * @param status the value of the status register
      */
-    Memory(List.Element<Double> values, boolean status) {
+    ListMemory(List.Element<Double> values, boolean status) {
         this(List.<Double>nil(), values.tail(), values.head(), status, 0, values.size());
     }
 
-    private Memory(List<Double> left, List<Double> right, double value, boolean status, int insertPos, int size) {
+    private ListMemory(List<Double> left, List<Double> right, double value, boolean status, int insertPos, int size) {
         this.left = left;
         this.right = right;
         this.status = status;
@@ -88,20 +86,20 @@ class Memory implements ROM {
      * @param value the value to set
      * @return a new memory instance
      */
-    Memory setValue(final double value) {
+    ListMemory setValue(final double value) {
         return advance(value, status);
     }
 
-    Memory setStatus(boolean status) {
+    ListMemory setStatus(boolean status) {
         return advance(value, status);
     }
 
-    Memory copy() {
+    ListMemory copy() {
         return advance(value, status);
     }
 
-    private Memory advance(final double value, final boolean status) {
-        final Memory result;
+    private ListMemory advance(final double value, final boolean status) {
+        final ListMemory result;
         //long begin = System.nanoTime();
         if (right instanceof List.Element) {
             result = advance((List.Element<Double>) this.right, value, status);
@@ -112,8 +110,8 @@ class Memory implements ROM {
         return result;
     }
 
-    private Memory advance(List.Element<Double> right, final double value, final boolean status) {
-        return new Memory(new LinkedList<Double>(value, this.left)
+    private ListMemory advance(List.Element<Double> right, final double value, final boolean status) {
+        return new ListMemory(new LinkedList<Double>(value, this.left)
                 , right.tail()
                 , right.head()
                 , status
@@ -122,9 +120,9 @@ class Memory implements ROM {
         );
     }
 
-    private Memory advance(List.Nil<Double> right, final double value, final boolean status) {
+    private ListMemory advance(List.Nil<Double> right, final double value, final boolean status) {
         final LinkedList<Double> list = new LinkedList<Double>(value, this.left).reverse();
-        return new Memory(right
+        return new ListMemory(right
                 , list.tail()
                 , list.head()
                 , status

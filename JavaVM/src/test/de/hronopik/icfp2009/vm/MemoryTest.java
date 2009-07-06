@@ -11,11 +11,11 @@ import de.hronopik.icfp2009.util.LinkedList;
  */
 public class MemoryTest {
 
-    Memory memory;
+    ListMemory memory;
 
     @Before
     public void setUp() {
-        memory = new Memory(LinkedList.newInstance4(1d, 2d, 3d, 4d), false);
+        memory = new ListMemory(LinkedList.newInstance4(1d, 2d, 3d, 4d), false);
     }
 
     @Test
