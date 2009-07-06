@@ -15,7 +15,7 @@ public class AvlMemoryTest {
 
     @Before
     public void setUp() {
-        memory = new AvlMemory2(LinkedList.newInstance4(1d, 2d, 3d, 4d), false);
+        memory = new AvlMemory(LinkedList.newInstance4(1d, 2d, 3d, 4d), false);
     }
 
     @Test
