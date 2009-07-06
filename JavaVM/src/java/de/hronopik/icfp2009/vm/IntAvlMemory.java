@@ -8,9 +8,9 @@ import de.hronopik.icfp2009.util.*;
  * @author Alexander Kiel
  * @version $Id$
  */
-class AvlMemory implements Memory {
+class IntAvlMemory implements Memory {
 
-    private final AvlTree<Integer, Double> tree;
+    private final IntAvlTree<Double> tree;
 
     private final boolean status;
 
@@ -24,11 +24,11 @@ class AvlMemory implements Memory {
      * @param values a list of the values in the memory
      * @param status the value of the status register
      */
-    AvlMemory(List.Element<Double> values, boolean status) {
-        this(AvlTree.fromList(values), status, 0, values.size());
+    IntAvlMemory(List.Element<Double> values, boolean status) {
+        this(IntAvlTree.fromList(values), status, 0, values.size());
     }
 
-    private AvlMemory(AvlTree<Integer, Double> tree, boolean status, int insertPos, int size) {
+    private IntAvlMemory(IntAvlTree<Double> tree, boolean status, int insertPos, int size) {
         this.tree = tree;
         this.status = status;
         this.insertPos = insertPos;
@@ -57,16 +57,16 @@ class AvlMemory implements Memory {
      * @param value the value to set
      * @return a new memory instance
      */
-    public AvlMemory setValue(final double value) {
-        return new AvlMemory(tree.put(insertPos, value), status, advance(), size);
+    public IntAvlMemory setValue(final double value) {
+        return new IntAvlMemory(tree.put(insertPos, value), status, advance(), size);
     }
 
-    public AvlMemory setStatus(boolean status) {
-        return new AvlMemory(tree, status, advance(), size);
+    public IntAvlMemory setStatus(boolean status) {
+        return new IntAvlMemory(tree, status, advance(), size);
     }
 
-    public AvlMemory copy() {
-        return new AvlMemory(tree, status, advance(), size);
+    public IntAvlMemory copy() {
+        return new IntAvlMemory(tree, status, advance(), size);
     }
 
     private int advance() {

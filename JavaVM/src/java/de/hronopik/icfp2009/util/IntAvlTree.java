@@ -9,33 +9,32 @@ import static java.lang.Math.max;
  * @author Alexander Kiel
  * @version $Id$
  */
-public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map<K, V> {
+public abstract class IntAvlTree<V> implements Collection<V> {
 
     //---------------------------------------------------------------------------------------------
     // Constructors
     //---------------------------------------------------------------------------------------------
 
-    private static final Empty<Integer, Object> EMPTY = new Empty<Integer, Object>();
+    private static final Empty<Object> EMPTY = new Empty<Object>();
 
     /**
-     * Creates an empty {@linkplain AvlTree}.
+     * Creates an empty {@linkplain IntAvlTree}.
      *
-     * @param <K> the type of the key
      * @param <V> the type of the value
-     * @return an empty {@linkplain AvlTree}
+     * @return an empty {@linkplain IntAvlTree}
      */
     @SuppressWarnings({"unchecked"})
-    public static <K extends Comparable<? super K>, V> Empty<K, V> empty() {
-        return new Empty<K, V>();
+    public static <V> Empty<V> empty() {
+        return (Empty<V>) EMPTY;
     }
 
-    public static <K extends Comparable<? super K>, V> ZeroNode<K, V> singelton(K key, V value) {
-        return AvlTree.<K, V>empty().put(key, value);
+    public static <V> ZeroNode<V> singelton(int key, V value) {
+        return IntAvlTree.<V>empty().put(key, value);
     }
 
-    public static <V> AvlTree<Integer, V> fromList(List<V> list) {
-        return list.foldLeft(new Empty<Integer, V>(), new Function2<AvlTree<Integer, V>, V, AvlTree<Integer, V>>() {
-            public AvlTree<Integer, V> apply(AvlTree<Integer, V> tree, V value) {
+    public static <V> IntAvlTree<V> fromList(List<V> list) {
+        return list.foldLeft(new Empty<V>(), new Function2<IntAvlTree<V>, V, IntAvlTree<V>>() {
+            public IntAvlTree<V> apply(IntAvlTree<V> tree, V value) {
                 return tree.put(tree.size(), value);
             }
         });
@@ -44,47 +43,16 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
     /**
      * This private constructor prevents foreign instantiations.
      */
-    private AvlTree() {
+    private IntAvlTree() {
     }
 
     //---------------------------------------------------------------------------------------------
-    // Map Implementation
+    // 
     //---------------------------------------------------------------------------------------------
 
-    public abstract Node<K, V> put(K key, V value);
+    public abstract Maybe<V> get(int key);
 
-    public Node<K, V> add(Pair<K, V> mapping) {
-        return put(mapping.getFst(), mapping.getSnd());
-    }
-
-    public MaybeC<AvlTree<K, V>, Pair<K, V>> add() {
-        return new MaybeC<AvlTree<K, V>, Pair<K, V>>() {
-
-            public Node<K, V> c(Pair<K, V> just) {
-                return add(just);
-            }
-
-            public AvlTree<K, V> c() {
-                return AvlTree.this;
-            }
-        };
-    }
-
-    public Map<K, V> remove(Pair<K, V> mapping) {
-        return null;
-    }
-
-    public MaybeC<Map<K, V>, Pair<K, V>> remove() {
-        return null;
-    }
-
-    public Map<K, V> removeKey(K key) {
-        return null;
-    }
-
-    public MaybeC<Map<K, V>, K> removeKey() {
-        return null;
-    }
+    public abstract Node<V> put(int key, V value);
 
     //---------------------------------------------------------------------------------------------
     //
@@ -98,21 +66,21 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
     // Node
     //---------------------------------------------------------------------------------------------
 
-    public static abstract class Node<K extends Comparable<? super K>, V> extends AvlTree<K, V> {
+    public static abstract class Node<V> extends IntAvlTree<V> {
 
-        final K key;
+        final int key;
         final V value;
 
-        final AvlTree<K, V> left;
-        final AvlTree<K, V> right;
+        final IntAvlTree<V> left;
+        final IntAvlTree<V> right;
 
         //---------------------------------------------------------------------------------------------
         // Constructor
         //---------------------------------------------------------------------------------------------
 
-        private Node(K key, V value, AvlTree<K, V> left, AvlTree<K, V> right) {
-            assert left instanceof Empty || ((Node<K, V>) left).key.compareTo(key) < 0 : "left key is smaller";
-            assert right instanceof Empty || ((Node<K, V>) right).key.compareTo(key) > 0 : "right key is bigger";
+        private Node(int key, V value, IntAvlTree<V> left, IntAvlTree<V> right) {
+            assert left instanceof Empty || ((Node<V>) left).key < key : "left key is smaller";
+            assert right instanceof Empty || ((Node<V>) right).key > key : "right key is bigger";
             this.key = key;
             this.value = value;
             this.left = left;
@@ -123,23 +91,23 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
         // Iterable Implementation
         //---------------------------------------------------------------------------------------------
 
-        public Iterator<Pair<K, V>> iterator() {
+        public Iterator<V> iterator() {
             return null;
         }
 
-        public <T> Set<T> map(Function1<Pair<K, V>, T> mapper) {
+        public <T> Collection<T> map(Function1<V, T> mapper) {
             return null;
         }
 
-        public Map<K, V> filter(Function1<Pair<K, V>, Boolean> p) {
+        public Collection<V> filter(Function1<V, Boolean> p) {
             return null;
         }
 
-        public <T> T foldLeft(T start, Function2<T, Pair<K, V>, T> f) {
+        public <T> T foldLeft(T start, Function2<T, V, T> f) {
             return null;
         }
 
-        public <T> T foldRight(T start, Function2<Pair<K, V>, T, T> f) {
+        public <T> T foldRight(T start, Function2<V, T, T> f) {
             return null;
         }
 
@@ -155,31 +123,22 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
             return left.size() + 1 + right.size();
         }
 
-        public boolean contains(final Pair<K, V> element) {
-            return get(element.getFst()).maybe(new MaybeC<Boolean, V>() {
-
-                public Boolean c(V just) {
-                    return element.equals(just);
-                }
-
-                public Boolean c() {
-                    return false;
-                }
-            });
+        public boolean contains(V element) {
+            return toList().contains(element);
         }
 
         //---------------------------------------------------------------------------------------------
         // Map Implementation
         //---------------------------------------------------------------------------------------------
 
-        public Maybe<V> apply(K key) {
+        public Maybe<V> apply(int key) {
             return get(key);
         }
 
-        public Maybe<V> get(K key) {
-            if (key.compareTo(this.key) < 0) {
+        public Maybe<V> get(int key) {
+            if (key < this.key) {
                 return left.get(key);
-            } else if (key.compareTo(this.key) > 0) {
+            } else if (key > this.key) {
                 return right.get(key);
             } else {
                 return just(value);
@@ -202,7 +161,7 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
         // Node Interface
         //---------------------------------------------------------------------------------------------
 
-        public K getKey() {
+        public int getKey() {
             return key;
         }
 
@@ -210,11 +169,11 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
             return value;
         }
 
-        public AvlTree<K, V> getLeft() {
+        public IntAvlTree<V> getLeft() {
             return left;
         }
 
-        public AvlTree<K, V> getRight() {
+        public IntAvlTree<V> getRight() {
             return right;
         }
 
@@ -237,29 +196,28 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
      * <p/>
      * At such a node the left subtree height is bigger than the right subtree height.
      *
-     * @param <K> the type of the key
      * @param <V> the type of the value
      */
-    public static final class PositiveNode<K extends Comparable<? super K>, V> extends Node<K, V> {
+    public static final class PositiveNode<V> extends Node<V> {
 
-        private PositiveNode(K key, V value, Node<K, V> left, AvlTree<K, V> right) {
+        private PositiveNode(int key, V value, Node<V> left, IntAvlTree<V> right) {
             super(key, value, left, right);
             assert left.height() == right.height() + 1 : "left height is bigger";
         }
 
-        public Node<K, V> put(K key, V value) {
-            if (key.compareTo(this.key) < 0) {
+        public Node<V> put(int key, V value) {
+            if (key < this.key) {
                 return putLeft(key, value);
-            } else if (key.compareTo(this.key) > 0) {
+            } else if (key > this.key) {
                 return putRight(key, value);
             } else {
                 return putHere(key, value);
             }
         }
 
-        private Node<K, V> left() {
+        private Node<V> left() {
             assert left instanceof Node : "left is a node";
-            return (Node<K, V>) left;
+            return (Node<V>) left;
         }
 
         /**
@@ -268,19 +226,19 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
          * @param key   the key to put
          * @param value the value to put
          * @return a new instance of this node
-         * @see NegativeNode#putRight
+         * @see IntAvlTree.NegativeNode#putRight
          */
-        private Node<K, V> putLeft(K key, V value) {
+        private Node<V> putLeft(int key, V value) {
             if (left instanceof ZeroNode) {
-                if (key.compareTo(left().key) < 0) {
+                if (key < left().key) {
                     return putAndRotateLeftLeft(key, value);
-                } else if (key.compareTo(left().key) > 0) {
+                } else if (key > left().key) {
                     return putAndRotateLeftRight(key, value);
                 } else {
-                    return new PositiveNode<K, V>(this.key, this.value, left.put(key, value), right);
+                    return new PositiveNode<V>(this.key, this.value, left.put(key, value), right);
                 }
             } else {
-                return new PositiveNode<K, V>(this.key, this.value, left.put(key, value), right);
+                return new PositiveNode<V>(this.key, this.value, left.put(key, value), right);
             }
         }
 
@@ -290,20 +248,20 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
          * @param key   the key to put
          * @param value the value to put
          * @return a new instance of this node
-         * @see NegativeNode#putLeft
+         * @see IntAvlTree.NegativeNode#putLeft
          */
-        private Node<K, V> putRight(K key, V value) {
-            final Node<K, V> newRight = right.put(key, value);
+        private Node<V> putRight(int key, V value) {
+            final Node<V> newRight = right.put(key, value);
             if (right instanceof Empty) {
-                return new ZeroNode<K, V>(this.key, this.value, left, newRight);
+                return new ZeroNode<V>(this.key, this.value, left, newRight);
             } else if (right instanceof ZeroNode) {
                 if (newRight instanceof ZeroNode) {
-                    return new PositiveNode<K, V>(this.key, this.value, (Node<K, V>) left, newRight);
+                    return new PositiveNode<V>(this.key, this.value, (Node<V>) left, newRight);
                 } else {
-                    return new ZeroNode<K, V>(this.key, this.value, left, newRight);
+                    return new ZeroNode<V>(this.key, this.value, left, newRight);
                 }
             } else {
-                return new PositiveNode<K, V>(this.key, this.value, (Node<K, V>) left, newRight);
+                return new PositiveNode<V>(this.key, this.value, (Node<V>) left, newRight);
             }
         }
 
@@ -313,83 +271,83 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
          * @param key   the key to put
          * @param value the value to put
          * @return a new instance of this node
-         * @see NegativeNode#putHere
+         * @see IntAvlTree.NegativeNode#putHere
          */
-        private PositiveNode<K, V> putHere(K key, V value) {
-            return new PositiveNode<K, V>(key, value, left(), right);
+        private PositiveNode<V> putHere(int key, V value) {
+            return new PositiveNode<V>(key, value, left(), right);
         }
 
-        private Node<K, V> putAndRotateLeftLeft(K key, V value) {
+        private Node<V> putAndRotateLeftLeft(int key, V value) {
             if (left().left instanceof Empty) {
                 assert right instanceof Empty : "right is also empty";
                 assert left().right instanceof Empty : "left right is also empty";
 
-                return new ZeroNode<K, V>(left().key
+                return new ZeroNode<V>(left().key
                         , left().value
-                        , new ZeroNode<K, V>(key, value, AvlTree.<K, V>empty(), AvlTree.<K, V>empty())
-                        , new ZeroNode<K, V>(this.key, this.value, left().right, this.right)
+                        , new ZeroNode<V>(key, value, IntAvlTree.<V>empty(), IntAvlTree.<V>empty())
+                        , new ZeroNode<V>(this.key, this.value, left().right, this.right)
                 );
             } else if (left().left instanceof ZeroNode) {
-                final Node<K, V> leftLeft = left().left.put(key, value);
+                final Node<V> leftLeft = left().left.put(key, value);
                 if (leftLeft instanceof ZeroNode) {
-                    return new PositiveNode<K, V>(this.key
+                    return new PositiveNode<V>(this.key
                             , this.value
-                            , new ZeroNode<K, V>(left().key, left().value, leftLeft, left().right)
+                            , new ZeroNode<V>(left().key, left().value, leftLeft, left().right)
                             , right
                     );
                 } else {
-                    return new ZeroNode<K, V>(left().key
+                    return new ZeroNode<V>(left().key
                             , left().value
                             , leftLeft
-                            , new ZeroNode<K, V>(this.key, this.value, left().right, right)
+                            , new ZeroNode<V>(this.key, this.value, left().right, right)
                     );
                 }
             } else {
-                return new PositiveNode<K, V>(this.key
+                return new PositiveNode<V>(this.key
                         , this.value
-                        , new ZeroNode<K, V>(left().key, left().value, left().left.put(key, value), left().right)
+                        , new ZeroNode<V>(left().key, left().value, left().left.put(key, value), left().right)
                         , right
                 );
             }
         }
 
-        private Node<K, V> putAndRotateLeftRight(K key, V value) {
+        private Node<V> putAndRotateLeftRight(int key, V value) {
             if (left().right instanceof Empty) {
                 assert right instanceof Empty : "right is also empty";
                 assert left().left instanceof Empty : "left left is also empty";
 
-                return new ZeroNode<K, V>(key
+                return new ZeroNode<V>(key
                         , value
-                        , new ZeroNode<K, V>(left().key, left().value, left().left, AvlTree.<K, V>empty())
-                        , new ZeroNode<K, V>(this.key, this.value, AvlTree.<K, V>empty(), this.right)
+                        , new ZeroNode<V>(left().key, left().value, left().left, IntAvlTree.<V>empty())
+                        , new ZeroNode<V>(this.key, this.value, IntAvlTree.<V>empty(), this.right)
                 );
             } else if (left().right instanceof ZeroNode) {
-                final Node<K, V> leftRight = left().right.put(key, value);
+                final Node<V> leftRight = left().right.put(key, value);
                 if (leftRight instanceof ZeroNode) {
-                    return new PositiveNode<K, V>(this.key
+                    return new PositiveNode<V>(this.key
                             , this.value
-                            , new ZeroNode<K, V>(left().key, left().value, left().left, leftRight)
+                            , new ZeroNode<V>(left().key, left().value, left().left, leftRight)
                             , right
                     );
                 } else if (leftRight instanceof NegativeNode) {
-                    return new ZeroNode<K, V>(leftRight.key
+                    return new ZeroNode<V>(leftRight.key
                             , leftRight.value
-                            , new PositiveNode<K, V>(left().key, left().value, (Node<K, V>) left().left, leftRight.left)
-                            , new ZeroNode<K, V>(this.key, this.value, leftRight.right, right)
+                            , new PositiveNode<V>(left().key, left().value, (Node<V>) left().left, leftRight.left)
+                            , new ZeroNode<V>(this.key, this.value, leftRight.right, right)
                     );
                 } else if (leftRight instanceof PositiveNode) {
-                    return new ZeroNode<K, V>(leftRight.key
+                    return new ZeroNode<V>(leftRight.key
                             , leftRight.value
-                            , new ZeroNode<K, V>(left().key, left().value, left().left, leftRight.left)
-                            , new NegativeNode<K, V>(this.key, this.value, leftRight.right, (Node<K, V>) right)
+                            , new ZeroNode<V>(left().key, left().value, left().left, leftRight.left)
+                            , new NegativeNode<V>(this.key, this.value, leftRight.right, (Node<V>) right)
                     );
                 } else {
                     throw new RuntimeException("empty node not possible");
                 }
             } else {
-                return new PositiveNode<K, V>(this.key
+                return new PositiveNode<V>(this.key
                         , this.value
-                        , new ZeroNode<K, V>(left().key, left().value, left().left, left().right.put(key, value))
+                        , new ZeroNode<V>(left().key, left().value, left().left, left().right.put(key, value))
                         , right
                 );
             }
@@ -400,17 +358,17 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
     // ZeroNode
     //---------------------------------------------------------------------------------------------
 
-    public static final class ZeroNode<K extends Comparable<? super K>, V> extends Node<K, V> {
+    public static final class ZeroNode<V> extends Node<V> {
 
-        private ZeroNode(K key, V value, AvlTree<K, V> left, AvlTree<K, V> right) {
+        private ZeroNode(int key, V value, IntAvlTree<V> left, IntAvlTree<V> right) {
             super(key, value, left, right);
             assert left.height() == right.height() : "heights are equal";
         }
 
-        public Node<K, V> put(K key, V value) {
-            if (key.compareTo(this.key) < 0) {
+        public Node<V> put(int key, V value) {
+            if (key < this.key) {
                 return putLeft(key, value);
-            } else if (key.compareTo(this.key) > 0) {
+            } else if (key > this.key) {
                 return putRight(key, value);
             } else {
                 return putHere(key, value);
@@ -424,19 +382,19 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
          * @param value the value to put
          * @return a new instance of this node
          */
-        private Node<K, V> putLeft(K key, V value) {
+        private Node<V> putLeft(int key, V value) {
             if (left instanceof Empty) {
                 assert right instanceof Empty : "right is also empty";
-                return new PositiveNode<K, V>(this.key, this.value, left.put(key, value), right);
+                return new PositiveNode<V>(this.key, this.value, left.put(key, value), right);
             } else if (left instanceof ZeroNode) {
-                final Node<K, V> newLeft = left.put(key, value);
+                final Node<V> newLeft = left.put(key, value);
                 if (newLeft instanceof ZeroNode) {
-                    return new ZeroNode<K, V>(this.key, this.value, newLeft, right);
+                    return new ZeroNode<V>(this.key, this.value, newLeft, right);
                 } else {
-                    return new PositiveNode<K, V>(this.key, this.value, newLeft, right);
+                    return new PositiveNode<V>(this.key, this.value, newLeft, right);
                 }
             } else {
-                return new ZeroNode<K, V>(this.key, this.value, left.put(key, value), right);
+                return new ZeroNode<V>(this.key, this.value, left.put(key, value), right);
             }
         }
 
@@ -447,31 +405,31 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
          * @param value the value to put
          * @return a new instance of this node
          */
-        private Node<K, V> putRight(K key, V value) {
+        private Node<V> putRight(int key, V value) {
             if (right instanceof Empty) {
                 assert left instanceof Empty : "left is also empty";
-                return new NegativeNode<K, V>(this.key, this.value, left, right.put(key, value));
+                return new NegativeNode<V>(this.key, this.value, left, right.put(key, value));
             } else if (right instanceof ZeroNode) {
-                final Node<K, V> newRight = right.put(key, value);
+                final Node<V> newRight = right.put(key, value);
                 if (newRight instanceof ZeroNode) {
-                    return new ZeroNode<K, V>(this.key, this.value, left, newRight);
+                    return new ZeroNode<V>(this.key, this.value, left, newRight);
                 } else {
-                    return new NegativeNode<K, V>(this.key, this.value, left, newRight);
+                    return new NegativeNode<V>(this.key, this.value, left, newRight);
                 }
             } else {
-                return new ZeroNode<K, V>(this.key, this.value, left, right.put(key, value));
+                return new ZeroNode<V>(this.key, this.value, left, right.put(key, value));
             }
         }
-        
+
         /**
          * Update existing node.
          *
          * @param key   the key to put
          * @param value the value to put
-         * @return a new instance of this node         
+         * @return a new instance of this node
          */
-        private ZeroNode<K, V> putHere(K key, V value) {
-            return new ZeroNode<K, V>(key, value, left, right);
+        private ZeroNode<V> putHere(int key, V value) {
+            return new ZeroNode<V>(key, value, left, right);
         }
     }
 
@@ -484,29 +442,28 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
      * <p/>
      * At such a node the right subtree height is bigger than the left subtree height.
      *
-     * @param <K> the type of the key
      * @param <V> the type of the value
      */
-    public static final class NegativeNode<K extends Comparable<? super K>, V> extends Node<K, V> {
+    public static final class NegativeNode<V> extends Node<V> {
 
-        private NegativeNode(K key, V value, AvlTree<K, V> left, Node<K, V> right) {
+        private NegativeNode(int key, V value, IntAvlTree<V> left, Node<V> right) {
             super(key, value, left, right);
             assert left.height() + 1 == right.height() : "right height is bigger";
         }
 
-        public Node<K, V> put(K key, V value) {
-            if (key.compareTo(this.key) < 0) {
+        public Node<V> put(int key, V value) {
+            if (key < this.key) {
                 return putLeft(key, value);
-            } else if (key.compareTo(this.key) > 0) {
+            } else if (key > this.key) {
                 return putRight(key, value);
             } else {
                 return putHere(key, value);
             }
         }
 
-        private Node<K, V> right() {
+        private Node<V> right() {
             assert right instanceof Node : "right is a node";
-            return (Node<K, V>) right;
+            return (Node<V>) right;
         }
 
         /**
@@ -515,20 +472,20 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
          * @param key   the key to put
          * @param value the value to put
          * @return a new instance of this node
-         * @see PositiveNode#putRight
+         * @see IntAvlTree.PositiveNode#putRight
          */
-        private Node<K, V> putLeft(K key, V value) {
-            final Node<K, V> newLeft = left.put(key, value);
+        private Node<V> putLeft(int key, V value) {
+            final Node<V> newLeft = left.put(key, value);
             if (left instanceof Empty) {
-                return new ZeroNode<K, V>(this.key, this.value, newLeft, right);
+                return new ZeroNode<V>(this.key, this.value, newLeft, right);
             } else if (left instanceof ZeroNode) {
                 if (newLeft instanceof ZeroNode) {
-                    return new NegativeNode<K, V>(this.key, this.value, newLeft, (Node<K, V>) right);
+                    return new NegativeNode<V>(this.key, this.value, newLeft, (Node<V>) right);
                 } else {
-                    return new ZeroNode<K, V>(this.key, this.value, newLeft, right);
+                    return new ZeroNode<V>(this.key, this.value, newLeft, right);
                 }
             } else {
-                return new NegativeNode<K, V>(this.key, this.value, newLeft, (Node<K, V>) right);
+                return new NegativeNode<V>(this.key, this.value, newLeft, (Node<V>) right);
             }
         }
 
@@ -538,19 +495,19 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
          * @param key   the key to put
          * @param value the value to put
          * @return a new instance of this node
-         * @see PositiveNode#putLeft
+         * @see IntAvlTree.PositiveNode#putLeft
          */
-        private Node<K, V> putRight(K key, V value) {
+        private Node<V> putRight(int key, V value) {
             if (right instanceof ZeroNode) {
-                if (key.compareTo(right().key) > 0) {
+                if (key > right().key) {
                     return putAndRotateRightRight(key, value);
-                } else if (key.compareTo(right().key) < 0) {
+                } else if (key < right().key) {
                     return putAndRotateRightLeft(key, value);
                 } else {
-                    return new NegativeNode<K, V>(this.key, this.value, left, right.put(key, value));
+                    return new NegativeNode<V>(this.key, this.value, left, right.put(key, value));
                 }
             } else {
-                return new NegativeNode<K, V>(this.key, this.value, left, right.put(key, value));
+                return new NegativeNode<V>(this.key, this.value, left, right.put(key, value));
             }
         }
 
@@ -560,84 +517,84 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
          * @param key   the key to put
          * @param value the value to put
          * @return a new instance of this node
-         * @see PositiveNode#putHere
+         * @see IntAvlTree.PositiveNode#putHere
          */
-        private NegativeNode<K, V> putHere(K key, V value) {
-            return new NegativeNode<K, V>(key, value, left, right());
+        private NegativeNode<V> putHere(int key, V value) {
+            return new NegativeNode<V>(key, value, left, right());
         }
 
-        private Node<K, V> putAndRotateRightRight(K key, V value) {
+        private Node<V> putAndRotateRightRight(int key, V value) {
             if (right().right instanceof Empty) {
                 assert left instanceof Empty : "left is also empty";
                 assert right().left instanceof Empty : "right left is also empty";
 
-                return new ZeroNode<K, V>(right().key
+                return new ZeroNode<V>(right().key
                         , right().value
-                        , new ZeroNode<K, V>(this.key, this.value, this.left, right().left)
-                        , new ZeroNode<K, V>(key, value, AvlTree.<K, V>empty(), AvlTree.<K, V>empty())
+                        , new ZeroNode<V>(this.key, this.value, this.left, right().left)
+                        , new ZeroNode<V>(key, value, IntAvlTree.<V>empty(), IntAvlTree.<V>empty())
                 );
             } else if (right().right instanceof ZeroNode) {
-                final Node<K, V> rightRight = right().right.put(key, value);
+                final Node<V> rightRight = right().right.put(key, value);
                 if (rightRight instanceof ZeroNode) {
-                    return new NegativeNode<K, V>(this.key
+                    return new NegativeNode<V>(this.key
                             , this.value
                             , left
-                            , new ZeroNode<K, V>(right().key, right().value, right().left, rightRight)
+                            , new ZeroNode<V>(right().key, right().value, right().left, rightRight)
                     );
                 } else {
-                    return new ZeroNode<K, V>(right().key
+                    return new ZeroNode<V>(right().key
                             , right().value
-                            , new ZeroNode<K, V>(this.key, this.value, left, right().left)
+                            , new ZeroNode<V>(this.key, this.value, left, right().left)
                             , rightRight
                     );
                 }
             } else {
-                return new NegativeNode<K, V>(this.key
+                return new NegativeNode<V>(this.key
                         , this.value
                         , left
-                        , new ZeroNode<K, V>(right().key, right().value, right().left, right().right.put(key, value))
+                        , new ZeroNode<V>(right().key, right().value, right().left, right().right.put(key, value))
                 );
             }
         }
 
-        private Node<K, V> putAndRotateRightLeft(K key, V value) {
+        private Node<V> putAndRotateRightLeft(int key, V value) {
             if (right().left instanceof Empty) {
                 assert left instanceof Empty : "left is also empty";
                 assert right().right instanceof Empty : "right right is also empty";
 
-                return new ZeroNode<K, V>(key
+                return new ZeroNode<V>(key
                         , value
-                        , new ZeroNode<K, V>(this.key, this.value, this.left, AvlTree.<K, V>empty())
-                        , new ZeroNode<K, V>(right().key, right().value, AvlTree.<K, V>empty(), right().right)
+                        , new ZeroNode<V>(this.key, this.value, this.left, IntAvlTree.<V>empty())
+                        , new ZeroNode<V>(right().key, right().value, IntAvlTree.<V>empty(), right().right)
                 );
             } else if (right().left instanceof ZeroNode) {
-                final Node<K, V> rightLeft = right().left.put(key, value);
+                final Node<V> rightLeft = right().left.put(key, value);
                 if (rightLeft instanceof ZeroNode) {
-                    return new NegativeNode<K, V>(this.key
+                    return new NegativeNode<V>(this.key
                             , this.value
                             , left
-                            , new ZeroNode<K, V>(right().key, right().value, rightLeft, right().right)
+                            , new ZeroNode<V>(right().key, right().value, rightLeft, right().right)
                     );
                 } else if (rightLeft instanceof PositiveNode) {
-                    return new ZeroNode<K, V>(rightLeft.key
+                    return new ZeroNode<V>(rightLeft.key
                             , rightLeft.value
-                            , new ZeroNode<K, V>(this.key, this.value, left, rightLeft.left)
-                            , new NegativeNode<K, V>(right().key, right().value, rightLeft.right, (Node<K, V>) right().right)
+                            , new ZeroNode<V>(this.key, this.value, left, rightLeft.left)
+                            , new NegativeNode<V>(right().key, right().value, rightLeft.right, (Node<V>) right().right)
                     );
                 } else if (rightLeft instanceof NegativeNode) {
-                    return new ZeroNode<K, V>(rightLeft.key
+                    return new ZeroNode<V>(rightLeft.key
                             , rightLeft.value
-                            , new PositiveNode<K, V>(this.key, this.value, (Node<K, V>) left, rightLeft.left)
-                            , new ZeroNode<K, V>(right().key, right().value, rightLeft.right, right().right)
+                            , new PositiveNode<V>(this.key, this.value, (Node<V>) left, rightLeft.left)
+                            , new ZeroNode<V>(right().key, right().value, rightLeft.right, right().right)
                     );
                 } else {
                     throw new RuntimeException("empty node not possible");
                 }
             } else {
-                return new NegativeNode<K, V>(this.key
+                return new NegativeNode<V>(this.key
                         , this.value
                         , left
-                        , new ZeroNode<K, V>(right().key, right().value, right().left.put(key, value), right().right)
+                        , new ZeroNode<V>(right().key, right().value, right().left.put(key, value), right().right)
                 );
             }
         }
@@ -647,7 +604,7 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
     // Empty
     //---------------------------------------------------------------------------------------------
 
-    public static final class Empty<K extends Comparable<? super K>, V> extends AvlTree<K, V> {
+    public static final class Empty<V> extends IntAvlTree<V> {
 
         private Empty() {
         }
@@ -656,23 +613,23 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
         // Iterable Implementation
         //---------------------------------------------------------------------------------------------
 
-        public Iterator<Pair<K, V>> iterator() {
+        public Iterator<V> iterator() {
             return null;
         }
 
-        public <T> Set<T> map(Function1<Pair<K, V>, T> mapper) {
+        public <T> Collection<T> map(Function1<V, T> mapper) {
             return null;
         }
 
-        public Map<K, V> filter(Function1<Pair<K, V>, Boolean> p) {
+        public Collection<V> filter(Function1<V, Boolean> p) {
             return null;
         }
 
-        public <T> T foldLeft(T start, Function2<T, Pair<K, V>, T> f) {
+        public <T> T foldLeft(T start, Function2<T, V, T> f) {
             return null;
         }
 
-        public <T> T foldRight(T start, Function2<Pair<K, V>, T, T> f) {
+        public <T> T foldRight(T start, Function2<V, T, T> f) {
             return null;
         }
 
@@ -688,7 +645,7 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
             return 0;
         }
 
-        public boolean contains(Pair<K, V> element) {
+        public boolean contains(V element) {
             return false;
         }
 
@@ -696,16 +653,12 @@ public abstract class AvlTree<K extends Comparable<? super K>, V> implements Map
         // Map Implementation
         //---------------------------------------------------------------------------------------------
 
-        public Maybe<V> apply(K k) {
+        public Maybe<V> get(int key) {
             return nothing();
         }
 
-        public Maybe<V> get(K key) {
-            return nothing();
-        }
-
-        public ZeroNode<K, V> put(K key, V value) {
-            return new ZeroNode<K, V>(key, value, AvlTree.<K, V>empty(), AvlTree.<K, V>empty());
+        public ZeroNode<V> put(int key, V value) {
+            return new ZeroNode<V>(key, value, IntAvlTree.<V>empty(), IntAvlTree.<V>empty());
         }
 
         //---------------------------------------------------------------------------------------------

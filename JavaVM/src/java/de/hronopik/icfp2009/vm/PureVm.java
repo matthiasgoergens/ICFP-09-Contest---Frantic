@@ -42,7 +42,7 @@ public class PureVm {
         }
 
         this.instructions = instructions.reverse();
-        this.memory = new AvlMemory((List.Element<Double>) memory.reverse(), false);
+        this.memory = new IntAvlMemory((List.Element<Double>) memory.reverse(), false);
     }
 
     public PureVm(List<Instruction> instructions, Memory memory) {
