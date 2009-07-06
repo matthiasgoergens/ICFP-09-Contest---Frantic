@@ -2,6 +2,8 @@ package de.hronopik.icfp2009.util;
 
 import static de.hronopik.icfp2009.util.Maybe.nothing;
 
+import java.util.ArrayList;
+
 /**
  * @author Alexander Kiel
  * @version $Id$
@@ -148,6 +150,15 @@ public abstract class List<E> implements Collection<E> {
         }
 
         public abstract Element<E> reverse();
+
+        public <T> T[] toArray(T[] a) {
+            return foldLeft(new ArrayList<E>(), new Function2<ArrayList<E>, E, ArrayList<E>>() {
+                public ArrayList<E> apply(ArrayList<E> es, E e) {
+                    es.add(e);
+                    return es;
+                }
+            }).toArray(a);
+        }
 
         //---------------------------------------------------------------------------------------------
         // Overridden Object Methods

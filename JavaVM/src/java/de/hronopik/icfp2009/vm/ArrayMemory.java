@@ -1,6 +1,6 @@
 package de.hronopik.icfp2009.vm;
 
-import de.hronopik.icfp2009.util.*;
+import de.hronopik.icfp2009.util.List;
 
 /**
  * This class represents the memory of the VM.
@@ -8,9 +8,9 @@ import de.hronopik.icfp2009.util.*;
  * @author Alexander Kiel
  * @version $Id$
  */
-class IntAvlMemory implements Memory {
+class ArrayMemory implements Memory {
 
-    private final IntAvlTree<Double> tree;
+    private final double[] array;
 
     private final boolean status;
 
@@ -24,12 +24,21 @@ class IntAvlMemory implements Memory {
      * @param values a list of the values in the memory
      * @param status the value of the status register
      */
-    IntAvlMemory(List.Element<Double> values, boolean status) {
-        this(IntAvlTree.fromList(values), status, 0, values.size());
+    ArrayMemory(List.Element<Double> values, boolean status) {
+        this(toArray(values), status, 0, values.size());
     }
 
-    private IntAvlMemory(IntAvlTree<Double> tree, boolean status, int insertPos, int size) {
-        this.tree = tree;
+    private static double[] toArray(List.Element<Double> values) {
+        final Double[] doubles = values.toArray(new Double[]{});
+        final double[] result = new double[doubles.length];
+        for (int i = 0; i < doubles.length; i++) {
+            result[i] = doubles[i];
+        }
+        return result;
+    }
+
+    private ArrayMemory(double[] array, boolean status, int insertPos, int size) {
+        this.array = array;
         this.status = status;
         this.insertPos = insertPos;
         this.size = size;
@@ -44,7 +53,7 @@ class IntAvlMemory implements Memory {
             throw new IndexOutOfBoundsException("address = " + address + "; size = " + size);
         }
 
-        return ((Maybe.Just<Double>) tree.get(address)).getValue();
+        return array[address];
     }
 
     public boolean isStatus() {
@@ -57,16 +66,19 @@ class IntAvlMemory implements Memory {
      * @param value the value to set
      * @return a new memory instance
      */
-    public IntAvlMemory setValue(final double value) {
-        return new IntAvlMemory(tree.put(insertPos, value), status, advance(), size);
+    public ArrayMemory setValue(final double value) {
+        double[] newArray = new double[array.length];
+        System.arraycopy(array, 0, newArray, 0, array.length);
+        newArray[insertPos] = value;
+        return new ArrayMemory(newArray, status, advance(), size);
     }
 
-    public IntAvlMemory setStatus(boolean status) {
-        return new IntAvlMemory(tree, status, advance(), size);
+    public ArrayMemory setStatus(boolean status) {
+        return new ArrayMemory(array, status, advance(), size);
     }
 
-    public IntAvlMemory copy() {
-        return new IntAvlMemory(tree, status, advance(), size);
+    public ArrayMemory copy() {
+        return new ArrayMemory(array, status, advance(), size);
     }
 
     private int advance() {

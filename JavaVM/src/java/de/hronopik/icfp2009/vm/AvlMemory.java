@@ -70,7 +70,8 @@ class AvlMemory implements Memory {
     }
 
     private int advance() {
-        return insertPos < size - 1 ? insertPos + 1 : 0;
+        final int nextPos = insertPos + 1;
+        return nextPos == size ? 0 : nextPos;
     }
 
     //---------------------------------------------------------------------------------------------

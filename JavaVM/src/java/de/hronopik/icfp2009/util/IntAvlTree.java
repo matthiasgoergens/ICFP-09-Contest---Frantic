@@ -131,10 +131,6 @@ public abstract class IntAvlTree<V> implements Collection<V> {
         // Map Implementation
         //---------------------------------------------------------------------------------------------
 
-        public Maybe<V> apply(int key) {
-            return get(key);
-        }
-
         public Maybe<V> get(int key) {
             if (key < this.key) {
                 return left.get(key);
