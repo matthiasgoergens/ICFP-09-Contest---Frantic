@@ -46,6 +46,7 @@ main = do
                1 -> task1Controller
                2 -> task2Controller
                3 -> task3Controller
+               5 -> stupidController
                7 -> noopController 10000
                8 -> getVTestController2
                9 -> testHohmannController
