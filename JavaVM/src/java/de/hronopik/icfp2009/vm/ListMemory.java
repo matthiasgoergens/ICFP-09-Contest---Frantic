@@ -10,7 +10,7 @@ import de.hronopik.icfp2009.util.List;
  * @author Alexander Kiel
  * @version $Id$
  */
-class ListMemory implements ROM {
+class ListMemory implements Memory {
 
     //private static long readTime = 0;
     //private static long writeTime = 0;
@@ -86,15 +86,15 @@ class ListMemory implements ROM {
      * @param value the value to set
      * @return a new memory instance
      */
-    ListMemory setValue(final double value) {
+    public ListMemory setValue(final double value) {
         return advance(value, status);
     }
 
-    ListMemory setStatus(boolean status) {
+    public ListMemory setStatus(boolean status) {
         return advance(value, status);
     }
 
-    ListMemory copy() {
+    public ListMemory copy() {
         return advance(value, status);
     }
 

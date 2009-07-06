@@ -11,11 +11,11 @@ import de.hronopik.icfp2009.util.LinkedList;
  */
 public class AvlMemoryTest {
 
-    AvlMemory memory;
+    Memory memory;
 
     @Before
     public void setUp() {
-        memory = new AvlMemory(LinkedList.newInstance4(1d, 2d, 3d, 4d), false);
+        memory = new AvlMemory2(LinkedList.newInstance4(1d, 2d, 3d, 4d), false);
     }
 
     @Test

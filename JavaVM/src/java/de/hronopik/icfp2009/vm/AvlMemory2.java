@@ -9,7 +9,7 @@ import de.hronopik.icfp2009.util.*;
  * @author Alexander Kiel
  * @version $Id$
  */
-class AvlMemory2 implements ROM {
+class AvlMemory2 implements Memory {
 
     //private static long readTime = 0;
     //private static long writeTime = 0;
@@ -73,15 +73,15 @@ class AvlMemory2 implements ROM {
      * @param value the value to set
      * @return a new memory instance
      */
-    AvlMemory2 setValue(final double value) {
+    public AvlMemory2 setValue(final double value) {
         return new AvlMemory2(tree.put(insertPos, value), status, advance(), size);
     }
 
-    AvlMemory2 setStatus(boolean status) {
+    public AvlMemory2 setStatus(boolean status) {
         return new AvlMemory2(tree, status, advance(), size);
     }
 
-    AvlMemory2 copy() {
+    public AvlMemory2 copy() {
         return new AvlMemory2(tree, status, advance(), size);
     }
 

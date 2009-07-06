@@ -16,7 +16,7 @@ public class PureVm {
 
     private final List<Instruction> instructions;
 
-    private final AvlMemory2 memory;
+    private final Memory memory;
 
     //---------------------------------------------------------------------------------------------
     // Constructor
@@ -45,7 +45,7 @@ public class PureVm {
         this.memory = new AvlMemory2((List.Element<Double>) memory.reverse(), false);
     }
 
-    public PureVm(List<Instruction> instructions, AvlMemory2 memory) {
+    public PureVm(List<Instruction> instructions, Memory memory) {
         this.instructions = instructions;
         this.memory = memory;
     }
@@ -57,17 +57,17 @@ public class PureVm {
     public Pair<PureVm, Map<Integer, Double>> step(final InputPorts input) {
 
         // Starting with our memory and an empty map of outputs
-        final Pair<AvlMemory2, Map<Integer, Double>> start = newPair(memory, ListMap.<Integer, Double>emptyMap());
+        final Pair<Memory, Map<Integer, Double>> start = newPair(memory, ListMap.<Integer, Double>emptyMap());
 
         // Folding over the instructions getting a new memory and the outputs
-        final Pair<AvlMemory2, Map<Integer, Double>> memOut = instructions.foldLeft(start, new MicroStep(input));
+        final Pair<Memory, Map<Integer, Double>> memOut = instructions.foldLeft(start, new MicroStep(input));
 
         // Returning a new VM and the output
         return newPair(new PureVm(instructions, memOut.getFst()), memOut.getSnd());
     }
 
     private static class MicroStep implements
-            Function2<Pair<AvlMemory2, Map<Integer, Double>>, Instruction, Pair<AvlMemory2, Map<Integer, Double>>> {
+            Function2<Pair<Memory, Map<Integer, Double>>, Instruction, Pair<Memory, Map<Integer, Double>>> {
 
         private final InputPorts input;
 
@@ -75,27 +75,27 @@ public class PureVm {
             this.input = input;
         }
 
-        public Pair<AvlMemory2, Map<Integer, Double>> apply(Pair<AvlMemory2, Map<Integer, Double>> state,
+        public Pair<Memory, Map<Integer, Double>> apply(Pair<Memory, Map<Integer, Double>> state,
                                                         Instruction instruction) {
-            final AvlMemory2 memory = state.getFst();
+            final Memory memory = state.getFst();
             final Map<Integer, Double> output = state.getSnd();
 
             return instruction.execute(0, memory, input).cont(
-                    new Instruction.ResultC<Pair<AvlMemory2, Map<Integer, Double>>>() {
+                    new Instruction.ResultC<Pair<Memory, Map<Integer, Double>>>() {
 
-                        public Pair<AvlMemory2, Map<Integer, Double>> memoryResult(double value) {
+                        public Pair<Memory, Map<Integer, Double>> memoryResult(double value) {
                             return newPair(memory.setValue(value), output);
                         }
 
-                        public Pair<AvlMemory2, Map<Integer, Double>> outputResult(Output value) {
+                        public Pair<Memory, Map<Integer, Double>> outputResult(Output value) {
                             return newPair(memory.copy(), output.add(value));
                         }
 
-                        public Pair<AvlMemory2, Map<Integer, Double>> statusResult(boolean value) {
+                        public Pair<Memory, Map<Integer, Double>> statusResult(boolean value) {
                             return newPair(memory.setStatus(value), output);
                         }
 
-                        public Pair<AvlMemory2, Map<Integer, Double>> noopResult() {
+                        public Pair<Memory, Map<Integer, Double>> noopResult() {
                             return newPair(memory.copy(), output);
                         }
                     }
