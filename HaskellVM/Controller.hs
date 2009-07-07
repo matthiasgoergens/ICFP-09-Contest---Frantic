@@ -19,13 +19,7 @@ type Controller z a = WriterT Trace (State z) a
 
 -- oder anderer Rueckgabewert
 
-runController :: (Controller VM a)  -> VM -> Trace
-runController controller vm = snd . fst $ (runState (runWriterT (controller)) vm)
-                              -- snd $ (runWriter (runStateT (controller) vm))
 
--- runController2 :: (Controller VM a)  -> VM -> VM
-runController2 controller vm = -- snd . fst $ (runState (runWriterT (controller)) vm)
-                              (runWriter (runStateT (controller) vm))
 
 
 class Tick z where

@@ -97,28 +97,32 @@ instance Compile NameSpace where
     compile f _ = show f
 
 instance Compile (S.Set NameSpace) where
-    compile s undefined = nest (concat . L.intersperse ", " . map show . S.toAscList $ s)
+    compile s undefined = nest ("Z " ++ (concat . L.intersperse " " . map show . S.toAscList $ s))
 
 instance Compile (String,VM) where
     compile (name,vm) undefined = src -- ++ "\n"++compile minstate ()
         where 
               minstate = getMinState locs
+              minstateType = ("Z " ++ (concat . L.intersperse " ". map (const "!Dat") . S.toAscList $ minstate))
               minstateStr = compile minstate undefined
-              src = "module "++name++"(f,mem0) where \n"++
+              src = "module "++name++" where \n"++
                     "import Data.IntMap as I\n"++
                     "import Types\n"++
                     "import Data.ByteString.Lazy\n"++
                     "import Data.Binary\n"++
                     "output = I.empty\n"++
-                    "f "++minstateStr++" (Inp input)"++" = "
+                    "f "++nest(minstateStr)++" (Inp input)"++" = "
                             ++compile (map (uncurry LoC) (instr vm))
                              (nest (minstateStr ++", Outp output")++"\n\t")++
                     "\n"++
                     -- "minstate = "++minstateStr++"\n"++
                     renderMem (mem vm) (S.union (constants locs) minstate) ++"\n"++
                     "fromList = I.fromList\n"++
-                    "mem0 = " ++ minstateStr ++"\n"
-                    ++"\n"
+                    "mem0 = " ++ minstateStr ++"\n"++
+                    "t0 :: Time\n"++
+                    "t0 = 0\n"++
+                    "data Z = " ++ minstateType++ "\n"++
+                    "\n"
 
               locs = (map (uncurry LoC) (instr vm))
 
