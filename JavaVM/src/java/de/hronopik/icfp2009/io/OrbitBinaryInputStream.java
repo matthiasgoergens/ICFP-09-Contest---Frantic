@@ -1,7 +1,10 @@
 package de.hronopik.icfp2009.io;
 
 import de.hronopik.icfp2009.model.*;
-import org.jetbrains.annotations.NotNull;
+import static de.hronopik.icfp2009.model.SOp.Cmpz;
+import de.hronopik.icfp2009.util.Maybe;
+import static de.hronopik.icfp2009.util.Maybe.just;
+import static de.hronopik.icfp2009.util.Maybe.nothing;
 
 import java.io.EOFException;
 import java.io.FilterInputStream;
@@ -20,7 +23,7 @@ public class OrbitBinaryInputStream extends FilterInputStream {
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    public OrbitBinaryInputStream(@NotNull InputStream in) {
+    public OrbitBinaryInputStream(InputStream in) {
         super(in);
         frameAddress = 0;
     }
@@ -29,7 +32,7 @@ public class OrbitBinaryInputStream extends FilterInputStream {
     //
     //---------------------------------------------------------------------------------------------
 
-    @NotNull
+
     public final OrbitBinaryFrame readFrame() throws IOException {
         OrbitBinaryFrame result;
         if (frameAddress % 2 == 0) {
@@ -50,7 +53,7 @@ public class OrbitBinaryInputStream extends FilterInputStream {
      * @throws IOException if an I/O error occurs
      * @see "task-1.0.pdf 2.4 p.4"
      */
-    @NotNull
+
     public final OrbitBinaryFrame readEvenFrame() throws IOException {
         double value = readValue();
         Instruction instruction = readInstruction();
@@ -66,14 +69,14 @@ public class OrbitBinaryInputStream extends FilterInputStream {
      * @throws IOException if an I/O error occurs
      * @see "task-1.0.pdf 2.4 p.4"
      */
-    @NotNull
+
     public final OrbitBinaryFrame readOddFrame() throws IOException {
         Instruction instruction = readInstruction();
         double value = readValue();
         return new OrbitBinaryFrame(instruction, value);
     }
 
-    @NotNull
+
     private Instruction readInstruction() throws IOException {
         long ch1 = in.read();
         int ch2 = in.read();
@@ -97,15 +100,7 @@ public class OrbitBinaryInputStream extends FilterInputStream {
         } else {
 
             // We have a S-Type instruction here
-            SOp op = SOp.fromOpcode((int) ((instructionCode >> 24) & 0xF));
-            Parameter param;
-            if (op == SOp.Cmpz) {
-                param = CompParam.fromOpcode((int) ((instructionCode >> 21) & 0x7));
-            } else {
-                param = null;
-            }
-            int r1 = (int) (instructionCode & 0x3FFF);
-            return new SInstruction<Parameter>(frameAddress, op, param, r1);
+            return createSInstruction(instructionCode);
         }
     }
 
@@ -124,5 +119,19 @@ public class OrbitBinaryInputStream extends FilterInputStream {
         long longValue = (ch8 << 56) + (ch7 << 48) + (ch6 << 40) + (ch5 << 32) +
                 (ch4 << 24) + (ch3 << 16) + (ch2 << 8) + ch1;
         return Double.longBitsToDouble(longValue);
+    }
+
+    private SInstruction createSInstruction(long instructionCode) {
+
+        SOpI op = SOp.fromOpcode((int) ((instructionCode >> 24) & 0xF));
+
+        Maybe<?> param;
+        if (op == Cmpz) {
+            param = just(CompParam.fromOpcode((int) ((instructionCode >> 21) & 0x7)));
+        } else {
+            param = nothing();
+        }
+        int r1 = (int) (instructionCode & 0x3FFF);
+        return new SInstruction(frameAddress, op, param, r1);
     }
 }

@@ -1,20 +1,18 @@
 package de.hronopik.icfp2009.vm;
 
-import org.jetbrains.annotations.NotNull;
+import de.hronopik.icfp2009.util.Map;
+import de.hronopik.icfp2009.util.Pair;
 
-import java.util.Map;
 
 /**
  * @author Alexander Kiel
  * @version $Id$
  */
-public interface Vm {
+public interface Vm<T extends Vm<T>> {
 
     int getStepIndex();
 
-    @NotNull
-    Map<Integer, Double> step();
+    Pair<T, Map<Integer, Double>> step();
 
-    @NotNull
-    Map<Integer, Double> step(@NotNull Map<Integer, Double> inputs);
+    Pair<T, Map<Integer, Double>> step(Map<Integer, Double> input);
 }

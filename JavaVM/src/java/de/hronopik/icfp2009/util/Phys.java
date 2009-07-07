@@ -15,17 +15,17 @@ public class Phys {
 
     public static final double mu = G * m_e;
 
-    public static double radius(@NotNull Vector s_t) {
+    public static double radius(Vector s_t) {
         return sqrt(s_t.getX() * s_t.getX() + s_t.getY() * s_t.getY());
     }
 
-    public static double distance(@NotNull Vector s_1, @NotNull Vector s_2) {
+    public static double distance(Vector s_1, Vector s_2) {
         double x = s_1.getX() - s_2.getX();
         double y = s_1.getY() - s_2.getY();
         return sqrt(x * x + y * y);
     }
 
-    public static double angle(@NotNull Vector s_1, @NotNull Vector s_2) {
+    public static double angle(Vector s_1, Vector s_2) {
         return acos(s_1.dot(s_2) / s_1.length() / s_2.length()) * 180 / PI;
     }
 
@@ -36,28 +36,28 @@ public class Phys {
      * @param s_t1 the second point
      * @return the speed at the point {@code s_t0}
      */
-    @NotNull
-    public static Vector speedT0(@NotNull Vector s_t0, @NotNull Vector s_t1) {
+
+    public static Vector speedT0(Vector s_t0, Vector s_t1) {
         Vector g_t0 = gravitation(s_t0);
         return s_t1.minus(s_t0).minus(g_t0.scale(0.5));
     }
 
-    @NotNull
-    public static Vector speed(@NotNull Vector s0, @NotNull Vector s1, @NotNull Vector s2) {
+
+    public static Vector speed(Vector s0, Vector s1, Vector s2) {
         Vector g0 = gravitation(s0);
         Vector g1 = gravitation(s1);
         return s2.minus(s1).minus(g1).minus(g0).scale(2);
     }
 
-    @NotNull
-    public static Vector speedPatrick(@NotNull Vector s0, @NotNull Vector s1, @NotNull Vector s2) {
+
+    public static Vector speedPatrick(Vector s0, Vector s1, Vector s2) {
         Vector v0 = speedT0(s0, s1);
         Vector v1 = speedT0(s1, s2);
         return v0.plus(v1).scale(0.5);
     }
 
-    @NotNull
-    public static Vector nextPoint(@NotNull Vector s, @NotNull Vector v, @NotNull Vector dv) {
+
+    public static Vector nextPoint(Vector s, Vector v, Vector dv) {
         return s.plus(v).plus(gravitation(s).plus(dv).scale(0.5));
     }
 
@@ -95,8 +95,8 @@ public class Phys {
         return mu / (r * r);
     }
 
-    @NotNull
-    public static Vector gravitation(@NotNull Vector s) {
+
+    public static Vector gravitation(Vector s) {
         return s.normalize().flip().scale(gravitation(radius(s)));
     }
 }

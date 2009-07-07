@@ -40,7 +40,7 @@ public enum CompParam implements Parameter {
         }
     };
 
-    @NotNull
+
     private final String operation;
 
     //---------------------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ public enum CompParam implements Parameter {
         return values()[opcode];
     }
 
-    CompParam(@NotNull String operation) {
+    CompParam(String operation) {
         this.operation = operation;
     }
 

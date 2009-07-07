@@ -1,8 +1,8 @@
 package de.hronopik.icfp2009.model;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Map;
+import de.hronopik.icfp2009.util.Map;
+import de.hronopik.icfp2009.util.Pair;
+import de.hronopik.icfp2009.vm.Memory;
 
 /**
  * A 32-bit instruction.
@@ -26,12 +26,10 @@ public abstract class Instruction {
      * Executes the instruction.
      *
      * @param stepIndex the index of the current simulation step
-     * @param status    the value of the status register
-     * @param values    the RAM
-     * @param inputs    the input register
-     * @param outputs   the output register     @return the new value of the status register
-     * @return the new status value
+     * @param memory    the memory of the VM
+     * @param input     the input ports
+     * @param output
+     * @return the new memory and new output as result of the instruction execution
      */
-    public abstract boolean execute(int stepIndex, boolean status, double[] values,
-                                    @NotNull Map<Integer, Double> inputs, @NotNull Map<Integer, Double> outputs);
+    public abstract Pair<Memory, Map<Integer, Double>> execute(int stepIndex, Memory memory, Map<Integer, Double> input, Map<Integer, Double> output);
 }

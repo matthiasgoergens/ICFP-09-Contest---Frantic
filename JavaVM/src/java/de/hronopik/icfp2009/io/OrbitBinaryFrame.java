@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class OrbitBinaryFrame {
 
-    @NotNull
+
     private final Instruction instruction;
     private final double value;
 
@@ -17,7 +17,7 @@ public final class OrbitBinaryFrame {
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    OrbitBinaryFrame(@NotNull Instruction instruction, double value) {
+    OrbitBinaryFrame(Instruction instruction, double value) {
         this.instruction = instruction;
         this.value = value;
     }
@@ -26,7 +26,7 @@ public final class OrbitBinaryFrame {
     //
     //---------------------------------------------------------------------------------------------
 
-    @NotNull
+
     public Instruction getInstruction() {
         return instruction;
     }

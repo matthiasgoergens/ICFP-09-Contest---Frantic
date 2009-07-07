@@ -4,31 +4,32 @@ import de.hronopik.icfp2009.io.Frames;
 import de.hronopik.icfp2009.io.OrbitBinaryFrame;
 import de.hronopik.icfp2009.io.VmReader;
 import de.hronopik.icfp2009.io.VmWriter;
-import org.jetbrains.annotations.NotNull;
+import de.hronopik.icfp2009.util.Continuations;
+import de.hronopik.icfp2009.util.Map;
+import de.hronopik.icfp2009.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Alexander Kiel
  * @version $Id$
  */
-public class StreamVm extends AbstractVm implements Runnable {
+public class VmStreamRunner {
 
-    @NotNull
+    private Vm vm;
+
     private final VmReader in;
 
-    @NotNull
     private final VmWriter out;
 
     //---------------------------------------------------------------------------------------------
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    public StreamVm(@NotNull List<OrbitBinaryFrame> frames, @NotNull Reader in, @NotNull Writer out) {
-        super(frames);
+    public VmStreamRunner(List<OrbitBinaryFrame> frames, Reader in, Writer out) {
+        this.vm = new PureVm(frames);
         this.in = new VmReader(in);
         this.out = new VmWriter(out);
     }
@@ -55,16 +56,19 @@ public class StreamVm extends AbstractVm implements Runnable {
      * <ul><li>reads the inputs<li>executes all instructions<li>writes the outputs
      *
      * @return {@code true} if the simulation should continue
-     * @throws IOException if an I/O error occurs
+     * @throws java.io.IOException if an I/O error occurs
      */
     public boolean ioStep() throws IOException {
-        Map<Integer, Double> inputs = in.readInputs();
+        final Pair<Vm, Map<Integer, Double>> state = vm.step(in.readInputs());
 
-        Map<Integer, Double> outputs = step(inputs);
+        vm = state.getFst();
+        out.writeOutputs(state.getSnd());
 
-        out.writeOutputs(outputs);
-
-        return outputs.get(0) == 0;
+        final Double score = state.getSnd().get(0).maybe(Continuations.<Double>fail("score missing"));
+        if (score == -1) {
+            throw new RuntimeException("CRASHED");
+        }
+        return score == 0;
     }
 
     //---------------------------------------------------------------------------------------------
@@ -91,7 +95,7 @@ public class StreamVm extends AbstractVm implements Runnable {
         InputStreamReader in = new InputStreamReader(System.in);
         OutputStreamWriter out = new OutputStreamWriter(System.out);
 
-        StreamVm vm = new StreamVm(frames, in, out);
+        VmStreamRunner vm = new VmStreamRunner(frames, in, out);
 
         try {
             vm.run();
@@ -108,7 +112,7 @@ public class StreamVm extends AbstractVm implements Runnable {
     }
 
     @Nullable
-    private static List<OrbitBinaryFrame> readFrames(@NotNull File file) {
+    private static List<OrbitBinaryFrame> readFrames(File file) {
         try {
             return Frames.readFromFile(file);
         } catch (IOException e) {

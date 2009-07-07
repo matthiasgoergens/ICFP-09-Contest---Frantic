@@ -1,0 +1,258 @@
+package de.hronopik.icfp2009.util;
+
+import static de.hronopik.icfp2009.util.IntAvlTree.fromList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+
+/**
+ * @author Alexander Kiel
+ * @version $Id$
+ */
+public class IntAvlTreeTest {
+
+    @Test
+    public void testPutLL() {
+
+        // Build initial tree
+        final IntAvlTree.Node<String> tree = IntAvlTree.singelton(4, "4").put(3, "3").put(5, "5");
+
+        testZeroNode(tree, 4, "4");
+        testZeroNode(tree.getLeft(), 3, "3");
+        testZeroNode(tree.getRight(), 5, "5");
+
+        // Put (2, "2")
+        final IntAvlTree.Node<String> tree2 = tree.put(2, "2");
+
+        testPositiveNode(tree2, 4, "4");
+        final IntAvlTree.Node<String> left2 = testPositiveNode(tree2.getLeft(), 3, "3");
+        testZeroNode(tree2.getRight(), 5, "5");
+        testZeroNode(left2.getLeft(), 2, "2");
+
+        // Put (1, "1")
+        final IntAvlTree.Node<String> tree1 = tree2.put(1, "1");
+        testPositiveNode(tree1, 4, "4");
+        final IntAvlTree.Node<String> left1 = testZeroNode(tree1.getLeft(), 2, "2");
+        testZeroNode(tree.getRight(), 5, "5");
+        testZeroNode(left1.getLeft(), 1, "1");
+        testZeroNode(left1.getRight(), 3, "3");
+    }
+
+    @Test
+    public void testPutLR() {
+
+        // Build initial tree
+        final IntAvlTree.Node<String> tree = IntAvlTree.singelton(4, "4").put(3, "3").put(5, "5");
+
+        testZeroNode(tree, 4, "4");
+        testZeroNode(tree.getLeft(), 3, "3");
+        testZeroNode(tree.getRight(), 5, "5");
+
+        // Put (1, "1")
+        final IntAvlTree.Node<String> tree1 = tree.put(1, "1");
+
+        testPositiveNode(tree1, 4, "4");
+        final IntAvlTree.Node<String> left1 = testPositiveNode(tree1.getLeft(), 3, "3");
+        testZeroNode(tree1.getRight(), 5, "5");
+        testZeroNode(left1.getLeft(), 1, "1");
+
+        // Put (2, "2")
+        final IntAvlTree.Node<String> tree2 = tree1.put(2, "2");
+        testPositiveNode(tree2, 4, "4");
+        final IntAvlTree.Node<String> left2 = testZeroNode(tree2.getLeft(), 2, "2");
+        testZeroNode(tree.getRight(), 5, "5");
+        testZeroNode(left2.getLeft(), 1, "1");
+        testZeroNode(left2.getRight(), 3, "3");
+    }
+
+    @Test
+    public void testPutRR() {
+
+        // Build initial tree
+        final IntAvlTree.Node<String> tree = IntAvlTree.singelton(4, "4").put(3, "3").put(5, "5");
+
+        testZeroNode(tree, 4, "4");
+        testZeroNode(tree.getLeft(), 3, "3");
+        testZeroNode(tree.getRight(), 5, "5");
+
+        // Put (6, "6")
+        final IntAvlTree.Node<String> tree6 = tree.put(6, "6");
+
+        testNegativeNode(tree6, 4, "4");
+        testZeroNode(tree6.getLeft(), 3, "3");
+        final IntAvlTree.Node<String> right6 = testNegativeNode(tree6.getRight(), 5, "5");
+        testZeroNode(right6.getRight(), 6, "6");
+
+        // Put (7, "7")
+        final IntAvlTree.Node<String> tree67 = tree6.put(7, "7");
+        testNegativeNode(tree67, 4, "4");
+        testZeroNode(tree.getLeft(), 3, "3");
+        final IntAvlTree.Node<String> right67 = testZeroNode(tree67.getRight(), 6, "6");
+        testZeroNode(right67.getLeft(), 5, "5");
+        testZeroNode(right67.getRight(), 7, "7");
+    }
+
+    @Test
+    public void testPutRL() {
+
+        // Build initial tree
+        final IntAvlTree.Node<String> tree = IntAvlTree.singelton(4, "4").put(3, "3").put(5, "5");
+
+        testZeroNode(tree, 4, "4");
+        testZeroNode(tree.getLeft(), 3, "3");
+        testZeroNode(tree.getRight(), 5, "5");
+
+        // Put (7, "7")
+        final IntAvlTree.Node<String> tree7 = tree.put(7, "7");
+
+        testNegativeNode(tree7, 4, "4");
+        testZeroNode(tree7.getLeft(), 3, "3");
+        final IntAvlTree.Node<String> right7 = testNegativeNode(tree7.getRight(), 5, "5");
+        testZeroNode(right7.getRight(), 7, "7");
+
+        // Put (6, "6")
+        final IntAvlTree.Node<String> tree6 = tree7.put(6, "6");
+        testNegativeNode(tree6, 4, "4");
+        testZeroNode(tree.getLeft(), 3, "3");
+        final IntAvlTree.Node<String> right6 = testZeroNode(tree6.getRight(), 6, "6");
+        testZeroNode(right6.getLeft(), 5, "5");
+        testZeroNode(right6.getRight(), 7, "7");
+    }
+
+    @Test
+    public void testFromList() {
+        assertTrue(fromList(List.nil()).isEmpty());
+
+        final IntAvlTree<String> tree = fromList(LinkedList.newInstance1("0"));
+        testZeroNode(tree, 0, "0");
+
+        final IntAvlTree<String> tree1 = fromList(LinkedList.newInstance2("0", "1"));
+        final IntAvlTree.Node<String> node1 = testNegativeNode(tree1, 0, "0");
+        testZeroNode(node1.getRight(), 1, "1");
+
+        final IntAvlTree<String> tree2 = fromList(LinkedList.newInstance3("0", "1", "2"));
+        final IntAvlTree.Node<String> node2 = testZeroNode(tree2, 1, "1");
+        testZeroNode(node2.getLeft(), 0, "0");
+        testZeroNode(node2.getRight(), 2, "2");
+
+        final IntAvlTree<String> tree3 = fromList(LinkedList.newInstance4("0", "1", "2", "3"));
+        final IntAvlTree.Node<String> node3 = testNegativeNode(tree3, 1, "1");
+        testZeroNode(node3.getLeft(), 0, "0");
+        final IntAvlTree.Node<String> node33 = testNegativeNode(node3.getRight(), 2, "2");
+        testZeroNode(node33.getRight(), 3, "3");
+    }
+
+    @Test
+    public void testToList() {
+        assertTrue(fromList(List.nil()).toList().isEmpty());
+
+        assertEquals(LinkedList.newInstance1("0"), fromList(LinkedList.newInstance1("0")).toList());
+        assertEquals(LinkedList.newInstance2("0", "1"), fromList(LinkedList.newInstance2("0", "1")).toList());
+        assertEquals(LinkedList.newInstance3("0", "1", "2"), fromList(LinkedList.newInstance3("0", "1", "2")).toList());
+        assertEquals(LinkedList.newInstance4("0", "1", "2", "3"), fromList(LinkedList.newInstance4("0", "1", "2", "3")).toList());
+    }
+
+    @Test
+    public void testBigTree8() {
+        List<Integer> list = List.nil();
+        for (int i = 0; i < 8; i++) {
+            list = new LinkedList<Integer>(i, list);
+        }
+        final IntAvlTree<Integer> tree = fromList(list.reverse());
+        assertEquals("size", 8, tree.size());
+        assertEquals("height", 4, tree.height());
+    }
+
+    @Test
+    public void testBigTree16() {
+        List<Integer> list = List.nil();
+        for (int i = 0; i < 16; i++) {
+            list = new LinkedList<Integer>(i, list);
+        }
+        final IntAvlTree<Integer> tree = fromList(list.reverse());
+        assertEquals("size", 16, tree.size());
+        assertEquals("height", 5, tree.height());
+    }
+
+    @Test
+    public void testBigTree32() {
+        List<Integer> list = List.nil();
+        for (int i = 0; i < 32; i++) {
+            list = new LinkedList<Integer>(i, list);
+        }
+        final IntAvlTree<Integer> tree = fromList(list.reverse());
+        assertEquals("size", 32, tree.size());
+        assertEquals("height", 6, tree.height());
+    }
+
+    @Test
+    public void testBigTree64() {
+        List<Integer> list = List.nil();
+        for (int i = 0; i < 64; i++) {
+            list = new LinkedList<Integer>(i, list);
+        }
+        final IntAvlTree<Integer> tree = fromList(list.reverse());
+        assertEquals("size", 64, tree.size());
+        assertEquals("height", 7, tree.height());
+    }
+
+    @Test
+    public void testBigTree128() {
+        List<Integer> list = List.nil();
+        for (int i = 0; i < 128; i++) {
+            list = new LinkedList<Integer>(i, list);
+        }
+        final IntAvlTree<Integer> tree = fromList(list.reverse());
+        assertEquals("size", 128, tree.size());
+        assertEquals("height", 8, tree.height());
+    }
+
+    @Test
+    public void testBigTree256() {
+        List<Integer> list = List.nil();
+        for (int i = 0; i < 256; i++) {
+            list = new LinkedList<Integer>(i, list);
+        }
+        final IntAvlTree<Integer> tree = fromList(list.reverse());
+        assertEquals("size", 256, tree.size());
+        assertEquals("height", 9, tree.height());
+    }
+
+    @Test
+    public void testBigTree512() {
+        List<Integer> list = List.nil();
+        for (int i = 0; i < 512; i++) {
+            list = new LinkedList<Integer>(i, list);
+        }
+        final IntAvlTree<Integer> tree = fromList(list.reverse());
+        assertEquals("size", 512, tree.size());
+        assertEquals("height", 10, tree.height());
+    }
+
+    //---------------------------------------------------------------------------------------------
+    // Helper Methods
+    //---------------------------------------------------------------------------------------------
+
+    private <V> IntAvlTree.Node<V> testPositiveNode(IntAvlTree<V> tree, int key, V value) {
+        assertTrue("positive node", tree instanceof IntAvlTree.PositiveNode);
+        return testNode((IntAvlTree.Node<V>) tree, key, value);
+    }
+
+    private <V> IntAvlTree.Node<V> testZeroNode(IntAvlTree<V> tree, int key, V value) {
+        assertTrue(tree instanceof IntAvlTree.ZeroNode);
+        return testNode((IntAvlTree.Node<V>) tree, key, value);
+    }
+
+    private <V> IntAvlTree.Node<V> testNegativeNode(IntAvlTree<V> tree, int key, V value) {
+        assertTrue(tree instanceof IntAvlTree.NegativeNode);
+        return testNode((IntAvlTree.Node<V>) tree, key, value);
+    }
+
+    private <V> IntAvlTree.Node<V> testNode(IntAvlTree.Node<V> tree, int key, V value) {
+
+        assertEquals(key, tree.getKey());
+        assertEquals(value, tree.getValue());
+
+        return tree;
+    }
+}

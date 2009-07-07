@@ -1,16 +1,12 @@
 package de.hronopik.icfp2009.controller;
 
-import de.hronopik.icfp2009.util.InputBuilder;
-import de.hronopik.icfp2009.util.Pair;
 import static de.hronopik.icfp2009.util.Phys.radius;
-import de.hronopik.icfp2009.util.Vector;
+import de.hronopik.icfp2009.util.*;
 import de.hronopik.icfp2009.vm.DirectVm;
 import de.hronopik.icfp2009.vm.InputLoggingVmWrapper;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author Alexander Kiel
@@ -20,7 +16,7 @@ public class Task1FuelBurningController {
 
     private final static double R_EARTH = 6.357E6;
 
-    @NotNull
+
     private final File binary;
     private final int scenario;
 
@@ -28,7 +24,7 @@ public class Task1FuelBurningController {
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    public Task1FuelBurningController(@NotNull File binary, int scenario) {
+    public Task1FuelBurningController(File binary, int scenario) {
         this.binary = binary;
         this.scenario = scenario;
     }
@@ -57,13 +53,13 @@ public class Task1FuelBurningController {
         double r1 = radius(s1);
 
         // Our target radius
-        double r2 = outputs.get(4);
+        double r2 = outputs.get(4).maybe(Continuations.<Double>fail("output 4 not existent"));
 
-        Pair<Vector, Vector> positions = Pair.newPair(s0, s1);
+        Pair<Vector, Vector> positions = Pairs.newPair(s0, s1);
 
         positions = new HohmannTransfer(r2).perform(vm, positions);
 
-        double remFuel = vm.step().get(1);
+        double remFuel = vm.step().get(1).maybe(Continuations.<Double>fail("output 1 not existent"));
         System.err.println("remFuel = " + remFuel);
 
         // Reserve
@@ -91,7 +87,7 @@ public class Task1FuelBurningController {
         positions = new HohmannTransfer(r3).perform(vm, positions);
         new HohmannTransfer(r2).perform(vm, positions);
 
-        while (outputs.get(0) == 0) {
+        while (outputs.get(0).maybe(Continuations.<Double>fail("output 0 not existent")) == 0) {
             outputs = vm.step();
         }
 
@@ -102,14 +98,17 @@ public class Task1FuelBurningController {
     }
 
 
-    @NotNull
-    private Map<Integer, Double> buildDeltaVInput(@NotNull Vector dv) {
+
+    private java.util.Map<Integer, Double> buildDeltaVInput(Vector dv) {
         return new InputBuilder(2, dv.getX()).add(3, dv.getY()).build();
     }
 
-    @NotNull
-    private Vector getPosition(@NotNull Map<Integer, Double> outputs) {
-        return new Vector(outputs.get(2), outputs.get(3)).flip();
+
+    private Vector getPosition(Map<Integer, Double> outputs) {
+        return new Vector(
+                outputs.get(2).maybe(Continuations.<Double>fail("output 2 not existent")),
+                outputs.get(3).maybe(Continuations.<Double>fail("output 3 not existent"))
+        ).flip();
     }
 
     public static void main(String[] args) throws IOException {

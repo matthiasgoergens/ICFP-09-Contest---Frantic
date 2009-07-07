@@ -1,15 +1,11 @@
 package de.hronopik.icfp2009.controller;
 
-import de.hronopik.icfp2009.util.InputBuilder;
-import de.hronopik.icfp2009.util.Pair;
-import static de.hronopik.icfp2009.util.Pair.newPair;
+import de.hronopik.icfp2009.util.*;
+import static de.hronopik.icfp2009.util.Pairs.newPair;
 import static de.hronopik.icfp2009.util.Phys.*;
-import de.hronopik.icfp2009.util.Vector;
 import de.hronopik.icfp2009.vm.Vm;
-import org.jetbrains.annotations.NotNull;
 
 import static java.lang.Math.abs;
-import java.util.Map;
 
 /**
  * Performs one Hohmann transfer from r1 to r2.
@@ -33,8 +29,8 @@ public class HohmannTransfer {
     //
     //---------------------------------------------------------------------------------------------
 
-    public double getFuelConsumption(@NotNull Pair<Vector, Vector> positions) {
-        Vector s1 = positions.getB();
+    public double getFuelConsumption(Pair<Vector, Vector> positions) {
+        Vector s1 = positions.getSnd();
 
         // Our radius around the earth
         double r1 = radius(s1);
@@ -51,9 +47,9 @@ public class HohmannTransfer {
         return abs(adv) + abs(adv2);
     }
 
-    public Pair<Vector, Vector> perform(@NotNull Vm vm, @NotNull Pair<Vector, Vector> positions) {
-        Vector s0 = positions.getA();
-        Vector s1 = positions.getB();
+    public Pair<Vector, Vector> perform(Vm vm, Pair<Vector, Vector> positions) {
+        Vector s0 = positions.getFst();
+        Vector s1 = positions.getSnd();
 
         // Our radius around the earth
         double r1 = radius(s1);
@@ -122,13 +118,28 @@ public class HohmannTransfer {
         return d0.dot(d1) > d0.dot(d2) ? d1 : d2;
     }
 
-    @NotNull
-    private Map<Integer, Double> buildDeltaVInput(@NotNull Vector dv) {
+
+    private java.util.Map<Integer, Double> buildDeltaVInput(Vector dv) {
         return new InputBuilder(2, dv.getX()).add(3, dv.getY()).build();
     }
 
-    @NotNull
-    private Vector getPosition(@NotNull Map<Integer, Double> outputs) {
-        return new Vector(outputs.get(2), outputs.get(3)).flip();
+
+    private Vector getPosition(Map<Integer, Double> outputs) {
+        return new Vector(outputs.get(2).maybe(GET_POSITION), outputs.get(3).maybe(GET_POSITION)).flip();
     }
+
+    //---------------------------------------------------------------------------------------------
+    //
+    //---------------------------------------------------------------------------------------------
+
+    private static final MaybeC<Double, Double> GET_POSITION = new MaybeC<Double, Double>() {
+
+        public Double c(Double r) {
+            return r;
+        }
+
+        public Double c() {
+            throw new IllegalArgumentException("No position.");
+        }
+    };
 }

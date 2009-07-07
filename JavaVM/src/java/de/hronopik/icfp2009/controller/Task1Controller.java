@@ -1,17 +1,19 @@
 package de.hronopik.icfp2009.controller;
 
-import de.hronopik.icfp2009.util.InputBuilder;
-import de.hronopik.icfp2009.util.Phys;
 import static de.hronopik.icfp2009.util.Phys.*;
-import de.hronopik.icfp2009.util.Vector;
+import de.hronopik.icfp2009.util.*;
+import static de.hronopik.icfp2009.util.AvlTree.singelton;
 import de.hronopik.icfp2009.vm.DirectVm;
 import de.hronopik.icfp2009.vm.InputLoggingVmWrapper;
+import de.hronopik.icfp2009.vm.PureVm;
+import de.hronopik.icfp2009.vm.Vm;
+import de.hronopik.icfp2009.io.Frames;
+import static de.hronopik.icfp2009.io.Frames.readFromFile;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import static java.lang.Math.abs;
-import java.util.Map;
 
 /**
  * @author Alexander Kiel
@@ -19,7 +21,7 @@ import java.util.Map;
  */
 public class Task1Controller {
 
-    @NotNull
+
     private final File binary;
     private final int scenario;
 
@@ -27,7 +29,7 @@ public class Task1Controller {
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    public Task1Controller(@NotNull File binary, int scenario) {
+    public Task1Controller(File binary, int scenario) {
         this.binary = binary;
         this.scenario = scenario;
     }
@@ -37,10 +39,12 @@ public class Task1Controller {
     //---------------------------------------------------------------------------------------------
 
     public void run() throws IOException {
-        InputLoggingVmWrapper vm = new InputLoggingVmWrapper(new DirectVm(binary));
+        InputLoggingVmWrapper<PureVm> vm = new InputLoggingVmWrapper<PureVm>(new PureVm(readFromFile(binary)));
 
         // First config step
-        Map<Integer, Double> outputs = vm.step(new InputBuilder(16000, scenario).build());
+        final Pair<InputLoggingVmWrapper<PureVm>, Map<Integer, Double>> pair = vm.step(AvlTree.<Integer, Double>singelton(16000, (double) scenario));
+        vm = pair.getFst();
+        Map<Integer, Double> outputs = pair.getSnd();
 
         assert vm.getStepIndex() == 1;
 
@@ -49,14 +53,14 @@ public class Task1Controller {
         //
 
         // Get three positions for our speed
-        Vector s0 = getPosition(outputs);
+        Vector s0 = getPosition(pair);
         Vector s1 = getPosition(vm.step());
 
         // Our radius around the earth
         double r1 = radius(s1);
 
         // Our target radius
-        double r2 = outputs.get(4);
+        double r2 = outputs.get(4).maybe(Continuations.<Double>fail("missing target radius"));
 
         // The time we need for the Hohmann transfer
         double tho = hohmannTime1(r1, r2);
@@ -121,7 +125,7 @@ public class Task1Controller {
         assert vm.getStepIndex() == timeBeforeHohmann2;
         vm.step(buildDeltaVInput(dv2));
 
-        while (outputs.get(0) == 0) {
+        while (outputs.get(0).maybe(Continuations.<Double>fail("missing score")) == 0) {
             outputs = vm.step();
         }
 
@@ -154,14 +158,18 @@ public class Task1Controller {
         return d0.dot(d1) > d0.dot(d2) ? d1 : d2;
     }
 
-    @NotNull
-    private Map<Integer, Double> buildDeltaVInput(@NotNull Vector dv) {
-        return new InputBuilder(2, dv.getX()).add(3, dv.getY()).build();
+
+    private Map<Integer, Double> buildDeltaVInput(Vector dv) {
+        return singelton(2, dv.getX()).put(3, dv.getY());
     }
 
-    @NotNull
-    private Vector getPosition(@NotNull Map<Integer, Double> outputs) {
-        return new Vector(outputs.get(2), outputs.get(3)).flip();
+
+    private Vector getPosition(Pair<?, Map<Integer, Double>> vm) {
+        final Map<Integer, Double> outputs = vm.getSnd();
+        return new Vector(
+                outputs.get(2).maybe(Continuations.<Double>fail("missing s_x")),
+                outputs.get(3).maybe(Continuations.<Double>fail("missing s_y"))
+        ).flip();
     }
 
     public static void main(String[] args) throws IOException {

@@ -1,8 +1,9 @@
 package de.hronopik.icfp2009.io;
 
+import de.hronopik.icfp2009.util.AvlTree;
+import de.hronopik.icfp2009.util.Map;
+
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Alexander Kiel
@@ -25,10 +26,11 @@ public class VmReader extends FilterReader {
     //
     //---------------------------------------------------------------------------------------------
 
-    public Map<Integer, Double> readInputs() throws IOException {
-        LineNumberReader in = (LineNumberReader) this.in;
 
-        Map<Integer, Double> inputs = new HashMap<Integer, Double>();
+    public Map<Integer, Double> readInputs() throws IOException {
+        final LineNumberReader in = (LineNumberReader) this.in;
+
+        Map<Integer, Double> inputs = AvlTree.empty();
         boolean stopExecution = true;
 
         String line;
@@ -63,9 +65,11 @@ public class VmReader extends FilterReader {
                         ".");
             }
 
-            if (inputs.put(address, value) != null) {
+            if (inputs.containsKey(address)) {
                 throw new IOException("Double address " + address + " in line " + in.getLineNumber() + ".");
             }
+
+            inputs = inputs.put(address, value);
         }
 
         if (stopExecution) {

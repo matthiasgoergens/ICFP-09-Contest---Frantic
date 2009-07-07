@@ -1,15 +1,44 @@
 ICFP Contest 2009
 Team: I C Frantic People
 
-Team Members: Allan Clark, Matthias Görgens, Alexander Kiel, Anya Martius, Georg Martius, Patrick Schreibe
+Team Members: Matthias Goergens, Alexander Kiel, Anya Martius, Georg Martius, Patrick Schreibe
 
-Languages: Java, Haskell, C++
+Languages: Haskell, Java, Perl
 
 Tools we wrote:
+VM in Haskell and in Java
+Controller in Haskell
+Controller in Java
+Plotting in gnuplot
+A simple controller in perl (only feedforward)
+Analysis Tool of VM in Haskell
+
+How to obtain solutions:  (ROOTDIR =  the root folder of this archive)
+Task 1 in Java:
+cd $ROOTDIR/run
+./run_task1.sh
+
+Task 1,2 in Haskell:
+cd $ROOTDIR/HaskellVM/
+make
+cd $ROOTDIR/run
+./run_tasks_haskell.sh
+
+# for plotting e.g.
+cd $ROOTDIR/run
+./run_controller.sh ../task/bin3.obf 3001 with +RTS -M1504m -RTS | ./output2csv.sh > test.dat
+gnuplot task3.dem
+gnuplot distToSat.dem
+
+
 
 General Remarks:
+For some reason our hohmann transfer did not work when we tried it the first
+ time such that we spend a lot of time implementing and thinking about complicated solutions
 
 Conclusion:
+Nice task, A bit too much "binary" for my tast and 
+ too less ways of testing the implemenentation, e.g. the of submission file.
 
 Thanks for the good organisation!
  I C Frantic People

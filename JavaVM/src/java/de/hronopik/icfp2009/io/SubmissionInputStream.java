@@ -22,7 +22,7 @@ public class SubmissionInputStream extends FilterInputStream {
     // Constructor
     //---------------------------------------------------------------------------------------------
 
-    public SubmissionInputStream(@NotNull InputStream in) {
+    public SubmissionInputStream(InputStream in) {
         super(in);
     }
 
@@ -30,7 +30,7 @@ public class SubmissionInputStream extends FilterInputStream {
     //
     //---------------------------------------------------------------------------------------------
 
-    @NotNull
+
     public final SimulationHeader readHeader() throws IOException {
         long magicNumber = readUnsignedInteger();
         if (magicNumber != MAGIC_NUMBER) {
@@ -39,7 +39,7 @@ public class SubmissionInputStream extends FilterInputStream {
         return new SimulationHeader((int) readUnsignedInteger(), (int) readUnsignedInteger());
     }
 
-    @NotNull
+
     public final SimulationFrame readFrame() throws IOException {
         int timeStep = (int) readUnsignedInteger();
         int count = (int) readUnsignedInteger();

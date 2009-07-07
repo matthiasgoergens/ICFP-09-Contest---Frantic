@@ -4,42 +4,19 @@ package de.hronopik.icfp2009.util;
  * @author Alexander Kiel
  * @version $Id$
  */
-public class Pair<A, B> {
+public interface Pair<A, B> {
 
-    private final A a;
-    private final B b;
+    /**
+     * Returns the first element of this pair.
+     *
+     * @return the first element of this pair
+     */
+    A getFst();
 
-    //---------------------------------------------------------------------------------------------
-    // Constructors
-    //---------------------------------------------------------------------------------------------
-
-    public static <A, B> Pair<A, B> newPair(A a, B b) {
-        return new Pair<A, B>(a, b);
-    }
-
-    private Pair(A a, B b) {
-        this.a = a;
-        this.b = b;
-    }
-
-    //---------------------------------------------------------------------------------------------
-    //
-    //---------------------------------------------------------------------------------------------
-
-    public A getA() {
-        return a;
-    }
-
-    public B getB() {
-        return b;
-    }
-
-    //---------------------------------------------------------------------------------------------
-    // Overridden Object Methods
-    //---------------------------------------------------------------------------------------------
-
-    @Override
-    public String toString() {
-        return "(" + a + ", " + b + ")";
-    }
+    /**
+     * Returns the second element of this pair.
+     *
+     * @return the second element of this pair
+     */
+    B getSnd();
 }

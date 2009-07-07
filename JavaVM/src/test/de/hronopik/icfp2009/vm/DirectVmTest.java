@@ -1,13 +1,13 @@
 package de.hronopik.icfp2009.vm;
 
 import de.hronopik.icfp2009.util.InputBuilder;
+import de.hronopik.icfp2009.util.Map;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Map;
 
 /**
  * @author Alexander Kiel
@@ -66,7 +66,7 @@ public class DirectVmTest {
         vm.createSnapshoot("start");
         assertEquals(0, vm.getStepIndex());
 
-        Map<Integer, Double> inputs = new InputBuilder().add(16000, 1001).add(3, -2466.484135).build();
+        java.util.Map<Integer, Double> inputs = new InputBuilder().add(16000, 1001).add(3, -2466.484135).build();
 
         Map<Integer, Double> output1 = vm.step(inputs);
         assertEquals(1, vm.getStepIndex());

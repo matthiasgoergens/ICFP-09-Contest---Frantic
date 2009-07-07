@@ -19,6 +19,12 @@ mapfst f (a,c) = (f a,c)
 mapsnd :: (a -> b) ->  (c,a) -> (c,b)
 mapsnd f (c,a) = (c,f a)
                     
+fst3 :: (a,b,c) -> a
+fst3 (a,_,_) = a
+
+snd3 :: (a,b,c) -> b
+snd3 (_,b,_) = b
+
 trd3 :: (a,b,c) -> c
 trd3 (_,_,c) = c
 

@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class InputBuilder {
 
-    @NotNull
+
     private final Map<Integer, Double> input = new LinkedHashMap<Integer, Double>();
 
     //---------------------------------------------------------------------------------------------
@@ -31,13 +31,13 @@ public class InputBuilder {
     //
     //---------------------------------------------------------------------------------------------
 
-    @NotNull
+
     public InputBuilder add(int inputPort, double value) {
         input.put(inputPort, value);
         return this;
     }
 
-    @NotNull
+
     public Map<Integer, Double> build() {
         return new LinkedHashMap<Integer, Double>(input);
     }

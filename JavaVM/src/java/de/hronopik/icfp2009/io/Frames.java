@@ -15,8 +15,8 @@ import java.util.List;
  */
 public class Frames {
 
-    @NotNull
-    public static List<OrbitBinaryFrame> readFromFile(@NotNull File file) throws IOException {
+
+    public static List<OrbitBinaryFrame> readFromFile(File file) throws IOException {
         OrbitBinaryInputStream in = new OrbitBinaryInputStream(new FileInputStream(file));
         List<OrbitBinaryFrame> frames = new ArrayList<OrbitBinaryFrame>();
         try {

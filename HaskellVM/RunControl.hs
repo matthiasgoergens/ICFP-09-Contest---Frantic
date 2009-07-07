@@ -56,12 +56,11 @@ main = do
   
   let cont = case floor $ conf/1000.0 of
                2 -> task2Controller
---               1 -> task1Controller
-
---               3 -> task3Controller
---               7 -> noopController 10000
---               8 -> getVTestController2
---               9 -> testHohmannController
+               3 -> task3Controller
+               5 -> stupidController
+               7 -> noopController 10000
+               8 -> getVTestController2
+               9 -> testHohmannController
                _ -> error "not implemented"
   let trace' = (runController (cont conf) start)
       trace = DL.toList trace'
