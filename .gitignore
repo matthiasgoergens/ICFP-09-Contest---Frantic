@@ -5,3 +5,15 @@ HaskellVM/Analyze
 #*#
 *~
 */#*#
+HaskellVM/Lhs
+HaskellVM/RunAnalyze
+HaskellVM/RunCompiler
+HaskellVM/RunControl.aux
+HaskellVM/RunControl.hp
+HaskellVM/RunControl.pdf
+HaskellVM/RunControl.ps
+HaskellVM/Temp.hs
+HaskellVM/VM2
+HaskellVM/createSub
+HaskellVM/output2csv
+HaskellVM/runC
