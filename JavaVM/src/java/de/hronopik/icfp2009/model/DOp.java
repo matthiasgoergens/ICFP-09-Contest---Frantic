@@ -1,5 +1,10 @@
 package de.hronopik.icfp2009.model;
 
+import de.hronopik.icfp2009.util.Map;
+import de.hronopik.icfp2009.util.Pair;
+import static de.hronopik.icfp2009.util.Pairs.newPair;
+import de.hronopik.icfp2009.vm.Memory;
+
 /**
  * Operation for D-Type instructions.
  *
@@ -13,9 +18,8 @@ public enum DOp implements Op {
 
     Add {
 
-        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory
-        ) {
-            return Instruction.memoryResult(memory.getValue(r1) + memory.getValue(r2));
+        public Pair<Memory, Map<Integer, Double>> execute(final int r1, final int r2, final Memory memory, Map<Integer, Double> output) {
+            return newPair(memory.setValue(memory.getValue(r1) + memory.getValue(r2)), output);
         }
 
         public String toSemanticsString(int r1, int r2, ROM memory) {
@@ -25,9 +29,8 @@ public enum DOp implements Op {
 
     Sub {
 
-        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory
-        ) {
-            return Instruction.memoryResult(memory.getValue(r1) - memory.getValue(r2));
+        public Pair<Memory, Map<Integer, Double>> execute(final int r1, final int r2, final Memory memory, Map<Integer, Double> output) {
+            return newPair(memory.setValue(memory.getValue(r1) - memory.getValue(r2)), output);
         }
 
         public String toSemanticsString(int r1, int r2, ROM memory) {
@@ -37,9 +40,8 @@ public enum DOp implements Op {
 
     Mult {
 
-        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory
-        ) {
-            return Instruction.memoryResult(memory.getValue(r1) * memory.getValue(r2));
+        public Pair<Memory, Map<Integer, Double>> execute(final int r1, final int r2, final Memory memory, Map<Integer, Double> output) {
+            return newPair(memory.setValue(memory.getValue(r1) * memory.getValue(r2)), output);
         }
 
         public String toSemanticsString(int r1, int r2, ROM memory) {
@@ -49,9 +51,9 @@ public enum DOp implements Op {
 
     Div {
 
-        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory
-        ) {
-            return Instruction.memoryResult(memory.getValue(r2) == 0 ? 0 : memory.getValue(r1) / memory.getValue(r2));
+        public Pair<Memory, Map<Integer, Double>> execute(final int r1, final int r2, final Memory memory, Map<Integer, Double> output) {
+            final double divisor = memory.getValue(r2);
+            return newPair(memory.setValue(divisor == 0 ? 0 : memory.getValue(r1) / divisor), output);
         }
 
         public String toSemanticsString(int r1, int r2, ROM memory) {
@@ -61,9 +63,8 @@ public enum DOp implements Op {
 
     Output {
 
-        public Instruction.Result.OutputResult execute(final int r1, final int r2, final ROM memory
-        ) {
-            return Instruction.outputResult(new Output(r1, memory.getValue(r2)));
+        public Pair<Memory, Map<Integer, Double>> execute(final int r1, final int r2, final Memory memory, Map<Integer, Double> output) {
+            return newPair(memory, output.put(r1, memory.getValue(r2)));
         }
 
         public String toSemanticsString(int r1, int r2, ROM memory) {
@@ -73,9 +74,8 @@ public enum DOp implements Op {
 
     Phi {
 
-        public Instruction.Result.MemoryResult execute(final int r1, final int r2, final ROM memory
-        ) {
-            return Instruction.memoryResult(memory.isStatus() ? memory.getValue(r1) : memory.getValue(r2));
+        public Pair<Memory, Map<Integer, Double>> execute(final int r1, final int r2, final Memory memory, Map<Integer, Double> output) {
+            return newPair(memory.setValue(memory.isStatus() ? memory.getValue(r1) : memory.getValue(r2)), output);
         }
 
         public String toSemanticsString(int r1, int r2, ROM memory) {
@@ -87,7 +87,7 @@ public enum DOp implements Op {
     //
     //---------------------------------------------------------------------------------------------
 
-    public abstract Instruction.Result execute(int r1, int r2, ROM memory);
+    public abstract Pair<Memory, Map<Integer, Double>> execute(int r1, int r2, Memory memory, Map<Integer, Double> output);
 
     public abstract String toSemanticsString(int r1, int r2, ROM memory);
 

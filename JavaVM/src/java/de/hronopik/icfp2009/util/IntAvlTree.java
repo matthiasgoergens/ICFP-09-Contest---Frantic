@@ -9,7 +9,7 @@ import static java.lang.Math.max;
  * @author Alexander Kiel
  * @version $Id$
  */
-public abstract class IntAvlTree<V> implements Collection<V> {
+public abstract class IntAvlTree<V> implements IntMap<V> {
 
     //---------------------------------------------------------------------------------------------
     // Constructors
@@ -47,10 +47,8 @@ public abstract class IntAvlTree<V> implements Collection<V> {
     }
 
     //---------------------------------------------------------------------------------------------
-    // 
+    //
     //---------------------------------------------------------------------------------------------
-
-    public abstract Maybe<V> get(int key);
 
     public abstract Node<V> put(int key, V value);
 
@@ -328,7 +326,8 @@ public abstract class IntAvlTree<V> implements Collection<V> {
                 } else if (leftRight instanceof NegativeNode) {
                     return new ZeroNode<V>(leftRight.key
                             , leftRight.value
-                            , new PositiveNode<V>(left().key, left().value, (Node<V>) left().left, leftRight.left)
+                            , new PositiveNode<V>(left().key, left().value, (Node<V>) left().left,
+                                    leftRight.left)
                             , new ZeroNode<V>(this.key, this.value, leftRight.right, right)
                     );
                 } else if (leftRight instanceof PositiveNode) {
@@ -548,7 +547,8 @@ public abstract class IntAvlTree<V> implements Collection<V> {
                 return new NegativeNode<V>(this.key
                         , this.value
                         , left
-                        , new ZeroNode<V>(right().key, right().value, right().left, right().right.put(key, value))
+                        , new ZeroNode<V>(right().key, right().value, right().left,
+                                right().right.put(key, value))
                 );
             }
         }
@@ -575,7 +575,8 @@ public abstract class IntAvlTree<V> implements Collection<V> {
                     return new ZeroNode<V>(rightLeft.key
                             , rightLeft.value
                             , new ZeroNode<V>(this.key, this.value, left, rightLeft.left)
-                            , new NegativeNode<V>(right().key, right().value, rightLeft.right, (Node<V>) right().right)
+                            , new NegativeNode<V>(right().key, right().value, rightLeft.right,
+                                    (Node<V>) right().right)
                     );
                 } else if (rightLeft instanceof NegativeNode) {
                     return new ZeroNode<V>(rightLeft.key
@@ -590,7 +591,8 @@ public abstract class IntAvlTree<V> implements Collection<V> {
                 return new NegativeNode<V>(this.key
                         , this.value
                         , left
-                        , new ZeroNode<V>(right().key, right().value, right().left.put(key, value), right().right)
+                        , new ZeroNode<V>(right().key, right().value, right().left.put(key, value),
+                                right().right)
                 );
             }
         }

@@ -5,7 +5,9 @@ import org.jetbrains.annotations.Nullable;
 import static java.util.logging.Level.FINE;
 import java.util.logging.Logger;
 
-import de.hronopik.icfp2009.util.Maybe;
+import de.hronopik.icfp2009.util.*;
+import static de.hronopik.icfp2009.util.Pairs.newPair;
+import de.hronopik.icfp2009.vm.Memory;
 
 /**
  * A S-Type instruction.
@@ -29,9 +31,7 @@ public final class SInstruction<P extends Maybe<MP>, MP extends Parameter> exten
     // Constructors
     //---------------------------------------------------------------------------------------------
 
-    public static <P extends Maybe<MP>, MP extends Parameter> SInstruction<P, MP> newInstance(int address,
-                                                                                              SOpI<P, MP> op, P param,
-                                                                                              int r1) {
+    public static <P extends Maybe<MP>, MP extends Parameter> SInstruction<P, MP> newInstance(int address, SOpI<P, MP> op, P param, int r1) {
         return new SInstruction<P, MP>(address, op, param, r1);
     }
 
@@ -63,15 +63,14 @@ public final class SInstruction<P extends Maybe<MP>, MP extends Parameter> exten
     //
     //---------------------------------------------------------------------------------------------
 
-    public Result execute(int stepIndex, ROM memory, InputPorts inputPorts) {
+    public Pair<Memory, Map<Integer, Double>> execute(int stepIndex, Memory memory, Map<Integer, Double> input, Map<Integer, Double> output) {
 
         // Log into the instruction trace
         if (logger.isLoggable(FINE)) {
-            logger.fine(stepIndex + "," + address + "," + toString() + "," +
-                    op.toSemanticsString(param, r1, memory, inputPorts));
+            logger.fine(stepIndex + "," + address + "," + toString() + "," + op.toSemanticsString(param, r1, memory, input));
         }
 
-        return op.execute(param, r1, memory, inputPorts);
+        return newPair(op.execute(param, r1, memory, input), output);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -80,6 +79,15 @@ public final class SInstruction<P extends Maybe<MP>, MP extends Parameter> exten
 
     @Override
     public String toString() {
-        return op + "(" + (param.isJust() ? ((Maybe.Just<MP>) param).getValue().toString() + ", " : "") + r1 + ")";
+        return op + "(" + (param.maybe(new MaybeC<String, MP>() {
+
+            public String c(MP just) {
+                return just.toString() + ", ";
+            }
+
+            public String c() {
+                return "";
+            }
+        })) + r1 + ")";
     }
 }

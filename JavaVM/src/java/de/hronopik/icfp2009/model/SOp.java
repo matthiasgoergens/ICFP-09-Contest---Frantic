@@ -1,6 +1,7 @@
 package de.hronopik.icfp2009.model;
 
 import de.hronopik.icfp2009.util.Maybe;
+import de.hronopik.icfp2009.vm.Memory;
 
 /**
  * Operation for S-Type instructions.
@@ -13,14 +14,11 @@ public class SOp {
 
     public static final SOpI<Maybe.Nothing<Parameter>, Parameter> Noop = new SOpI<Maybe.Nothing<Parameter>, Parameter>() {
 
-        public Instruction.Result execute(Maybe.Nothing<Parameter> param, int r1, final ROM memory,
-                                          InputPorts inputPorts) {
-            return Instruction.noopResult();
+        public Memory execute(Maybe.Nothing<Parameter> param, int r1, Memory memory, Map<Integer, Double> input) {
+            return memory.copy();
         }
 
-
-        public String toSemanticsString(Maybe.Nothing<Parameter> param, int r1, ROM memory,
-                                        InputPorts inputPorts) {
+        public String toSemanticsString(Maybe.Nothing<Parameter> param, int r1, Memory memory, Map<Integer, Double> input) {
             return "Noop";
         }
 
@@ -32,15 +30,12 @@ public class SOp {
 
     public static final SOpI<Maybe.Just<CompParam>, CompParam> Cmpz = new SOpI<Maybe.Just<CompParam>, CompParam>() {
 
-        public Instruction.Result execute(final Maybe.Just<CompParam> param, final int r1,
-                                          final ROM memory,
-                                          InputPorts inputPorts) {
-            return Instruction.statusResult(param.getValue().isCompZero(memory.getValue(r1)));
+        public Memory execute(Maybe.Just<CompParam> param, int r1, Memory memory, Map<Integer, Double> input) {
+            return memory.setStatus(param.getValue().isCompZero(memory.getValue(r1)));
         }
 
 
-        public String toSemanticsString(Maybe.Just<CompParam> param, int r1, ROM memory,
-                                        InputPorts inputPorts) {
+        public String toSemanticsString(Maybe.Just<CompParam> param, int r1, Memory memory, Map<Integer, Double> input) {
             return "status <- " + memory.getValue(r1) + " " + param.getValue() + " 0.0";
         }
 
@@ -52,18 +47,16 @@ public class SOp {
 
     public static final SOpI<Maybe.Nothing<Parameter>, Parameter> Sqrt = new SOpI<Maybe.Nothing<Parameter>, Parameter>() {
 
-        public Instruction.Result execute(Maybe.Nothing<Parameter> param, final int r1, final ROM memory,
-                                          InputPorts inputPorts) {
+        public Memory execute(Maybe.Nothing<Parameter> param, int r1, Memory memory, Map<Integer, Double> input) {
             double value = memory.getValue(r1);
             if (value < 0) {
                 // sqrt is undefined for negative values; see page 4
                 throw new ArithmeticException("negative sqrt");
             }
-            return Instruction.memoryResult(Math.sqrt(value));
+            return memory.setValue(Math.sqrt(value));
         }
 
-        public String toSemanticsString(Maybe.Nothing<Parameter> param, int r1, ROM memory,
-                                        InputPorts inputPorts) {
+        public String toSemanticsString(Maybe.Nothing<Parameter> param, int r1, Memory memory, Map<Integer, Double> input) {
             return "<- |sqrt(" + memory.getValue(r1) + ")|";
         }
 
@@ -75,13 +68,11 @@ public class SOp {
 
     public static final SOpI<Maybe.Nothing<Parameter>, Parameter> Copy = new SOpI<Maybe.Nothing<Parameter>, Parameter>() {
 
-        public Instruction.Result execute(Maybe.Nothing<Parameter> param, final int r1, final ROM memory,
-                                          InputPorts inputPorts) {
-            return Instruction.memoryResult(memory.getValue(r1));
+        public Memory execute(Maybe.Nothing<Parameter> param, int r1, Memory memory, Map<Integer, Double> input) {
+            return memory.setValue(memory.getValue(r1));
         }
 
-        public String toSemanticsString(Maybe.Nothing<Parameter> param, int r1, ROM memory,
-                                        InputPorts inputPorts) {
+        public String toSemanticsString(Maybe.Nothing<Parameter> param, int r1, Memory memory, Map<Integer, Double> input) {
             return "<- " + memory.getValue(r1);
         }
 
@@ -93,13 +84,12 @@ public class SOp {
 
     public static final SOpI<Maybe.Nothing<Parameter>, Parameter> Input = new SOpI<Maybe.Nothing<Parameter>, Parameter>() {
 
-        public Instruction.Result execute(Maybe.Nothing<Parameter> param, final int r1, ROM memory,
-                                          final InputPorts inputPorts) {
-            return Instruction.memoryResult(inputPorts.getValue(r1));
+        public Memory execute(Maybe.Nothing<Parameter> param, int r1, Memory memory, Map<Integer, Double> input) {
+            return memory.setValue(input.getValue(r1));
         }
 
-        public String toSemanticsString(Maybe.Nothing<Parameter> param, int r1, ROM memory, InputPorts inputPorts) {
-            return "<- " + inputPorts.getValue(r1);
+        public String toSemanticsString(Maybe.Nothing<Parameter> param, int r1, Memory memory, Map<Integer, Double> input) {
+            return "<- " + input.getValue(r1);
         }
 
         @Override

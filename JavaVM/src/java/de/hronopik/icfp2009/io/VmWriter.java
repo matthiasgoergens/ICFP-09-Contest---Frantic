@@ -1,11 +1,8 @@
 package de.hronopik.icfp2009.io;
 
-import de.hronopik.icfp2009.util.Function2;
 import static de.hronopik.icfp2009.util.LinkedList.fromCollection;
 import static de.hronopik.icfp2009.util.Lists.sort;
-import de.hronopik.icfp2009.util.Map;
-import de.hronopik.icfp2009.util.Pair;
-import de.hronopik.icfp2009.util.Pairs;
+import de.hronopik.icfp2009.util.*;
 
 import java.io.FilterWriter;
 import java.io.IOException;

@@ -4,8 +4,8 @@ import de.hronopik.icfp2009.io.Frames;
 import de.hronopik.icfp2009.io.OrbitBinaryFrame;
 import de.hronopik.icfp2009.io.VmReader;
 import de.hronopik.icfp2009.io.VmWriter;
-import de.hronopik.icfp2009.util.Map;
 import de.hronopik.icfp2009.util.Continuations;
+import de.hronopik.icfp2009.util.Map;
 import de.hronopik.icfp2009.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class VmStreamRunner {
 
-    private PureVm vm;
+    private Vm vm;
 
     private final VmReader in;
 
@@ -59,7 +59,7 @@ public class VmStreamRunner {
      * @throws java.io.IOException if an I/O error occurs
      */
     public boolean ioStep() throws IOException {
-        final Pair<PureVm,Map<Integer,Double>> state = vm.step(in.readInputs());
+        final Pair<Vm, Map<Integer, Double>> state = vm.step(in.readInputs());
 
         vm = state.getFst();
         out.writeOutputs(state.getSnd());

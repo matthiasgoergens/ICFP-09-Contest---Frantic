@@ -6,6 +6,8 @@ package de.hronopik.icfp2009.util;
  */
 public interface Map<K, V> extends Set<Pair<K, V>>, Function1<K, Maybe<V>> {
 
+    boolean containsKey(K key);
+
     Maybe<V> get(K key);
 
     Map<K, V> put(K key, V value);

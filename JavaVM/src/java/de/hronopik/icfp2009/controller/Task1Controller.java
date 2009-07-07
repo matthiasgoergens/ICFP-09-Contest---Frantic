@@ -2,8 +2,13 @@ package de.hronopik.icfp2009.controller;
 
 import static de.hronopik.icfp2009.util.Phys.*;
 import de.hronopik.icfp2009.util.*;
+import static de.hronopik.icfp2009.util.AvlTree.singelton;
 import de.hronopik.icfp2009.vm.DirectVm;
 import de.hronopik.icfp2009.vm.InputLoggingVmWrapper;
+import de.hronopik.icfp2009.vm.PureVm;
+import de.hronopik.icfp2009.vm.Vm;
+import de.hronopik.icfp2009.io.Frames;
+import static de.hronopik.icfp2009.io.Frames.readFromFile;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -34,10 +39,12 @@ public class Task1Controller {
     //---------------------------------------------------------------------------------------------
 
     public void run() throws IOException {
-        InputLoggingVmWrapper vm = new InputLoggingVmWrapper(new DirectVm(binary));
+        InputLoggingVmWrapper<PureVm> vm = new InputLoggingVmWrapper<PureVm>(new PureVm(readFromFile(binary)));
 
         // First config step
-        Map<Integer, Double> outputs = vm.step(new InputBuilder(16000, scenario).build());
+        final Pair<InputLoggingVmWrapper<PureVm>, Map<Integer, Double>> pair = vm.step(AvlTree.<Integer, Double>singelton(16000, (double) scenario));
+        vm = pair.getFst();
+        Map<Integer, Double> outputs = pair.getSnd();
 
         assert vm.getStepIndex() == 1;
 
@@ -46,7 +53,7 @@ public class Task1Controller {
         //
 
         // Get three positions for our speed
-        Vector s0 = getPosition(outputs);
+        Vector s0 = getPosition(pair);
         Vector s1 = getPosition(vm.step());
 
         // Our radius around the earth
@@ -152,12 +159,13 @@ public class Task1Controller {
     }
 
 
-    private java.util.Map<Integer, Double> buildDeltaVInput(Vector dv) {
-        return new InputBuilder(2, dv.getX()).add(3, dv.getY()).build();
+    private Map<Integer, Double> buildDeltaVInput(Vector dv) {
+        return singelton(2, dv.getX()).put(3, dv.getY());
     }
 
 
-    private Vector getPosition(Map<Integer, Double> outputs) {
+    private Vector getPosition(Pair<?, Map<Integer, Double>> vm) {
+        final Map<Integer, Double> outputs = vm.getSnd();
         return new Vector(
                 outputs.get(2).maybe(Continuations.<Double>fail("missing s_x")),
                 outputs.get(3).maybe(Continuations.<Double>fail("missing s_y"))

@@ -1,5 +1,9 @@
 package de.hronopik.icfp2009.model;
 
+import de.hronopik.icfp2009.util.Map;
+import de.hronopik.icfp2009.util.Pair;
+import de.hronopik.icfp2009.vm.Memory;
+
 import static java.util.logging.Level.FINE;
 import java.util.logging.Logger;
 
@@ -50,14 +54,14 @@ public final class DInstruction extends Instruction {
     //
     //---------------------------------------------------------------------------------------------
 
-    public Result execute(int stepIndex, ROM memory, InputPorts inputPorts) {
+    public Pair<Memory, Map<Integer, Double>> execute(int stepIndex, Memory memory, Map<Integer, Double> inputPorts, Map<Integer, Double> output) {
 
         // Log into the instruction trace
         if (logger.isLoggable(FINE)) {
             logger.fine(stepIndex + "," + address + "," + toString() + "," + op.toSemanticsString(r1, r2, memory));
         }
 
-        return op.execute(r1, r2, memory);
+        return op.execute(r1, r2, memory, output);
     }
 
     //---------------------------------------------------------------------------------------------

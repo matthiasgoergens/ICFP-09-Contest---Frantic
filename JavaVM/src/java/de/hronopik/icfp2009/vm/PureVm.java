@@ -1,18 +1,16 @@
 package de.hronopik.icfp2009.vm;
 
 import de.hronopik.icfp2009.io.OrbitBinaryFrame;
-import de.hronopik.icfp2009.model.InputPorts;
 import de.hronopik.icfp2009.model.Instruction;
-import de.hronopik.icfp2009.model.Output;
 import de.hronopik.icfp2009.util.*;
-import static de.hronopik.icfp2009.util.List.nil;
 import static de.hronopik.icfp2009.util.Pairs.newPair;
+import static de.hronopik.icfp2009.util.List.nil;
 
 /**
  * @author Alexander Kiel
  * @version $Id$
  */
-public class PureVm {
+public class PureVm implements Vm<PureVm> {
 
     private final List<Instruction> instructions;
 
@@ -42,7 +40,7 @@ public class PureVm {
         }
 
         this.instructions = instructions.reverse();
-        this.memory = new ArrayMemory((List.Element<Double>) memory.reverse(), false);
+        this.memory = new IntAvlMemory((List.Element<Double>) memory, false);
     }
 
     public PureVm(List<Instruction> instructions, Memory memory) {
@@ -54,10 +52,18 @@ public class PureVm {
     // Stepping
     //---------------------------------------------------------------------------------------------
 
-    public Pair<PureVm, Map<Integer, Double>> step(final InputPorts input) {
+    public int getStepIndex() {
+        return 0;
+    }
+
+    public Pair<PureVm, Map<Integer, Double>> step() {
+        return step(AvlTree.<Integer, Double>empty());
+    }
+
+    public Pair<PureVm, Map<Integer, Double>> step(final Map<Integer, Double> input) {
 
         // Starting with our memory and an empty map of outputs
-        final Pair<Memory, Map<Integer, Double>> start = newPair(memory, ListMap.<Integer, Double>emptyMap());
+        final Pair<Memory, Map<Integer, Double>> start = Pairs.<Memory, Map<Integer, Double>>newPair(memory, AvlTree.<Integer, Double>empty());
 
         // Folding over the instructions getting a new memory and the outputs
         final Pair<Memory, Map<Integer, Double>> memOut = instructions.foldLeft(start, new MicroStep(input));
@@ -66,41 +72,16 @@ public class PureVm {
         return newPair(new PureVm(instructions, memOut.getFst()), memOut.getSnd());
     }
 
-    private static class MicroStep implements
-            Function2<Pair<Memory, Map<Integer, Double>>, Instruction, Pair<Memory, Map<Integer, Double>>> {
+    private static class MicroStep implements Function2<Pair<Memory, Map<Integer, Double>>, Instruction, Pair<Memory, Map<Integer, Double>>> {
 
-        private final InputPorts input;
+        private final Map<Integer, Double> input;
 
-        private MicroStep(InputPorts input) {
+        private MicroStep(Map<Integer, Double> input) {
             this.input = input;
         }
 
-        public Pair<Memory, Map<Integer, Double>> apply(Pair<Memory, Map<Integer, Double>> state,
-                                                        Instruction instruction) {
-            final Memory memory = state.getFst();
-            final Map<Integer, Double> output = state.getSnd();
-
-            return instruction.execute(0, memory, input).cont(
-                    new Instruction.ResultC<Pair<Memory, Map<Integer, Double>>>() {
-
-                        public Pair<Memory, Map<Integer, Double>> memoryResult(double value) {
-                            return newPair(memory.setValue(value), output);
-                        }
-
-                        public Pair<Memory, Map<Integer, Double>> outputResult(Output value) {
-                            return newPair(memory.copy(), output.add(value));
-                        }
-
-                        public Pair<Memory, Map<Integer, Double>> statusResult(boolean value) {
-                            return newPair(memory.setStatus(value), output);
-                        }
-
-                        public Pair<Memory, Map<Integer, Double>> noopResult() {
-                            return newPair(memory.copy(), output);
-                        }
-                    }
-            );
+        public Pair<Memory, Map<Integer, Double>> apply(Pair<Memory, Map<Integer, Double>> state, Instruction instruction) {
+            return instruction.execute(0, state.getFst(), input, state.getSnd());
         }
     }
-
 }

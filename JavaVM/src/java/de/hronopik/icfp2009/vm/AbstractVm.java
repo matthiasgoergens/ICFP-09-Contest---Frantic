@@ -83,11 +83,11 @@ abstract class AbstractVm implements Vm {
         return step(new MapBackedInputPorts(inputs));
     }
 
-    public Map<Integer, Double> step(InputPorts inputPorts) {
+    public Map<Integer, Double> step(IntMap<Double> inputPorts) {
         Map<Integer, Double> outputs = new ListMap<Integer, Double>();
 
         for (int i = 0; i < instructions.length; i++) {
-            Instruction.Result result = instructions[i].execute(stepIndex, memory, inputPorts);
+            Instruction.Result result = instructions[i].execute(stepIndex, memory, inputPorts, outputs);
             outputs = result.cont(new ResultContuniation(outputs, i));
 
             /*memory.setValue(i, result.getMemoryValue().maybe(Maybe.<Double>idC(), memory.getValueC(i)));
