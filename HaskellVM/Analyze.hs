@@ -410,10 +410,10 @@ fullNetworkAnalysis args = do
   let dataflow = analyzeDataflow $ vm
   
 --  putStr . toDot $ dataflow
-  print . getMinimalState $ dataflow
-  print $ dataflow
-  print . length . getMinimalState $ dataflow
-  print . length . getMaximalState $ dataflow
+--  print . getMinimalState $ dataflow
+  putStrLn . toDot $ dataflow
+--  print . length . getMinimalState $ dataflow
+--  print . length . getMaximalState $ dataflow
 
 
 compileLightningVM :: String -> VM -> String  
